@@ -1,0 +1,8 @@
+.p-menubar {
+    z-index: 1000;
+    background:gold !important;
+}
+.p-submenu-list{
+    background:gold !important;
+    color: white !important;;
+}

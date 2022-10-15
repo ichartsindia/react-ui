@@ -1,0 +1,431 @@
+{
+  "data": [
+    {
+      "CallLTP": 3065.3,
+      "Strike": 35500,
+      "PutLTP": 15,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2965.6,
+      "Strike": 35600,
+      "PutLTP": 16.7,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2866,
+      "Strike": 35700,
+      "PutLTP": 18.3,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2766.4,
+      "Strike": 35800,
+      "PutLTP": 20.2,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2667,
+      "Strike": 35900,
+      "PutLTP": 22.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2567.7,
+      "Strike": 36000,
+      "PutLTP": 25.2,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2469.2,
+      "Strike": 36100,
+      "PutLTP": 28.3,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2371.4,
+      "Strike": 36200,
+      "PutLTP": 30.9,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2275.4,
+      "Strike": 36300,
+      "PutLTP": 34,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2184.2,
+      "Strike": 36400,
+      "PutLTP": 39,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2106.6,
+      "Strike": 36500,
+      "PutLTP": 42.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 2011.4,
+      "Strike": 36600,
+      "PutLTP": 49.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1840,
+      "Strike": 36700,
+      "PutLTP": 54.6,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1828.2,
+      "Strike": 36800,
+      "PutLTP": 62.1,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1738.3,
+      "Strike": 36900,
+      "PutLTP": 69.7,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1650,
+      "Strike": 37000,
+      "PutLTP": 79.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1569.6,
+      "Strike": 37100,
+      "PutLTP": 88.7,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1472.5,
+      "Strike": 37200,
+      "PutLTP": 100.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1337.8,
+      "Strike": 37300,
+      "PutLTP": 112.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1298.9,
+      "Strike": 37400,
+      "PutLTP": 127.5,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1215.9,
+      "Strike": 37500,
+      "PutLTP": 142.1,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1127,
+      "Strike": 37600,
+      "PutLTP": 161.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 1049.9,
+      "Strike": 37700,
+      "PutLTP": 178.7,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 971.3,
+      "Strike": 37800,
+      "PutLTP": 202,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 895.5,
+      "Strike": 37900,
+      "PutLTP": 223.3,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 817.8,
+      "Strike": 38000,
+      "PutLTP": 251.5,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 753.2,
+      "Strike": 38100,
+      "PutLTP": 279.9,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 682.5,
+      "Strike": 38200,
+      "PutLTP": 311,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 618.9,
+      "Strike": 38300,
+      "PutLTP": 342.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 552.4,
+      "Strike": 38400,
+      "PutLTP": 385,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 496.1,
+      "Strike": 38500,
+      "PutLTP": 423.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 438.4,
+      "Strike": 38600,
+      "PutLTP": 469,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 385.4,
+      "Strike": 38700,
+      "PutLTP": 519.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 338.7,
+      "Strike": 38800,
+      "PutLTP": 571.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 297.1,
+      "Strike": 38900,
+      "PutLTP": 623.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 253,
+      "Strike": 39000,
+      "PutLTP": 682.5,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 218.1,
+      "Strike": 39100,
+      "PutLTP": 749.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 183.3,
+      "Strike": 39200,
+      "PutLTP": 811.2,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 157.3,
+      "Strike": 39300,
+      "PutLTP": 884.1,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 131.6,
+      "Strike": 39400,
+      "PutLTP": 955.5,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 109.7,
+      "Strike": 39500,
+      "PutLTP": 1040.5,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 91.2,
+      "Strike": 39600,
+      "PutLTP": 1159.2,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 75,
+      "Strike": 39700,
+      "PutLTP": 1328,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 61.7,
+      "Strike": 39800,
+      "PutLTP": 1324,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 50.2,
+      "Strike": 39900,
+      "PutLTP": 1385.3,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 41,
+      "Strike": 40000,
+      "PutLTP": 1469,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 33.3,
+      "Strike": 40100,
+      "PutLTP": 1550,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 26.4,
+      "Strike": 40200,
+      "PutLTP": 1646.3,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 21.8,
+      "Strike": 40300,
+      "PutLTP": 1743.3,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 18.5,
+      "Strike": 40400,
+      "PutLTP": 1841,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 16,
+      "Strike": 40500,
+      "PutLTP": 1980.1,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 13.6,
+      "Strike": 40600,
+      "PutLTP": 2073.7,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 12.2,
+      "Strike": 40700,
+      "PutLTP": 2168,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 10.4,
+      "Strike": 40800,
+      "PutLTP": 2263,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 9.3,
+      "Strike": 40900,
+      "PutLTP": 2358.6,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 8.7,
+      "Strike": 41000,
+      "PutLTP": 2599.9,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 8,
+      "Strike": 41100,
+      "PutLTP": 2687.4,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 7.7,
+      "Strike": 41200,
+      "PutLTP": 2775.8,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 7.2,
+      "Strike": 41300,
+      "PutLTP": 2865,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 6.7,
+      "Strike": 41400,
+      "PutLTP": 2954.9,
+      "optionPrice": 30,
+      "IV":27.70
+    },
+    {
+      "CallLTP": 6.2,
+      "Strike": 41500,
+      "PutLTP": 3115.5,
+      "optionPrice": 30,
+      "IV":27.70
+    }
+  ]
+}

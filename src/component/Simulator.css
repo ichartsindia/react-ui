@@ -1,0 +1,143 @@
+/* tr button {
+  display: none;
+}
+
+tr:hover button {
+  display: inline-block;
+} */
+
+.p-row-odd {
+  background:  rgb(225, 228, 225) !important;
+}
+
+.p-datatable-tbody {
+  font-size: small;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  height: 30px!important;
+  margin: 0px!important;
+  padding: 0px!important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  height: 20px!important;
+  margin: 0px!important;
+  padding: 0px!important;
+}
+
+div[id="selectedList"]>div>div>table>thead {
+  display:none;
+}
+
+body{
+  font-size: smaller;
+  margin: 3px;
+}
+
+.smallText {
+  width : 40px;
+  height: 20px;
+  font-size: smaller;
+  border-radius: 5px 5px 5px 5px;
+  border-color: blue;
+}
+
+.optionPriceText {
+  width : 60px;
+  height: 20px;
+  font-size: smaller;
+  border-radius: 2px;
+  border-color: blue;
+}
+
+.p-datatable-thead {
+  font-size:smaller;
+}
+.smallGreenButton{
+  width : 25px;
+  height: 20px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background: white;
+  text-align: center;
+  color: green;
+  border-color: green;
+  font-size: smaller;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.smallRedButton{
+  width : 25px;
+  height: 20px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background: white;
+  align-content: center;
+  color: red;
+  border-color: red;
+  border-radius: 5px;
+  font-size:smaller;
+  cursor: pointer;
+}
+
+.underline{
+  text-decoration: underline;
+}
+
+.flex-space-between{
+  justify-content: space-between;
+}
+
+.selected-button-buy{
+  background-color: green;
+  color: white;
+  border-radius: 5px;
+  font-size: smaller;
+}
+
+.selected-button-sell{
+  background-color:red;
+  color: white;
+  border-radius: 5px;
+  font-size: smaller;
+}
+
+.tabview{
+  
+}
+
+.dialog{
+  width: 600px;
+  height: 600px;
+}
+.dialogControl{
+  width: 300px;
+  height: 40px;
+  font-size: small;
+  margin-bottom: 5px;
+}
+
+.secondLine{
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  font-size: small;
+}
+
+.flex-item {
+  margin: 5px;
+}
+
+.symbol-dropdown{
+  width: 200px;
+}
+
+.date-dropdown{
+  width: 150px;
+}
+
+.line-break {
+  width: 100%;
+}
