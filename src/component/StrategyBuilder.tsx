@@ -5,20 +5,21 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button, Calendar, Checkbox, Dialog, Dropdown, InputNumber, InputText, Panel, SelectButton, TabPanel, TabView } from 'primereact';
 import { Position } from 'src/entity/position';
-import { StrategyEntity } from 'src/entity/StrategyEntity';
 import { v4 as uuidv4 } from 'uuid';
 import { SaveDialog } from './SaveDialog';
 import axios from "axios";
+import { OptionChain } from 'src/entity/OptionChain';
+import { CircleSpinnerOverlay, FerrisWheelSpinner } from 'react-spinner-overlay';
 
 interface Props {
 
 }
 
 interface State {
-  records: StrategyEntity[];
+  records: OptionChain[];
   positions: Position[];
   selectedsymbol: string;
-  strategyEntityList: StrategyEntity[];
+  strategyEntityList: OptionChain[];
   openSaveDialog: boolean;
   SymbolList;
   expiryDateList;
@@ -30,6 +31,7 @@ interface State {
   ivr;
   ivp;
   fairPrice;
+  isBusy: boolean
 }
 
 export class StrategyBuilder extends React.Component<Props, State> {
@@ -56,7 +58,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
       avgiv: null,
       ivr: null,
       ivp: null,
-      fairPrice: null
+      fairPrice: null,
+      isBusy:false
     }
 
     // const optionService = new OptionService();
@@ -67,70 +70,72 @@ export class StrategyBuilder extends React.Component<Props, State> {
     //   });
   }
 
-  callTemplate = (rowData: StrategyEntity) => {
+  callTemplate = (rowData: OptionChain) => {
     return (<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
       <div>
-        <button className='smallGreenButton' style={{ backgroundColor: rowData.callBuy == true ? 'green' : 'white', color: rowData.callBuy == true ? 'white' : 'black' }} onClick={(event) => {
-          if (rowData.callBuy) {
-            rowData.callLots = null;
-            rowData.callBuy = false;
+        <button className='smallGreenButton' style={{ backgroundColor: rowData.Buy_Call == true ? 'green' : 'white', color: rowData.Buy_Call == true ? 'white' : 'black' }} onClick={(event) => {
+          if (rowData.Buy_Call) {
+            rowData.Call_Lot = null;
+            rowData.Buy_Call = false;
           } else {
-            rowData.callLots = 1;
-            rowData.callBuy = true;
+            rowData.Call_Lot = 1;
+            rowData.Buy_Call = true;
+            rowData.Sell_Call = null;
           }
           this.setState({ records: this.state.records });
           this.generateStrategyList();
         }}>B</button>
       </div>
       <div>
-        <button className='smallRedButton' style={{ backgroundColor: rowData.callSell == true ? 'red' : 'white', color: rowData.callSell == true ? 'white' : 'black' }} onClick={() => {
-          if (rowData.callSell) {
-            rowData.callLots = null;
-            rowData.callSell = false;
-          } else {
-            rowData.callLots = 1;
-            rowData.callSell = true;
-          }
+        <button className='smallRedButton' style={{ backgroundColor: rowData.Sell_Call == true ? 'red' : 'white', color: rowData.Sell_Call == true ? 'white' : 'black' }} onClick={() => {
+            if (rowData.Sell_Call) {
+              rowData.Call_Lot = null;
+              rowData.Sell_Call = false;
+            } else {
+              rowData.Call_Lot = 1;
+              rowData.Sell_Call = true;
+              rowData.Buy_Call = null;
+            }
 
           this.setState({ records: this.state.records });
           this.generateStrategyList();
         }}>S</button>
       </div>
-      <div style={rowData.callLots ? { display: 'block' } : { display: 'none' }}>
-        <input type="number" min={1} max={5000} className='smallText' onChange={(event) => { rowData.callLots = Number.parseInt(event.target.value); this.setState({ records: this.state.records }); }} value={rowData.callLots}></input>
+      <div style={rowData.Call_Lot ? { display: 'block' } : { display: 'none' }}>
+        <input type="number" min={1} max={5000} className='smallText' onChange={(event) => { rowData.Call_Lot = Number.parseInt(event.target.value); this.setState({ records: this.state.records }); }} value={rowData.Call_Lot}></input>
       </div>
     </div>)
   }
 
-  putTemplate = (rowData: StrategyEntity) => {
+  putTemplate = (rowData: OptionChain) => {
     return (<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
-      <div style={rowData.putLots ? { display: 'block' } : { display: 'none' }}>
-        <input type="number" min={1} max={5000} className='smallText' onChange={(event) => { rowData.putLots = Number.parseInt(event.target.value); this.setState({ records: this.state.records }); }} value={rowData.putLots}></input>
+      <div style={rowData.Put_Lot ? { display: 'block' } : { display: 'none' }}>
+        <input type="number" min={1} max={5000} className='smallText' onChange={(event) => { rowData.Put_Lot = Number.parseInt(event.target.value); this.setState({ records: this.state.records }); }} value={rowData.Put_Lot}></input>
       </div>
       <div>
-        <button className='smallGreenButton' style={{ backgroundColor: rowData.putBuy == true ? 'green' : 'white', color: rowData.putBuy == true ? 'white' : 'black' }}
+        <button className='smallGreenButton' style={{ backgroundColor: rowData.Buy_Put == true ? 'green' : 'white', color: rowData.Buy_Put == true ? 'white' : 'black' }}
           onClick={() => {
-            if (rowData.putBuy) {
-              rowData.putLots = null;
-              rowData.putBuy = false;
+            if (rowData.Buy_Put) {
+              rowData.Put_Lot = null;
+              rowData.Buy_Put = false;
             } else {
-              rowData.putLots = 1;
-              rowData.putBuy = true;
-              rowData.putSell = null;
+              rowData.Put_Lot = 1;
+              rowData.Buy_Put = true;
+              rowData.Sell_Put = null;
             }
             this.setState({ records: this.state.records });
             this.generateStrategyList();
           }}>B</button>
       </div>
-      <div><button className='smallRedButton' style={{ backgroundColor: rowData.putSell == true ? 'red' : 'white', color: rowData.putSell == true ? 'white' : 'black' }}
+      <div><button className='smallRedButton' style={{ backgroundColor: rowData.Sell_Put == true ? 'red' : 'white', color: rowData.Sell_Put == true ? 'white' : 'black' }}
         onClick={() => {
-          if (rowData.putSell) {
-            rowData.putLots = null;
-            rowData.putSell = false;
+          if (rowData.Sell_Put) {
+            rowData.Put_Lot = null;
+            rowData.Sell_Put = false;
           } else {
-            rowData.putLots = 1;
-            rowData.putSell = true;
-            rowData.putBuy = null;
+            rowData.Put_Lot = 1;
+            rowData.Sell_Put = true;
+            rowData.Buy_Put = null;
           }
           this.setState({ records: this.state.records });
           this.generateStrategyList();
@@ -140,7 +145,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
   }
 
   generateStrategyList = () => {
-    let list = this.state.records.filter(p => p.callBuy || p.putBuy || p.callSell || p.putSell);
+    let list = this.state.records.filter(p => p.Buy_Call || p.Buy_Put || p.Sell_Call || p.Sell_Put);
     this.setState({ strategyEntityList: list })
   }
 
@@ -203,19 +208,21 @@ export class StrategyBuilder extends React.Component<Props, State> {
     return (
 
       <div className="grid p-fluid">
+         <div>
+          {this.state.isBusy ? <CircleSpinnerOverlay loading={true} overlayColor="rgba(0,153,255,0.2)" /> : null}
+        </div>
         <div className="col-12 lg:col-12">
           <div className='p-card secondLine'>
             <div className="flex-item symbol-dropdown" ><Dropdown value={this.state.selectedsymbol} options={this.state.SymbolList} onChange={(e) => {
               this.setState({ selectedsymbol: e.value });
               let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == e.value);
               let url = "https://www.icharts.in/opt/api/getExpiryDates_Api.php?sym=" + e.value + "&sym_type=" + symbol[0].symbol_type;
+              this.setState({isBusy:true})
               axios.get(url, { withCredentials: false })
                 .then(response => {
                   let data = response.data;
-                  this.setState({ expiryDateList: data });
+                  this.setState({ expiryDateList: data, isBusy:false });
                 }).catch(err => {
-                  console.log(err);
-                  console.log(err.response.data);
                   this.setState({ expiryDateList: err.response.data });
                 });
             }} /></div>
@@ -225,7 +232,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
                 let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == this.state.selectedsymbol);
                 console.log(symbol);
                 let url = "https://www.icharts.in/opt/api/SymbolDetails_Api.php?sym=" + symbol[0].symbol + "&exp_date=" + e.value + "&sym_type=" + symbol[0].symbol_type;
-                console.log(url);
+                this.setState({isBusy:true});
                 axios.get(url, { withCredentials: false })
                   .then(response => {
                     let data = response.data;
@@ -238,7 +245,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
                         avgiv: record.avgiv,
                         ivr: record.ivr,
                         ivp: record.ivp,
-                        fairPrice: record.fair_price
+                        fairPrice: record.fair_price,
+                        isBusy:false
                       });
                     }
 
@@ -247,13 +255,15 @@ export class StrategyBuilder extends React.Component<Props, State> {
                   });
 
                 let urlDetail = "https://www.icharts.in/opt/api/OptionChain_Api.php?sym=" + symbol[0].symbol + "&exp_date=" + e.value + "&sym_type=" + symbol[0].symbol_type;
+                this.setState({isBusy:true});
                 axios.get(urlDetail, { withCredentials: false })
                   .then(response => {
                     console.log(response)
                     let data = response.data;
                     console.log(data);
                     this.setState({
-                      records: data
+                      records: data,
+                      isBusy:false
                     })
                   }
                   )
@@ -261,7 +271,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
               }
 
               } /></div>
-            <div className="flex-item"><Button onClick={() => {
+            <div className="flex-item"><Button className='smallButton' onClick={() => {
               this.setState({
                 openSaveDialog: true
               });
@@ -269,7 +279,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
               console.log(this.state.openSaveDialog)
 
             }}>Save</Button></div>
-            <div className="flex-item"><Button onClick={() => {
+            <div className="flex-item"><Button className='smallButton' onClick={() => {
               this.setState({
                 openSaveDialog: true
               });
@@ -277,7 +287,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
               console.log(this.state.openSaveDialog)
 
             }}>Load</Button></div>
-            <div className="flex-item"><Button >Trade</Button></div>
+            <div className="flex-item"><Button className='smallButton'>Trade</Button></div>
           </div>
           <div className='secondLine'>
 
@@ -424,41 +434,41 @@ export class StrategyBuilder extends React.Component<Props, State> {
   }
 
 
-  positionTemplate = (rowData: StrategyEntity) => {
+  positionTemplate = (rowData: OptionChain) => {
     let str;
-    if (rowData.callSell) {
-      str = "-" + rowData.callLots + "x" + this.state.lotSize;
+    if (rowData.Sell_Call) {
+      str = "-" + rowData.Call_Lot + "x" + this.state.lotSize;
     }
-    if (rowData.callBuy) {
-      str = "+" + rowData.callLots + "x" + this.state.lotSize;
+    if (rowData.Buy_Call) {
+      str = "+" + rowData.Call_Lot + "x" + this.state.lotSize;
     }
-    if (rowData.putSell) {
-      str = "-" + rowData.putLots + "x" + this.state.lotSize;
+    if (rowData.Sell_Put) {
+      str = "-" + rowData.Put_Lot + "x" + this.state.lotSize;
     }
-    if (rowData.putBuy) {
-      str = "+" + rowData.putLots + "x" + this.state.lotSize;
+    if (rowData.Buy_Put) {
+      str = "+" + rowData.Put_Lot + "x" + this.state.lotSize;
     }
 
     return str;
   }
 
-  CEPETemplate = (rowData: StrategyEntity) => {
-    if (rowData.callBuy || rowData.callSell) {
+  CEPETemplate = (rowData: OptionChain) => {
+    if (rowData.Buy_Call || rowData.Sell_Call) {
       return "CE";
     }
 
-    if (rowData.putBuy || rowData.putSell) {
+    if (rowData.Buy_Put || rowData.Sell_Put) {
       return "PE";
     }
 
     return null;
   }
 
-  buttonTemplate = (rowData: StrategyEntity) => {
-    if (rowData.callBuy || rowData.putBuy) {
+  buttonTemplate = (rowData: OptionChain) => {
+    if (rowData.Buy_Call || rowData.Buy_Put) {
       return <button className='selected-button-buy'>B</button>
     }
-    if (rowData.callSell || rowData.putSell) {
+    if (rowData.Buy_Put || rowData.Sell_Put) {
       return <button className='selected-button-sell'>S</button>
     }
 
@@ -471,23 +481,23 @@ export class StrategyBuilder extends React.Component<Props, State> {
         onChange={(event) => {
           rowData.optionPrice = Number.parseFloat(event.target.value);
           this.setState({ strategyEntityList: this.state.strategyEntityList })
-        }} value={(rowData.putBuy || rowData.putSell)? rowData.Put_Ask:rowData.Call_Ask}></input>
+        }} value={(rowData.Buy_Put || rowData.Sell_Put)? rowData.Put_Ask:rowData.Call_Ask}></input>
     )
   }
 
-  IVTemplate = (rowData: StrategyEntity) => {
+  IVTemplate = (rowData: OptionChain) => {
     return "IV: " + this.state.ivp;
   }
 
-  deleteTemplate = (rowData: StrategyEntity) => {
+  deleteTemplate = (rowData: OptionChain) => {
     return <Button icon="pi  pi-trash" className='p-button-text' style={{ height: '20px' }}
       onClick={() => {
-        rowData.putLots = null;
-        rowData.callLots = null;
-        rowData.putSell = null;
-        rowData.putBuy = null;
-        rowData.callSell = null;
-        rowData.callBuy = null;
+        rowData.Put_Lot = null;
+        rowData.Call_Lot = null;
+        rowData.Sell_Put = null;
+        rowData.Buy_Put = null;
+        rowData.Sell_Call = null;
+        rowData.Buy_Call = null;
         this.setState({ records: this.state.records });
         this.generateStrategyList();
       }}></Button>
@@ -496,14 +506,14 @@ export class StrategyBuilder extends React.Component<Props, State> {
   maxProfit = () => {
     let strategyEntityList = this.state.strategyEntityList;
 
-    let buyCallList = strategyEntityList.filter(p => p.callBuy && p.callBuy == true);
-    let sellCallList = strategyEntityList.filter(p => p.callSell && p.callSell == true);
+    let buyCallList = strategyEntityList.filter(p => p.Buy_Call && p.Buy_Call == true);
+    let sellCallList = strategyEntityList.filter(p => p.Sell_Call && p.Sell_Call == true);
     if (buyCallList.length > 0 && sellCallList.length == 0) {
       return "Unlimited";
     }
 
-    let buyPutList = strategyEntityList.filter(p => p.putBuy && p.putBuy == true);
-    let sellPutList = strategyEntityList.filter(p => p.putSell && p.putSell == true);
+    let buyPutList = strategyEntityList.filter(p => p.Buy_Put && p.Buy_Put == true);
+    let sellPutList = strategyEntityList.filter(p => p.Sell_Put && p.Sell_Put == true);
     if (buyPutList.length > 0 && sellPutList.length == 0) {
       return "Unlimited";
     }
@@ -514,14 +524,14 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
   maxLoss = () => {
     let strategyEntityList = this.state.strategyEntityList;
-    let sellCallList = strategyEntityList.filter(p => p.callSell == true);
-    let buyCallList = strategyEntityList.filter(p => p.callBuy == true);
+    let sellCallList = strategyEntityList.filter(p => p.Sell_Call == true);
+    let buyCallList = strategyEntityList.filter(p => p.Buy_Call == true);
     if (sellCallList.length > 0 && buyCallList.length == 0) {
       return "Unlimited";
     }
 
-    let sellPutList = strategyEntityList.filter(p => p.putSell == true);
-    let buyPutList = strategyEntityList.filter(p => p.putBuy == true);
+    let sellPutList = strategyEntityList.filter(p => p.Sell_Put == true);
+    let buyPutList = strategyEntityList.filter(p => p.Buy_Put == true);
     if (sellPutList.length > 0 && buyPutList.length == 0) {
       return "Unlimited";
     }

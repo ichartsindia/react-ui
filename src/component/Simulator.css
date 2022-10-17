@@ -118,7 +118,9 @@ body{
   font-size: small;
   margin-bottom: 5px;
 }
-
+.p-dialog .p-dialog-content {
+  width: 100%;
+}
 .secondLine{
   display: flex;
   flex-wrap: wrap;
@@ -140,4 +142,44 @@ body{
 
 .line-break {
   width: 100%;
+}
+
+.smallButton{
+padding: 5px!important;
+font-size: small;
+font-weight: bold;
+}
+
+.p-component{
+  font-size: small;
+}
+
+.symbol-dropdown .p-inputtext{
+  font-size: small!important;
+  height: 30px!important;
+  vertical-align: middle!important;
+  padding: 7px!important;  
+}
+.date-dropdown .p-inputtext{
+  font-size: small!important;
+  height: 30px!important;
+  vertical-align: middle!important;
+  padding: 7px!important;  
+}
+
+.p-dropdown-items{
+font-size: small;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: #6366F1!important;
+  border-color: #6366F1!important;
+  color: white!important;
+  height: 30px!important;
+ 
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link{
+  height: 40px;
+  margin-bottom: 0cm!important;
 }
