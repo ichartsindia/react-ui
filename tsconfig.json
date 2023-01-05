@@ -2,10 +2,12 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "esnext",
+    "esModuleInterop": true,
     "target": "es5",
     "lib": ["es6", "dom"],
     "sourceMap": true,
     "allowJs": true,
+    "checkJs": false,
     "jsx": "react",
     "moduleResolution": "node",
     "rootDir": "src",
