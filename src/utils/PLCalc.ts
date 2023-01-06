@@ -181,6 +181,7 @@ export class PLCalc {
         let v = optleg.iv/100;
         let r = optheader.intrate;
 r=0;
+
         // Build X-axis data
         let xdata = this.range(xstart, xend, pdiff);
 
@@ -194,9 +195,8 @@ r=0;
                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
                     strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
                 }
-
                 let p = bs.blackScholes(strike, X, T, v, r, "call")
-                                   
+                                  
                 if (tradetype == 'B')
                     curdata.push((p - entryprice) * qty)
                 else
@@ -358,14 +358,14 @@ r=0;
 
         let tsecs = (expdt - dealdt) / 1000 + MarketCloseTime * 60 * 60;
         let tdays = tsecs / (24.0 * 60.0 * 60.0);
-        console.log(tdays)
+        // console.log(tdays)
         let T = tdays / 365.0;
     
         let sd = round(S * avgiv * Math.sqrt(T), 4);
         let p2sd = +S + (3.0 * +sd);
         let m2sd = +S - (3.0 * +sd);
  
-        console.log(m2sd,p2sd)
+        // console.log(m2sd,p2sd)
         let mstart = Math.min(mstrikes['minstrike'], m2sd)
         let mend = Math.max(mstrikes['maxstrike'], p2sd)
 
@@ -449,5 +449,31 @@ r=0;
         return [xdata, curdata, expdata]
     }
  
+    static calcMaxProfit(optdata: OptData){
+        let header =optdata.optheader;
+        let leg =optdata.optlegs;
+
+
+    }
+
+    static calcMaxProfileForLeg(optheader, optleg){
+        let putCallFlag = optleg.pcflag;
+        let X = optleg.strikePrice;
+        let entryprice = optleg.entryPrice;
+        let tradetype = optleg.tradeType;
+        let qty = optleg.qty;
+        let v = optleg.iv/100;
+    
+        let maxProfit=0.0;
+        if(putCallFlag=='C'){
+            if (tradetype == 'B'){
+               
+            } else {
+
+            }
+        }
+
+
+    }
 }
 

@@ -26,11 +26,6 @@ const AppMenu = (props) => {
                         icon: 'pi pi-fw pi-chart-bar',
                     },
                     {
-                        label: 'Simulator',
-                        command: () => {navigate('/simulator') },
-                        icon: 'pi pi-fw pi-chart-line',
-                    },
-                    {
                         label: 'Short ATM+/- 1%',
                         icon: 'pi pi-fw pi-minus'
                     },

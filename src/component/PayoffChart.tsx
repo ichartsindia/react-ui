@@ -7,6 +7,7 @@ import { std, mean, range } from 'mathjs';
 import { Button } from 'primereact/button';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import { LegEntity } from 'src/entity/LegEntity';
 interface Props {
     data
 }
@@ -28,15 +29,18 @@ export class PayoffChart extends React.Component<Props, State> {
             price: 50,
             IV: 50,
             days: 0,
-            finalPrice:0,
-            finalIV:0,
-            finalDays:0
+            finalPrice: 0,
+            finalIV: 0,
+            finalDays: 0
         };
     }
 
     chartData = () => {
+        if(this.props.data.records==null) return null;
+        
         let optdata: OptData = new OptData();
-
+        // console.log(this.props.data)
+   
         // assigning header
         let optheader = new OptHeader();
         optheader.avgiv = this.props.data.avgiv;
@@ -48,30 +52,29 @@ export class PayoffChart extends React.Component<Props, State> {
         optdata.optheader = optheader;
 
         let whatif = new WhatIf();
-        whatif.price =this.state.finalPrice;// (this.state.price - 50) / 2.5
+        whatif.price = this.state.finalPrice;// (this.state.price - 50) / 2.5
         whatif.IV = this.state.finalIV;//(this.state.IV - 50) / 2.5;
-        whatif.days =this.state.finalDays;// this.state.days / 5;
+        whatif.days = this.state.finalDays;// this.state.days / 5;
         optdata.whatif = whatif;
 
         // assinging option legs
         let optlegs = new Array<OptLeg>();
-        for (let opt of this.props.data.strategyEntityList) {
-            let optleg = new OptLeg();
-            optleg.entryPrice = opt.Option_Price;
-            optleg.pcflag = (opt.Buy_Call || opt.Sell_Call) ? 'C' : 'P';
+        for (let opt of this.props.data.legEntityList) {
+            let optleg: OptLeg = new OptLeg();
+            optleg.entryPrice = Number.parseFloat((opt.Option_Price).toString().replace(',', ''));
+            optleg.pcflag = opt.CE_PE == 'CE' ? 'C' : 'P';
             optleg.expdt = this.props.data.selectedExpiryDate;
-            optleg.iv = optleg.pcflag == 'C' ? opt.Call_IV : opt.Put_IV;
-            optleg.qty = (optleg.pcflag == 'C' ? opt.Call_Lot : opt.Put_Lot) * this.props.data.lotSize;
+            optleg.iv = opt.IV;
+            optleg.qty = opt.Position_Lot * this.props.data.lotSize;
             optleg.strikePrice = opt.Strike_Price;
-            optleg.tradeType = (opt.Buy_Call || opt.Buy_Put) ? 'B' : 'S';
+            optleg.tradeType = opt.Buy_Sell == 'Buy' ? 'B' : 'S';
+            optleg.futuresPrice = this.props.data.futPrice;
             optlegs.push(optleg);
         }
 
         optdata.optlegs = optlegs;
 
         let result = PLCalc.ComputePayoffData(optdata);
-
-
         return result;
     };
 
@@ -80,16 +83,24 @@ export class PayoffChart extends React.Component<Props, State> {
 
         let result = this.chartData();
 
+        if (result==null) return null;
+
         let arr1 = [];
         let arr2 = [];
 
         let xAxisData = result[0] as Array<number>;
         let len = xAxisData.length;
-        let mean = PLCalc.calcMean(xAxisData);
-        let sigma = xAxisData.length > 0 ? std(...xAxisData) : 0;
-        let point1 = Math.round(mean - +sigma);
-        let point2 = mean - 2 * +sigma;
-        console.log(point2)
+
+        // let mean = PLCalc.calcMean(xAxisData);
+        // let sigma = xAxisData.length > 0 ? std(...xAxisData) : 0;
+        
+        // let point2 = mean - 2 * +sigma;
+        let sd = std(xAxisData);
+        console.log(sd);
+        let fairPrice = this.props.data.fairPrice;
+        let point1 = Math.round(fairPrice - +sd);
+        
+        
         for (let i = 0; i < len; i++) {
             let item1 = [];
             let item2 = [];
@@ -106,6 +117,9 @@ export class PayoffChart extends React.Component<Props, State> {
             },
             title: {
                 text: this.props.data.selectedsymbol
+            }, 
+            credits: {
+                enabled: false
             },
             yAxis: {
                 title: {
@@ -124,32 +138,28 @@ export class PayoffChart extends React.Component<Props, State> {
                 plotLines: [{
                     color: '#B0B0B0',
                     width: 2,
-                    value: mean,
+                    value: fairPrice,
                     dashStyle: 'dash',
                     label: {
-                        text: mean,
+                        text: fairPrice,
                         y: 100
                     }
                 },
-                    // {
-                    //     width: 1,
-                    //     value: point1,
-                    //     label: {
-                    //         text:point1,
-                    //         y:100
-                    //     }
-                    // },
+                    {
+                        width: 1,
+                        value: point1,
+                        label: {
+                            text:point1,
+                            y:100
+                        }
+                    },
                     // {
                     //     width: 1,
                     //     value: point2
                     // }
                 ]
             },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle'
-            },
+            legend: { enabled: false },
             plotOptions: {
                 series: {
                     label: {
@@ -174,23 +184,23 @@ export class PayoffChart extends React.Component<Props, State> {
         };
 
 
-        return <div key={this.props.data.selectedsymbol}>
+        return <div key={'payoffChart_' + this.props.data.selectedsymbol}>
             <div>
                 <HighchartsReact highcharts={Highcharts} options={options} containerProps={{ style: { hight: '100%', width: '100%' } }} />
             </div>
             <div>
                 <div >Price ({(this.state.price - 50) / 2.5}%)</div>
-                <div > <Slider value={this.state.price} step={2.5} onChange={(e) => this.setState({ price: e })}  onAfterChange={(e)=>{this.setState({finalPrice:(+e - 50) / 2.5})}}/></div>
+                <div > <Slider value={this.state.price} step={2.5} onChange={(e) => this.setState({ price: e })} onAfterChange={(e) => { this.setState({ finalPrice: (+e - 50) / 2.5 }) }} /></div>
             </div>
             <br></br>
             <div >
                 <div >IV ({(this.state.IV - 50) / 2.5}%)</div>
-                <div > <Slider value={this.state.IV} onChange={(e) => this.setState({ IV: e })} step={2.5} onAfterChange={(e)=>{this.setState({finalIV:(+e - 50) / 2.5})}}/></div>
+                <div > <Slider value={this.state.IV} onChange={(e) => this.setState({ IV: e })} step={2.5} onAfterChange={(e) => { this.setState({ finalIV: (+e - 50) / 2.5 }) }} /></div>
             </div>
             <br></br>
             <div >
                 <div >Days ({this.state.days / 5})</div>
-                <div > <Slider value={this.state.days} onChange={(e) => this.setState({ days: e })} step={5}  onAfterChange={(e)=>{this.setState({finalIV:(+e) / 5})}} /></div>
+                <div > <Slider value={this.state.days} onChange={(e) => this.setState({ days: e })} step={5} onAfterChange={(e) => { this.setState({ finalIV: (+e) / 5 }) }} /></div>
             </div>
             <br></br>
             <div>
@@ -199,9 +209,9 @@ export class PayoffChart extends React.Component<Props, State> {
                         price: 50,
                         IV: 50,
                         days: 0,
-                        finalPrice:0,
-                        finalIV:0,
-                        finalDays:0
+                        finalPrice: 0,
+                        finalIV: 0,
+                        finalDays: 0
                     })
                 }} />
             </div>

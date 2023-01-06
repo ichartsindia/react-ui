@@ -16,7 +16,8 @@ export class OptionChain{
     Buy_Put:boolean;
     Sell_Put:boolean;
 
-    Option_Price:number;
+    Put_Price:number;
+    Call_Price:number;
     Expiry_Date: Date;
 
     Put_Lot:number;
