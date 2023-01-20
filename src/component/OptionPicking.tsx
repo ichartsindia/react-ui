@@ -131,8 +131,6 @@ export class OptionPicking extends React.Component<Props, State> {
               <div className="flex-item"><Button className='smallButton'>Trade</Button></div>
             </div>
             <div className='secondLine flex'> 
-              <div className='flex-item'>Spot Price:</div>
-              <div className='flex-item'>{this.state.record?.spot_price}</div>
               <div className='flex-item'>Lot Size:</div>
               <div className='flex-item'>{this.state.record?.lot_size}</div>
               <div className='flex-item'>Avergae Price:</div>
