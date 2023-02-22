@@ -1,6 +1,7 @@
 export class DateUtility {
 
     static yearElapse(dateString) {
+        if(dateString==null) return null;
         const _MS_PER_DAY = 1000 * 60 * 60 * 24 * 365;
         let day = +dateString.substring(0, 2);
         let month = dateString.substring(2, 5);

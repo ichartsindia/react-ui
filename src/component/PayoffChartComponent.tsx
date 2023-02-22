@@ -13,7 +13,11 @@ HighchartMore(Highcharts)
 interface Props {
     data;
     selectedsymbol:string;
+    expiryDate:string;
     callback: any;
+    fairPrice:number;
+    callbackShow,
+    chainShowed:boolean
 }
 
 interface State {
@@ -25,7 +29,7 @@ interface State {
     finalDays;
 }
 
-export class PayoffChart extends React.Component<Props, State> {
+export class PayoffChartComponent extends React.Component<Props, State> {
     whatif: WhatIf = new WhatIf();
     
     constructor(props) {
@@ -44,54 +48,7 @@ export class PayoffChart extends React.Component<Props, State> {
         this.whatif.price=0;
     }
 
-    // chartData = () => {
-       
-    //     if (this.props.data==null || this.props.data.legEntityList == null || (this.props.data && this.props.data.legEntityList!=null && this.props.data.legEntityList==0)) return null;
-
-    //     let optdata: OptData = new OptData();
-    //     // console.log(this.props.data)
-
-    //     // assigning header
-    //     let optheader = new OptHeader();
-    //     optheader.avgiv = this.props.data.avgiv;
-    //     optheader.symbol = this.props.data.selectedsymbol;
-    //     optheader.symbolPrice = this.props.data.spotPrice;
-    //     optheader.dealDate = new Date().toLocaleString();
-    //     optheader.payoffdate = this.props.data.selectedExpiryDate;
-    //     optheader.futuresPrice = this.props.data.futPrice;
-    //     optdata.optheader = optheader;
-
-    //     let whatif = new WhatIf();
-    //     whatif.price = this.state.finalPrice;
-    //     whatif.IV = this.state.finalIV;
-    //     whatif.days = this.state.finalDays;
-    //     optdata.whatif = whatif;
-
-    //     // assinging option legs
-    //     let optlegs = new Array<OptLeg>();
-    //     for (let opt of this.props.data.legEntityList) {
-    //         let optleg: OptLeg = new OptLeg();
-    //         optleg.entryPrice = Number.parseFloat((opt.Option_Price).toString().replace(',', ''));
-    //         optleg.pcflag = opt.CE_PE == 'CE' ? 'C' : 'P';
-    //         optleg.expdt = this.props.data.selectedExpiryDate;
-    //         optleg.iv = opt.IV;
-    //         optleg.qty = opt.Position_Lot * this.props.data.lotSize;
-    //         optleg.strikePrice = opt.Strike_Price;
-    //         optleg.tradeType = opt.Buy_Sell == 'Buy' ? 'B' : 'S';
-    //         optleg.futuresPrice = this.props.data.futPrice;
-    //         optlegs.push(optleg);
-    //     }
-
-    //     optdata.optlegs = optlegs;
-
-    //     let result = PLCalc.ComputePayoffData(optdata);
-    //     return result;
-    // };
-
-
-    render() {
-
-    
+    render() {   
         if (this.props.data == null) return null;
 
         let arr1 = [];
@@ -100,14 +57,9 @@ export class PayoffChart extends React.Component<Props, State> {
         let xAxisData = this.props.data[0] as Array<number>;
         let len = xAxisData.length;
 
-        // let mean = PLCalc.calcMean(xAxisData);
-        // let sigma = xAxisData.length > 0 ? std(...xAxisData) : 0;
-
-        // let point2 = mean - 2 * +sigma;
-
         let sd = this.props.data[3]["sd"];
 
-        let fairPrice = this.props.data.fairPrice;
+        let fairPrice:number = this.props.fairPrice;
         let mean = len == 0 ? 0 : math.mean(xAxisData);
         let leftSigma1 = Math.round(mean - +sd);
         let leftSigma2 = Math.round(mean - 2 * +sd);
@@ -128,7 +80,7 @@ export class PayoffChart extends React.Component<Props, State> {
         let options = {
             chart: {
                 zoomType: 'xy',
-                height: window.outerHeight - 320,       
+                height: 400,       
             },
 
              title: { 
@@ -165,31 +117,11 @@ export class PayoffChart extends React.Component<Props, State> {
                     },
         
                 },
-                labels: {
-        
+                labels: {       
                     style: {
                         color: 'black'
                     }
                 },
-
-                plotLines: [{
-                    color: '#231F20',
-                    fillOpacity: 0.2,
-                    lineWidth: 1.5,
-                    dashStyle: 'shortdot',
-                    value: fairPrice,
-                    label: {
-                        text: fairPrice,
-                        rotation: 0,
-                        x: -30,
-                        y: -5,
-                        style: {
-                            fontSize: '11.5px',
-                            color: '#606060'
-                        }
-                    },
-                    zIndex: 1000
-                }],
             
                 plotBands: [{
                     color: 'rgba(197, 210, 200,0.1)',
@@ -203,16 +135,13 @@ export class PayoffChart extends React.Component<Props, State> {
                             color: '#606060'
                         }
                     }
-        
                 }
                 , {
 
                     color: 'rgba(197, 210, 200,0.1)',
-                    fillOpacity: 0.2,
-        
+                    fillOpacity: 0.2,        
                     from: leftSigma1, // Start of the plot band
                     to: rightSigma1, // End of the plot band
-        
                     label: {
                         text: '+σ',
                         y: -18,
@@ -255,6 +184,24 @@ export class PayoffChart extends React.Component<Props, State> {
                         }
                     }
                 }],
+                plotLines: [{
+                    color: '#231F20',
+                    fillOpacity: 0.2,
+                     lineWidth: 3,
+                     dashStyle: 'shortdot',
+                    zIndex: 3,
+                     value: fairPrice,
+                     label: {
+                         text: fairPrice?.toString(),
+                         rotation: 0,
+                         x: -30,
+                         y: -18,
+                         style: {
+                             fontSize: '11.5px',
+                             color: '#606060'
+                         }
+                     },
+                  }],
                 crosshair: {
                     label: {
                         enabled: true,
@@ -367,164 +314,33 @@ export class PayoffChart extends React.Component<Props, State> {
                 }
             },
         ]
-            // yAxis: {
-            //     title: {
-            //         text: 'Profit/Loss'
-            //     }, plotLines: [{
-            //         color: 'green',
-            //         width: 1,
-            //         value: 0,
-            //         zIndex: 2
-            //     }]
-            // },
-
-
-
-
-            // xAxis: {
-            //     gridLineWidth: 1,
-            //     plotBands: [{
-            //         from: leftSigma2,
-            //         to: leftSigma1,
-            //         color: 'rgba(197, 210, 200,0.1)',
-            //         width: 1,
-            //     },
-            //     {
-            //         from: leftSigma1,
-            //         to: rightSigma1,
-            //         color: 'rgba(135, 138, 135, 0.1)',
-            //         width: 1,
-            //     }, {
-            //         from: leftSigma1,
-            //         to: rightSigma2,
-            //         color: 'rgba(197, 210, 200,0.1)',
-            //         width: 1,
-            //     }],
-
-            //     plotLines: [{
-            //         color: '#B0B0B0',
-            //         width: 2,
-            //         value: fairPrice,
-            //         dashStyle: 'dash',
-            //         label: {
-            //             text: fairPrice,
-            //             rotation: 0,
-            //             textAlign: 'center',
-            //             verticalAlign: 'top',
-            //             y: -10
-            //         }
-            //     },
-
-            //     {
-            //         width: 0,
-            //         value: leftSigma1,
-            //         label: {
-            //             text: '-1σ',
-            //             rotation: 0,
-            //             textAlign: 'center',
-            //             verticalAlign: 'top',
-            //             y: -10
-            //         }
-            //     },
-            //     {
-            //         width: 0,
-            //         value: leftSigma2,
-            //         label: {
-            //             text: '-2σ',
-            //             rotation: 0,
-            //             textAlign: 'center',
-            //             verticalAlign: 'top',
-            //             y: -10
-            //         }
-            //     },
-            //     {
-            //         width: 0,
-            //         value: rightSigma1,
-            //         label: {
-            //             text: '+1σ',
-            //             rotation: 0,
-            //             textAlign: 'center',
-            //             verticalAlign: 'top',
-            //             y: -10
-            //         }
-            //     },
-            //     {
-            //         width: 0,
-            //         value: rightSigma2,
-            //         label: {
-            //             text: '+2σ',
-            //             rotation: 0,
-            //             textAlign: 'center',
-            //             verticalAlign: 'top',
-            //             y: -10
-            //         }
-            //     },
-            //         // {
-            //         //     width: 1,
-            //         //     value: mean,
-            //         //     label: {
-            //         //         rotation:0,
-            //         //         textAlign:'center',
-            //         //         verticalAlign: 'top',
-            //         //         y:-10
-            //         //    }
-            //         // }
-            //     ]
-            // },
-
-            // plotOptions: {
-            //     series: {
-            //         fillOpacity: 0.1,
-            //         pointStart: xAxisData[0],
-            //         animation: false,
-            //         states: { hover: { enabled: false } }, 
-            //     }
-            // },
-            // series: [
-            //    {
-            //         type: 'line',
-            //         name: 'On Target',
-            //         width: 1.5,
-            //         data: arr1,
-            //         dashStyle: 'shortdot',
-            //         color:'rgb(0,0,255)',
-            //     },
-            //     {
-            //         type: 'area',
-            //         name: 'On Expiry',
-            //         data: arr2,
-            //         zones:
-            //             [{
-            //                 value: -0.01,
-            //                 color: 'rgba(255,127,127)'
-            //             }, {
-            //                 color: 'rgba(50,205,50)'
-            //             }],
-            //     },
-            // ]
+            
         };
 
 
-        return <div key={'payoffChart_' + this.props.selectedsymbol}>
+        return <div key={'payoffChart_' + this.props.selectedsymbol+ this.props.expiryDate}>
+               <div style={{ display:this.props.chainShowed?'none':'flex'}} className='alignedLeft' >Option Chain<img src='/show_left.svg' onClick={this.props.callbackShow}></img></div>    
             <div>
                 <HighchartsReact highcharts={Highcharts} options={options} containerProps={{ style: { hight: '100%', width: '100%' } }} />
             </div>
-            <div>
-                <div >Price ({(this.state.price - 50) / 2.5}%)</div>
+            <div className='flex' style={{width:'100%'}}>
+                <div style={{width:'30%', marginRight:'5px'}}>
+                <div style={{textAlign:'center'}} >Price ({(this.state.price - 50) / 2.5}%)</div>
                 <div > <Slider value={this.state.price} step={2.5} onChange={(e) => {this.whatif.price=(+e - 50) / 2.5; this.props.callback(this.whatif); this.setState({ price: e })}} onAfterChange={(e) => { this.setState({ finalPrice: (+e - 50) / 2.5 }) }} /></div>
             </div>
             <br></br>
-            <div >
-                <div >IV ({(this.state.IV - 50) / 2.5}%)</div>
+            <div style={{width:'30%', marginRight:'5px'}}>
+                <div style={{textAlign:'center'}}>IV ({(this.state.IV - 50) / 2.5}%)</div>
                 <div > <Slider value={this.state.IV} onChange={(e) => {this.whatif.IV=(+e - 50) / 2.5; this.props.callback(this.whatif);this.setState({ IV: e })}} step={2.5} onAfterChange={(e) => { this.setState({ finalIV: (+e - 50) / 2.5 }) }} /></div>
             </div>
             <br></br>
-            <div >
-                <div >Days ({this.state.days / 5})</div>
-                <div > <Slider value={this.state.days} onChange={(e) => {this.whatif.days=(+e)/5;this.props.callback(this.whatif);this.setState({ days: e })}} step={5} onAfterChange={(e) => { this.setState({ finalIV: (+e) / 5 }) }} /></div>
-            </div>
-            <br></br>
-            <div>
+            <div style={{width:'30%',marginLeft:'2px', marginRight:'5px'}}>
+                <div style={{textAlign:'center'}}>Days ({this.state.days / 5})</div>
+                <div> <Slider value={this.state.days} onChange={(e) => {this.whatif.days=(+e)/5;this.props.callback(this.whatif);this.setState({ days: e })}} step={5} onAfterChange={(e) => { this.setState({ finalIV: (+e) / 5 }) }} /></div>
+            </div>     
+           
+       
+            <div style={{width:'10%', marginLeft:'5px'}}>
                 <Button label="Reset" className="p-button-secondary smallButton" style={{ width: '60px', right: '0px' }} onClick={() => {
                     this.setState({
                         price: 50,
@@ -539,7 +355,7 @@ export class PayoffChart extends React.Component<Props, State> {
                         this.props.callback(this.whatif)});
                 }} />
             </div>
-
+ </div>
         </div>
     }
 }

@@ -43,7 +43,9 @@ body{
   border-radius: 5px 5px 5px 5px;
   border-color: blue;
 }
-
+.small-size{
+  font-size: smaller;
+}
 .optionPriceText {
   width : 60px;
   height: 20px;
@@ -195,6 +197,64 @@ font-size: small;
   display:table-row!important;
 } */
 
-.optionList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody td:nth-child(1){
-width: 20px;
+.optionList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody td:nth-child(1) {
+  width: 20px;
 }
+
+.strategyList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody tr:hover {
+  cursor: pointer;
+}
+
+.strategyList  .p-datatable-wrapper .p-datatable-table .p-datatable-thead > tr > th:nth-child(2) {
+  flex-grow: 2;
+ padding-right: 4em;
+} 
+/* .strategyList  .p-datatable-wrapper .p-datatable-table .p-datatable-thead > tr > th:nth-child(3) {
+ padding-right: 1em;
+ padding-left: .8em;
+} 
+.strategyList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody tr>td:nth-child(2) {
+    flex-grow: 2;
+} */
+.hideComponent{
+  display: none;
+}
+.showComponent{
+  display: block;
+}
+
+.alignedLeft {
+  text-align: left; 
+  background:#d0e1fd;
+  font-weight:bold;
+  color:black;
+  font-size:small;
+  /* display: flex!important; */
+  align-items: center;
+  cursor: pointer
+}
+
+.alignedCenter {
+  text-align: center; 
+  background:#d0e1fd;
+  font-weight:bold;
+  color:black;
+  font-size:small;
+  align-items: center;
+  cursor: pointer;
+  justify-content: center;
+  margin-top:-8px; 
+  margin-left:-8px; 
+  margin-right:-8px;
+  display: flex;
+}
+
+.borderClass{
+  border-style:'ridge';
+  border-color: #d0e1fd;
+}
+
+.redClass{
+  color: red;
+}
+
