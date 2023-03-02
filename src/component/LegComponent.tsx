@@ -1,4 +1,4 @@
-import { Button, Column, DataTable, TabPanel, TabView } from "primereact";
+import { Button, Column, DataTable, Dropdown, InputText, TabPanel, TabView } from "primereact";
 import React from "react";
 import { LegEntity } from "src/entity/LegEntity";
 import { OptionChain } from "src/entity/OptionChain";
@@ -31,20 +31,23 @@ export class LegComponent extends React.Component<Props, State> {
 
   render() {
     this.greeks = this.generateGreeks();
-    let expiry = this.props.passedData.selectedExpiryDate
+    let expiry = this.props.passedData.selectedExpiryDate;
+
     return (
       <TabView>
         <TabPanel header="Legs">
           <div className="p-card" id="selectedLegList" key={'Legs_' + this.props.passedData.selectedsymbol}>
             <DataTable value={this.props.passedData.legEntityList} responsiveLayout="scroll" >
-              <Column body={this.buttonTemplate} align="center"></Column>
+              <Column body={this.buttonTemplate} align="center" ></Column>
+              <Column body={this.plusTemplate} align="center" style={{ width: '2%' }}></Column>
               <Column body={this.lotTemplate} header="Lots" align="center"></Column>
+              <Column body={this.minusTemplate} align="center" style={{ width: '2%' }}></Column>
               <Column body={expiry} header='Expiry' align="center"></Column>
               <Column field="Strike_Price" header='Strike' align="center"></Column>
               <Column field="CE_PE" header='Type' align="center"></Column>
-              <Column body={this.optionPriceTemplate} header='Entry' align="center"></Column>
+              <Column body={this.optionPriceTemplate} header='Entry Price' align="center"></Column>
               <Column field="IV" header='IV' align="center"></Column>
-              <Column body={this.deleteTemplate}></Column>
+              <Column body={this.deleteTemplate} header="Action"></Column>
             </DataTable>
           </div>
         </TabPanel>
@@ -86,35 +89,70 @@ export class LegComponent extends React.Component<Props, State> {
 
     return null;
   }
+  plusTemplate = (rowData: LegEntity) => {  
+    
+    return <i className="pi pi-plus" style={{ color: 'slateblue', fontSize:'smaller', cursor:'pointer' }} onClick={(e)=>{
+      rowData.Position_Lot=+rowData.Position_Lot+1;
+      if(rowData.Position_Lot>0)
+          this.props.callback(this.props.passedData.legEntityList);
+    }
+    }></i>
 
+  }
+
+  minusTemplate = (rowData: LegEntity) => {  
+    
+    return <i className="pi pi-minus" style={{ color: 'slateblue' , fontSize:'smaller', cursor:'pointer' }} onClick={(e)=>{
+      rowData.Position_Lot=+rowData.Position_Lot-1;
+      if(rowData.Position_Lot>0)
+      this.props.callback(this.props.passedData.legEntityList);
+    }
+    }></i>
+
+  }
   optionPriceTemplate = (rowData: LegEntity) => {
     return (
-      <input width="150px" type="number" min={1.0} max={50000.0} value={rowData.Option_Price}
-        onChange={(event) => {
-          rowData.Option_Price = Number.parseFloat(event.target.value);
+      <InputText   value={rowData.Option_Price} style={{textAlign:'right', fontSize:'small', height:'22px', width:'100px'}}
+      onChange={(event) => {
+          console.log(event.target.value)
+          rowData.Option_Price = event.target.value;
+          if(rowData.Option_Price)
           this.props.callback(this.props.passedData.legEntityList);
-        }} ></input>
+        }} ></InputText>
     )
   }
 
-  IVTemplate = (rowData: LegEntity) => {
-    return (
-      "IV: " + rowData.IV
-    )
-  }
+  // IVTemplate = (rowData: LegEntity) => {
+  //   return (
+  //     "IV: " + rowData.IV
+  //   )
+  // }
 
   deleteTemplate = (rowData: LegEntity) => {
-    return <Button icon="pi  pi-trash" className='p-button-text' style={{ height: '20px' }}
-      onClick={() => {
-        let list = this.props.passedData.legEntityList;
-        const index = list.indexOf(rowData, 0);
-        if (index > -1) {
-          list.splice(index, 1);
-        }
-        this.props.callback(list);
-        // this.setState({ legEntityList: list });
-        // this.convertLegToOptionChain();
-      }}></Button>
+    let lotList = [];
+    
+    for(let i=0; i<rowData.Position_Lot; i++){
+      lotList.push(i+1);
+    }
+
+    return <div className='flex'>
+      <div className='leglot-dropdown'>
+        <Dropdown id="legLotDropdown" value={rowData.Position_Lot} onChange={(e) => { rowData.Position_Lot = e.value; this.props.callback(this.props.passedData.legEntityList); }} options={lotList} />
+      </div>
+      <div>
+        <Button icon="pi  pi-trash" className='p-button-text' style={{ height: '20px' }}
+          onClick={() => {
+            let list = this.props.passedData.legEntityList;
+            const index = list.indexOf(rowData, 0);
+            if (index > -1) {
+              list.splice(index, 1);
+            }
+            this.props.callback(list);
+            // this.setState({ legEntityList: list });
+            // this.convertLegToOptionChain();
+          }}></Button>
+      </div>
+    </div>
   }
   //#endregion
 

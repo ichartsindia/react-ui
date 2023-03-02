@@ -395,7 +395,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
         let position = new LegEntity();
         position.Buy_Sell = element.trade_type;
         position.CE_PE = element.option_type == 'p' ? 'PE' : 'CE';
-        position.Option_Price = Number.parseFloat(element.entry_price);
+        position.Option_Price = element.entry_price;
         position.Strike_Price = Number.parseFloat(element.strike_price);
         position.Position_Lot = element.lots;
         position.IV = this.state.avgiv;
@@ -418,7 +418,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Call || rowData.Sell_Call) {
         position.CE_PE = "CE";
-        position.Option_Price =Number.parseFloat( rowData.Call_LTP.toString().replace(",",""));
+        position.Option_Price =rowData.Call_LTP.toString().replace(",","");
       }
 
 
@@ -441,7 +441,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Put || rowData.Sell_Put) {
         position.CE_PE = "PE";
-        position.Option_Price = Number.parseFloat( rowData.Put_LTP.toString().replace(",",""));
+        position.Option_Price =  rowData.Put_LTP.toString().replace(",","");
       }
 
 

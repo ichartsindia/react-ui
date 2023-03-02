@@ -1,6 +1,6 @@
 import React from "react";
 import { LegEntity } from "src/entity/LegEntity";
-import { mean, min } from 'mathjs';
+import { max, mean, min } from 'mathjs';
 import { PLCalc } from "src/utils/PLCalc";
 import axios from "axios";
 import { ProfitLoss } from "src/entity/ProfitLoss";
@@ -180,9 +180,9 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         let chartData = this.props.passedData.chartData;
 
         if (chartData != null) {
-            let max = "₹ " + Math.max(...chartData[2]);
+            let max =  Math.max(...chartData[2]);
 
-            return max;
+            return "₹ " + max.toFixed(2);
         } else {
             return null;
         }
@@ -227,12 +227,22 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (dataY == null || dataY.length == 0) return null;
 
         let closestY = PLCalc.findClosest(dataY, 0);
+        console.log("closestY",closestY);
+        
         let closestIndex = dataY.indexOf(closestY);
+    
+        console.log("closestIndex",closestIndex);
+    
         let closestX = dataX[closestIndex];
+       
+        console.log("closestX",closestX);
+    
+
         if (dataY.length > 0) {
             let minY = min(...dataY);
             let minYIndex = dataY.indexOf(minY);
-            // console.log("minY", minY);
+             console.log("minY", minY);
+             console.log("minYIndex",minYIndex);
             // console.log("dataY[minYIndex - 50]",dataY[minYIndex - 10]);
             // console.log("dataY[minYIndex + 50]",dataY[minYIndex + 50]);
             let step:number=200;
@@ -248,9 +258,22 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
                 else
                     return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
             }
+            let maxY = max(...dataY);
+            let maxYIndex = dataY.indexOf(maxY);
+            if (maxYIndex - step > 0 && maxYIndex + step < dataX.length && dataY[maxYIndex - step] < maxY && dataY[maxYIndex +step] < maxY) {
+               dataY.splice(closestIndex, 1);
+               let closestYSecond = PLCalc.findClosest(dataY, 0);
+               let closestIndexSecond = dataY.indexOf(closestYSecond);
+               let closestXSecond = dataX[closestIndexSecond];
+
+               if (closestX > closestXSecond)
+                   return "₹ " + closestXSecond.toFixed(2) + " / ₹ " + closestX.toFixed(2);
+               else
+                   return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
+           }
         }
 
-        return "₹ " + closestX;
+        return "₹ " + closestX.toFixed(2);
 
     }
 
@@ -265,11 +288,11 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         let closestY = PLCalc.findClosest(dataY, 0);
         let closestIndex = dataY.indexOf(closestY);
         let closestX = dataX[closestIndex];
-
+        let step:number=200;
         if (dataY.length > 0) {
             let minY = min(...dataY);
             let minYIndex = dataY.indexOf(minY);
-            if (minYIndex - 50 > 0 && minYIndex + 50 < dataX.length && dataY[minYIndex - 50] > minY && dataY[minYIndex + 50] > minY) {
+            if (minYIndex - step > 0 && minYIndex + step < dataX.length && dataY[minYIndex - step] > minY && dataY[minYIndex + step] > minY) {
                 dataY.splice(closestIndex, 1);
 
                 let closestYSecond = PLCalc.findClosest(dataY, 0);
@@ -281,10 +304,26 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
                 else
                     return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
             }
+
+            let maxY = max(...dataY);
+            let maxYIndex = dataY.indexOf(maxY);
+            if (maxYIndex - step > 0 && maxYIndex + step < dataX.length && dataY[maxYIndex - step] < maxY && dataY[maxYIndex +step] < maxY) {
+               dataY.splice(closestIndex, 1);
+               let closestYSecond = PLCalc.findClosest(dataY, 0);
+               let closestIndexSecond = dataY.indexOf(closestYSecond);
+               let closestXSecond = dataX[closestIndexSecond];
+
+               if (closestX > closestXSecond)
+                   return "₹ " + closestXSecond.toFixed(2) + " / ₹ " + closestX.toFixed(2);
+               else
+                   return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
+           }
         }
 
+        if(closestX)
+        return "₹ " + closestX.toFixed(2);
 
-        return "₹ " + closestX;
+        return null;
     }
 
     netDebt = () => {
@@ -311,7 +350,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (totalShortPremium - totalLongPremium == 0)
             return null;
 
-        return "₹ " + (totalShortPremium - totalLongPremium).toFixed(2);
+        return "₹ " + (totalLongPremium-totalShortPremium).toFixed(2);
     }
 
     totalPL = (): string => {
@@ -412,7 +451,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
                 this.setState({ margin: margin })
             }
 
-            return margin;
+            return margin.toFixed(2);
         }
 
         )

@@ -3,6 +3,6 @@ export class LegEntity {
    Strike_Price: number;
    CE_PE: string;
    Buy_Sell: string;
-   Option_Price: number;
+   Option_Price: string;
    IV: number;
 }
