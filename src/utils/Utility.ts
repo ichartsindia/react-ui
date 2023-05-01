@@ -1,4 +1,6 @@
-export class DateUtility {
+import { OptionChain } from "src/entity/OptionChain";
+
+export class Utility {
 
     static yearElapse(dateString) {
         if(dateString==null) return null;
@@ -25,4 +27,25 @@ export class DateUtility {
         
         return date1;
     }
+
+    static objectsEqual = (o1: OptionChain[], o2: OptionChain[]) => {
+        if (o1.length != o2.length) {
+            return false;
+        }
+
+        let isEqual=true;
+        for(let i=0; i<o1.length; i++){
+            let a1=o1[i];
+            let a2=o2[i];
+
+            Object.keys(a1).every((p) => {
+                isEqual = a1[p]==a2[p]
+                return isEqual;
+            });
+        }
+
+        return isEqual;
+    }
+    
+   
 }

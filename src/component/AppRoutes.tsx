@@ -5,7 +5,7 @@ import { StrategyBuilder } from './StrategyBuilder';
 const AppRoutes = (props) => {
   return (
     <Routes>
-      <Route path="/strategyBuilder" element={<StrategyBuilder />} />
+      <Route path="/strategy" element={<StrategyBuilder />} />
     </Routes>
   )
 }

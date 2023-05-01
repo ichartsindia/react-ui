@@ -2,12 +2,12 @@
   "name": "ichart-ui",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/strategy/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.11.64",
     "@types/quill": "^2.0.9",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
@@ -19,6 +19,7 @@
     "bootstrap": "^5.2.2",
     "chart.js": "^3.9.1",
     "classnames": "^2.3.2",
+    "fs": "^0.0.1-security",
     "highcharts": "^10.3.2",
     "highcharts-react-official": "^3.1.0",
     "jstat": "^1.9.6",
@@ -62,5 +63,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.2"
   }
 }

@@ -6,5 +6,6 @@ export class Greeks {
     delta: string;
     gamma: string;
     theta: string;
-    vega: string
+    vega: string;
+    CE_PE:string;
 }

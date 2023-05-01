@@ -29,6 +29,7 @@ export class OptLeg{
 export class WhatIf{
     price:number;
     IV:number;
-    days:number;
+    days:Date|Date[];
+    allowLegAdjustment: boolean
 
 }

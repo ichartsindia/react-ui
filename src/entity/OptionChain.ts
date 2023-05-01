@@ -22,4 +22,7 @@ export class OptionChain{
 
     Put_Lot:number;
     Call_Lot:number;
+    iv_adjustment:number;
+    // Put_OTM:boolean;
+    // Call_OTM:boolean;
 }

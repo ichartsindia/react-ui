@@ -14,6 +14,7 @@ interface State {
 }
 export class DialogSave extends React.Component<Props, State> {
   tradeOptions: { label: string; value: string; }[];
+  st_save_id: any;
   constructor(props: Props) {
     super(props);
     console.log(props);
@@ -31,6 +32,7 @@ export class DialogSave extends React.Component<Props, State> {
         tag: 'PaperTrades'
       }
     }
+    console.log(this.props.passedData);
     console.log(this.state);
     this.tradeOptions = [
       { label: 'Live Trades', value: "LiveTrades" },
@@ -42,14 +44,14 @@ export class DialogSave extends React.Component<Props, State> {
 
   onHide = () => {
 
-    this.props.closed(true);
+    this.props.closed(this.st_save_id);
   }
 
   onSave = () => {
 
     this.saveStrategy();
 
-    this.props.closed(true);
+    this.props.closed(this.st_save_id);
   }
 
   saveStrategy=()=>{
@@ -70,13 +72,14 @@ export class DialogSave extends React.Component<Props, State> {
     let strategyDetails = [];
 
     legs.forEach(leg => {
+      console.log(leg);
       let strategyDetail = {
         "trade_type": leg.Buy_Sell,
         "strprc": leg.Strike_Price,
         "opttype": leg.CE_PE,
         "exd": this.props.passedData.selectedExpiryDate,
         "entry_price": leg.Option_Price,
-        "exit_price": 10000, //hardcoded, ask haritha
+        "exit_price": leg.exited==true?1000000:0, ////temp
         "optleg_status": 1,
         "lots": leg.Position_Lot,
         "opt_leg_id": Math.random()
@@ -90,6 +93,7 @@ export class DialogSave extends React.Component<Props, State> {
       "strategy_details": strategyDetails
     };
  
+   
     let url = "https://www.icharts.in/opt/api/saveStrategy_Api.php";
     // if (this.props.passedData.strategyProfile) {
     //   url = "https://www.icharts.in/opt/api/EditStrategy_Api.php";
@@ -97,6 +101,11 @@ export class DialogSave extends React.Component<Props, State> {
     //   console.log(optdata);
     // }
  
+    if(this.props.passedData.strategyId){
+      strategyHeader.strategy_id=this.props.passedData.strategyId;
+      url ="https://www.icharts.in/opt/api/EditStrategy_Api.php";
+    }
+
     let formData = new FormData();
     formData.append("optdata", JSON.stringify(optdata));
 
@@ -105,14 +114,13 @@ export class DialogSave extends React.Component<Props, State> {
       url: url,
       data: formData
     })
-      .then(response => {
+    .then(response => {
         let data = response.data;
+        this.st_save_id=data.st_save_id;
         console.log(response);
       }).catch(err => {
         console.log(err);
       });
-
-
   }
 
   footer = (
@@ -123,33 +131,34 @@ export class DialogSave extends React.Component<Props, State> {
     </div>
   );
 
- deleteStrategy=()=>{
-  let formData = new FormData();
-  formData.append("strategy_id", this.props.passedData.strategyProfile.strategyId);
-  formData.append("username", "haritha0");
+  deleteStrategy=()=>{
+    let formData = new FormData();
+    formData.append("strategy_id", this.props.passedData.strategyProfile.strategyId);
+    formData.append("username", "haritha0");
 
-  let url = "https://www.icharts.in/opt/api/DeleteStrategy_Api.php";
-  axios({
-    method: "post",
-    url: url,
-    data: formData
-  }).then(response => {
-    this.saveStrategy();
+    let url = "https://www.icharts.in/opt/api/DeleteStrategy_Api.php";
+    axios({
+      method: "post",
+      url: url,
+      data: formData
+    }).then(response => {
+      this.saveStrategy();
 
-  }).catch(err => {
-    console.log(err);
-  });
- }
+    }).catch(err => {
+      console.log(err);
+    });
+  }
+
   render() {
-
-
     return (
-
       <Dialog blockScroll={true} header="Portfolio Manager" visible={true} onHide={this.onHide} footer={this.footer} className="dialog" >
-        <form id="login">
+        <form id="savedialog">
           <Panel header="Editing">
             <div>
-              <InputText className='dialogControl' value={this.state.strategyName} placeholder='Strategy name' onChange={(e) => this.setState({ strategyName: e.target.value })}></InputText>
+              <InputText className='dialogControl' value={this.state.strategyName} placeholder='Strategy name' onChange={(e) => {
+                console.log(e);
+                this.setState({ strategyName: e.target.value })}
+                }></InputText>
             </div>
             <div>
               <InputText className='dialogControl' value={this.state.description} placeholder='Portfolio description' onChange={(e) => this.setState({ description: e.target.value })}></InputText>
@@ -159,9 +168,7 @@ export class DialogSave extends React.Component<Props, State> {
             </div>
           </Panel>
         </form>
-
       </Dialog>
-
     )
   }
 }

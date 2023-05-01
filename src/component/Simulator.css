@@ -7,7 +7,7 @@ tr:hover button {
 } */
 
 .p-row-odd {
-  background:  rgb(225, 228, 225) !important;
+ /* background:  rgb(225, 228, 225) !important;*/
 }
 
 .p-datatable-tbody {
@@ -28,6 +28,10 @@ tr:hover button {
 }
 
 div[id="selectedList"]>div>div>table>thead {
+  display:none;
+}
+
+div[id="computePLList"]>div>div>table>thead {
   display:none;
 }
 
@@ -107,14 +111,11 @@ body{
   font-size: smaller;
 }
 
-.tabview{
-  
-}
-
 .dialog{
   width: 600px;
   height: 600px;
 }
+
 .dialogControl{
   width: 300px;
   height: 40px;
@@ -266,3 +267,12 @@ font-size: small;
   margin: -4px;  
 }
 
+.otm{
+  background-color: #FFFF00;
+}
+.p-inputnumber-button {
+  width: 20px!important;
+}
+.p-fluid .p-inputtext{
+  font-size: small!important;
+}

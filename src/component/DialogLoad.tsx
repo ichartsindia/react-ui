@@ -49,6 +49,7 @@ export class DialogLoad extends React.Component<Props, State> {
         console.log(err);
       });
   }
+  
   onHide = () => {
     this.props.closed(true, null);
   }

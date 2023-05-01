@@ -9,8 +9,7 @@ import { DialogSave } from './DialogSave';
 import axios from "axios";
 import { OptionChain } from 'src/entity/OptionChain';
 import { CircleSpinnerOverlay, FerrisWheelSpinner } from 'react-spinner-overlay';
-import { DateUtility } from 'src/utils/DateUtility';
-import { OptData, OptHeader, OptLeg } from 'src/entity/OptData';
+import { OptData, OptHeader, OptLeg, WhatIf } from 'src/entity/OptData';
 import { PLCalc } from 'src/utils/PLCalc';
 import { PayoffChartComponent } from './PayoffChartComponent';
 import { LegEntity } from 'src/entity/LegEntity';
@@ -23,6 +22,7 @@ import { LegComponent } from './LegComponent';
 import { OptionChainComponent } from './OptionChainComponent';
 import { DialogLoad } from './DialogLoad';
 import { StrategyProfile } from 'src/entity/StretegyProfile';
+import { Utility } from 'src/utils/Utility';
 interface Props {
 
 }
@@ -36,7 +36,7 @@ interface State {
   SymbolList;
   expiryDateList;
   selectedExpiryDate;
-  spotPrice;
+  // spotPrice;
   futPrice;
   lotSize;
   avgiv;
@@ -48,26 +48,31 @@ interface State {
   chartData;
   closest;
   strategyProfile: StrategyProfile;
-  classChain:string;
-  classRight:string;
+  classChain: string;
+  classRight: string;
   // classPayoff:string;
   // classLeg:string;
-  chainShowed:boolean;
-  payoffChartShowed:boolean;
+  chainShowed: boolean;
+  payoffChartShowed: boolean;
+  exitedLegList: [],
+  strategyId: string;
+  latestRefreshDate: Date;
+  whatif: WhatIf;
+  lastUpdate:Date;
 }
 
 export class StrategyBuilder extends React.Component<Props, State> {
   basicData: { labels: string[]; datasets: { label: string; data: number[]; fill: boolean; borderColor: string; tension: number; }[]; };
   SymbolWithMarketSegments: any;
   interval: NodeJS.Timer;
- 
-  classPayoff:string;
-  classLeg:string;
+
+  classPayoff: string;
+  classLeg: string;
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      records: null,
+      records: [],
       selectedsymbol: 'NIFTY',
       legEntityList: [],
       openSaveDialog: false,
@@ -75,7 +80,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
       SymbolList: [],
       expiryDateList: [],
       selectedExpiryDate: null,
-      spotPrice: null,
+      //   spotPrice: null,
       futPrice: null,
       lotSize: null,
       avgiv: null,
@@ -87,32 +92,107 @@ export class StrategyBuilder extends React.Component<Props, State> {
       chartData: null,
       closest: null,
       strategyProfile: null,
-      classChain:"col-5 lg:col-5 ",
-      classRight:"col-7 lg:col-7",
-     
-      chainShowed:true,
-      payoffChartShowed:true
-    } 
-    
-    this.classPayoff= "p-card col-12 lg:col-12";
-    this.classLeg= "p-card col-12 lg:col-12";
+      classChain: "col-5 lg:col-5 ",
+      classRight: "col-7 lg:col-7",
+
+      chainShowed: true,
+      payoffChartShowed: true,
+      exitedLegList: [],
+      strategyId: null,
+      latestRefreshDate: null,
+      whatif: null,
+      lastUpdate:null
+    }
+
+    this.classPayoff = "p-card col-12 lg:col-12";
+    this.classLeg = "p-card col-12 lg:col-12";
   }
 
   componentDidMount = () => {
     this.loadsymbolListAndExpiryList();
-    //this is temporary
-    // setInterval(()=>{
-    //   this.refreshOptionData();
-    //  // this.updateRecord(null, this.generateLegList)); 
-      
-    // },30000);
+    this.setCounter();
+
+    document.addEventListener('keydown', event => {
+
+      // event.preventDefault();
+      this.stopCounter();
+      this.setCounter();
+
+    });
+
+    document.addEventListener('click', event => {
+      // event.preventDefault();
+      this.stopCounter();
+      this.setCounter();
+    });
+
+    if(this.state.lastUpdate!=null  && this.state.latestRefreshDate>this.state.lastUpdate){
+      this.setState({latestRefreshDate:this.state.lastUpdate},()=>console.log(this.state))
+    }
+  }
+
+  stopCounter = () => {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+  }
+
+  setCounter = () => {
+    this.interval = setInterval(() => {
+      this.refreshData();
+  //    this.refreshOptionData();
+    //  this.onExpiryDateChange(this.state.selectedExpiryDate,false);
+    }, 30000);
   }
 
   componentWillUnmount() {
     clearInterval(this.interval);
+    this.setState({
+      exitedLegList: []
+    })
   }
 
-  loadsymbolListAndExpiryList=()=>{
+  onExpiryDateChange = (date, displayBusy = true) => {
+    this.setState({ selectedExpiryDate: date })
+    let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == this.state.selectedsymbol);
+    this.setState({ symbol: symbol })
+    let url = "https://www.icharts.in/opt/api/SymbolDetails_Api.php?sym=" + symbol[0].symbol + "&exp_date=" + date + "&sym_type=" + symbol[0].symbol_type;
+    if (displayBusy)
+      this.setState({ isBusy: true, legEntityList: [] });
+    axios.get(url, { withCredentials: false })
+      .then(response => {
+        let data = response.data;
+        //      console.log(data);
+        if (data.length > 0) {
+          let record = data[0];
+          let latestRefreshDate = new Date();
+          if (latestRefreshDate > new Date(record.last_updated)) {
+            latestRefreshDate = new Date(record.last_updated);
+          }
+          this.setState({
+            //       spotPrice: record.spot_price,
+            futPrice: record.fut_price,
+            lotSize: record.lot_size,
+            avgiv: record.avgiv,
+            ivr: record.ivr,
+            ivp: record.ivp,
+            fairPrice: record.fair_price,
+            isBusy: false,
+            strategyProfile: null,
+            legEntityList: [],
+            exitedLegList: [],
+            lastUpdate: latestRefreshDate,
+            latestRefreshDate: latestRefreshDate
+          }, () => this.refreshOptionData());
+        }
+
+      }).catch(err => {
+        console.log(err);
+      });
+  }
+
+  loadsymbolListAndExpiryList = () => {
     axios.get("https://www.icharts.in/opt/api/Symbol_List_Api.php", { withCredentials: false })
       .then(response => {
         let data = response.data;
@@ -134,27 +214,67 @@ export class StrategyBuilder extends React.Component<Props, State> {
       });
   }
 
-  refreshOptionData = () => {
+  refreshData=()=>{
+    let sym=this.state.symbol;
+      let url = "https://www.icharts.in/opt/api/SymbolDetails_Api.php?sym=" + this.state.selectedsymbol+ "&exp_date=" + this.state.selectedExpiryDate + "&sym_type=" + sym[0].symbol_type;
+     axios.get(url, { withCredentials: false })
+     .then(response => {
+       let data = response.data;
+       if (data.length > 0) {
+         let record = data[0];
+         let latestRefreshDate = new Date();
+         if (latestRefreshDate > new Date(record.last_updated)) {
+           latestRefreshDate = new Date(record.last_updated);
+         }
+         this.setState({
+           futPrice: record.fut_price,
+           lotSize: record.lot_size,
+           avgiv: record.avgiv,
+           ivr: record.ivr,
+           ivp: record.ivp,
+           fairPrice: record.fair_price,
+           isBusy: false,
+           strategyProfile: null,
+           lastUpdate: latestRefreshDate,
+           latestRefreshDate: latestRefreshDate
+         }, () => this.refreshOptionData(true));
+       }
 
+     }).catch(err => {
+       console.log(err);
+     });
+  }
+
+  refreshOptionData = (fromTimer=false) => {
     let urlDetail = "https://www.icharts.in/opt/api/OptionChain_Api.php?sym=" + this.state.symbol[0].symbol + "&exp_date=" + this.state.selectedExpiryDate + "&sym_type=" + this.state.symbol[0].symbol_type;
-    this.setState({ isBusy: true });
+    // this.setState({ isBusy: true });
     axios(urlDetail, { withCredentials: false })
       .then(response => {
         let data = response.data;
+        if (this.state.records != null && data != null) {
+          let isEqual = Utility.objectsEqual(data,this.state.records);
+          console.log(isEqual)
+          if (isEqual) {
+            this.setState({
+              isBusy: false,
+            });
+            return;
+          }
+        }
+
         this.setState({
           records: data,
           isBusy: false,
-          // strategyProfile: null
-        },
-          () => {
+        }, () => {
+           // console.log(this.state);
             this.convertLegToOptionChain();
+            if (data == null) return;
+            if(fromTimer) return;
+
             let strikePriceArray = data.map(p => p.Strike_Price);
-            //     console.log(strikePriceArray);
             let closest = PLCalc.findClosest(strikePriceArray, this.state.fairPrice);
-            //  let tbody  = document.getElementById("optionList").firstChild.firstChild.childNodes[1];
             let tbody = document.querySelector('.optionList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody');
             let trs = tbody.querySelectorAll('tr');
-
             let len = trs.length;
 
             if (len > 40) {
@@ -174,39 +294,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
       )
   }
 
-  onExpiryDateChange = (date) => {
-    this.setState({ selectedExpiryDate: date })
-    let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == this.state.selectedsymbol);
-    this.setState({ symbol: symbol })
-    let url = "https://www.icharts.in/opt/api/SymbolDetails_Api.php?sym=" + symbol[0].symbol + "&exp_date=" + date + "&sym_type=" + symbol[0].symbol_type;
-    this.setState({ isBusy: true, legEntityList: [] });
-    axios.get(url, { withCredentials: false })
-      .then(response => {
-        let data = response.data;
-        //      console.log(data);
-        if (data.length > 0) {
-          let record = data[0];
-          this.setState({
-            spotPrice: record.spot_price,
-            futPrice: record.fut_price,
-            lotSize: record.lot_size,
-            avgiv: record.avgiv,
-            ivr: record.ivr,
-            ivp: record.ivp,
-            fairPrice: record.fair_price,
-            isBusy: false,
-            strategyProfile: null,
-            legEntityList:[]
-          }, () => this.refreshOptionData());
-        }
-
-      }).catch(err => {
-        console.log(err);
-      });
-  }
-
   render() {
-
     return (
       <div className="grid p-fluid">
         <div>
@@ -223,7 +311,11 @@ export class StrategyBuilder extends React.Component<Props, State> {
               axios.get(url, { withCredentials: false })
                 .then(response => {
                   let data = response.data;
-                  this.setState({ expiryDateList: data, isBusy: false, records: [] });
+                  let expiry = data != null && data.length > 0 ? data[0]['expiry_dates'] : null;
+                  this.setState({ expiryDateList: data, isBusy: false, records: [], selectedExpiryDate: expiry });
+                  if (expiry != null) {
+                    this.onExpiryDateChange(expiry);
+                  }
                 }).catch(err => {
                   this.setState({ expiryDateList: err.response.data });
                 });
@@ -242,81 +334,80 @@ export class StrategyBuilder extends React.Component<Props, State> {
                 openLoadDialog: true
               });
             }}>Load</Button></div>
+            <div className="flex-item"><Button className='smallButton' onClick={() => {
+              this.setState({ selectedExpiryDate: null, legEntityList: [], exitedLegList: [] }, () => { this.refreshOptionData() })
+            }}>Reset</Button></div>
             <div className="flex-item"><Button className='smallButton'>Trade</Button></div>
           </div>
-          <div className='secondLine'>
-            <div className='flex-item'>Fair Price:</div>
-            <div className='flex-item'>{this.state.fairPrice}</div>
-            <div className='flex-item'>Future Price:</div>
-            <div className='flex-item'>{this.state.futPrice}</div>
-            <div className='flex-item'>Lot Size:</div>
-            <div className='flex-item'>{this.state.lotSize}</div>
-            <div className='flex-item'>IV:</div>
-            <div className='flex-item'>{this.state.avgiv}</div>
-            <div className='flex-item'>IVR:</div>
-            <div className='flex-item'>{this.state.ivr}</div>
-            <div className='flex-item'>IVP:</div>
-            <div className='flex-item'>{this.state.ivp}</div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex' }}>
+                <div className='flex-item'>Fair Price:</div>
+                <div className='flex-item'>{this.state.fairPrice}</div>
+                <div className='flex-item'>Future Price:</div>
+                <div className='flex-item'>{this.state.futPrice}</div>
+                <div className='flex-item'>Lot Size:</div>
+                <div className='flex-item'>{this.state.lotSize}</div>
+                <div className='flex-item'>IV:</div>
+                <div className='flex-item'>{this.state.avgiv}</div>
+                <div className='flex-item'>IVR:</div>
+                <div className='flex-item'>{this.state.ivr}</div>
+                <div className='flex-item'>IVP:</div>
+                <div className='flex-item'>{this.state.ivp}</div>
+              </div>
+              <div style={{ display: 'flex' }}>
+                <div className='flex-item'>Last Update Time</div>
+                <div className='flex-item'>{this.state.latestRefreshDate!=null?this.state.latestRefreshDate.toLocaleTimeString():null}</div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* list of available positions */}
-        <div className={this.state.classChain} style={{borderStyle:'ridge'}}>
-          <div className="p-card flex flex-column" >
-             <OptionChainComponent passedData={this.state} 
-            callback={(data) => { 
-              this.setState({ records: data.records }, 
-              () => this.updateRecord(null, this.generateLegList)); 
-              }}
-              callbackHide={()=>{
-                this.classPayoff="p-card col-6";
-                this.classLeg="p-card col-6";
-                this.setState({
-                  classChain:'hideComponent',
-                  classRight:'col-12 flex',               
-                  chainShowed:false
-                });
-              }
-              } />
-           </div>
-        </div>
-        {/* right side: charts and leg table  */}
-        <div className={this.state.classRight} style={{borderStyle:'ridge'}} > 
-          <div  className='alignedCenter' style={{display:this.state.chainShowed?'flex':'none'}} 
-          onClick={()=>{
+        <div className={this.state.classRight} style={{ borderStyle: 'ridge' }} >
+          <div className='alignedCenter' style={{ display: this.state.chainShowed ? 'flex' : 'none' }}
+            onClick={() => {
               this.setState({
-                payoffChartShowed:!this.state.payoffChartShowed && this.state.chainShowed
+                payoffChartShowed: !this.state.payoffChartShowed && this.state.chainShowed
               })
-          }}>Payoff Chart
-            <img src={this.state.payoffChartShowed?'/hide_up.svg':'/show_down.svg'} />
-          </div>    
-          <div className={this.classPayoff} hidden={this.state.legEntityList.length == 0||!this.state.payoffChartShowed}>
-              <PayoffChartComponent data={this.state.chartData} chainShowed={this.state.chainShowed} expiryDate={this.state.selectedExpiryDate} fairPrice={this.state.fairPrice} selectedsymbol={this.state.selectedsymbol} 
+            }}>Payoff Chart
+            <img src={this.state.payoffChartShowed ? './hide_up.svg' : './show_down.svg'} />
+          </div>
+          <div className={this.classPayoff} style={{ marginBottom: '10px' }} hidden={this.state.legEntityList.length == 0 || !this.state.payoffChartShowed}>
+          
+           <PayoffChartComponent data={this.state.chartData} chainShowed={this.state.chainShowed} 
+            expiryDate={this.state.selectedExpiryDate} 
+            fairPrice={this.state.fairPrice} 
+            selectedsymbol={this.state.selectedsymbol}
+              latestRefreshDate={this.state.latestRefreshDate}
               callback={(p) => {
-                this.state.chartData.whatif = p;
+                console.log(p);
+                this.setState({ whatif: p });
                 this.updateRecord(null, this.generateLegList);
-              }}  
-              callbackShow={()=>  {
-                this.classPayoff="p-card col-12";
-                this.classLeg="p-card col-12" ;
+              }}
+              callbackShow={() => {
+                this.classPayoff = "p-card col-12";
+                this.classLeg = "p-card col-12";
                 this.setState({
-                      classChain:"col-6",
-                      classRight:"col-6",                    
-                      chainShowed:true
+                  classChain: "col-6",
+                  classRight: "col-6",
+                  chainShowed: true
                 })
               }} />
-            </div>
-          <div className= {this.classLeg}>
-            <div>
+          </div>
+          <div className={this.classLeg} style={{display:'flex'}}>
+            <div style={{width:'20%', marginRight:'20px', display:this.state.chartData!=null?'block':'none'}}>
               <PLComputeCompoenent passedData={this.state} />
             </div>
-            <div>
+            <div style={{width:this.state.chartData==null? '100%':'80%'}}>
               <LegComponent passedData={this.state} callback={
                 legEntityList => {
-                  this.setState({ legEntityList: legEntityList },
+                  let exitedList = legEntityList.filter(p => p.exited);
+                  this.setState({ legEntityList: legEntityList, exitedLegList: exitedList },
                     () => {
+                      console.log(this.state.legEntityList)
                       this.convertLegToOptionChain();
-                      let chartData = PLCalc.chartData(this.state, this.state.chartData?.whatif);
+                       let chartData = new PLCalc().chartData(this.state);
                       this.setState({ chartData: chartData });
                     })
                 }}
@@ -325,21 +416,45 @@ export class StrategyBuilder extends React.Component<Props, State> {
           </div>
           <p></p>
         </div>
+        {/* right side: charts and leg table  */}
+        <div className={this.state.classChain} style={{ borderStyle: 'ridge' }}>
+          <div className="p-card flex flex-column" >
+            <OptionChainComponent passedData={this.state}
+              callback={(data) => {
+                this.setState({ records: data.records },
+                  () => this.updateRecord(null, this.generateLegList));
+              }}
+              callbackHide={() => {
+                this.classPayoff = "p-card col-6";
+                this.classLeg = "p-card col-6";
+                this.setState({
+                  classChain: 'hideComponent',
+                  classRight: 'col-12 flex',
+                  chainShowed: false
+                });
+              }
+              } />
+          </div>
+        </div>
+
+
         {
           this.state.openSaveDialog ? <div>
-            <DialogSave passedData={this.state} closed={() => { this.setState({ openSaveDialog: false }) }} /></div> : null
+            <DialogSave passedData={this.state} closed={(st_save_id) => { this.setState({ openSaveDialog: false, strategyId: st_save_id }) }} /></div> : null
         }
         {
           this.state.openLoadDialog ? <div>
             <DialogLoad passedData={this.state} closed={(closed, data) => {
               if (closed == null) {
+                console.log(data);
+                this.setState({ strategyId: data.strategy_id })
                 this.loadOptionChain(data)
               } else {
                 this.setState({ openLoadDialog: false })
               }
             }} /></div> : null
         }
-      
+
       </div>
     )
   }
@@ -392,14 +507,19 @@ export class StrategyBuilder extends React.Component<Props, State> {
     ret.data.forEach(p => {
       let legList = p.strategy_details;
       legList.forEach(element => {
+        console.log(element)
         let position = new LegEntity();
         position.Buy_Sell = element.trade_type;
-        position.CE_PE = element.option_type == 'p' ? 'PE' : 'CE';
-        position.Option_Price = element.entry_price;
+        position.CE_PE = element.option_type;
+        position.Option_Price = Number.parseFloat(element.entry_price).toFixed(2);
         position.Strike_Price = Number.parseFloat(element.strike_price);
         position.Position_Lot = element.lots;
         position.IV = this.state.avgiv;
         positionList.push(position);
+
+        if (element.exit_price == "1000000.0000000") {
+          position.exited = true;
+        };
       });
     })
 
@@ -411,6 +531,9 @@ export class StrategyBuilder extends React.Component<Props, State> {
     let list2 = this.state.records.filter(p => p.Buy_Put == true || p.Sell_Put == true);
 
     let positionList = [];
+    if (this.state.exitedLegList.length > 0)
+      positionList.push(...this.state.exitedLegList)
+
     list1.forEach(rowData => {
       let position = new LegEntity();
 
@@ -418,7 +541,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Call || rowData.Sell_Call) {
         position.CE_PE = "CE";
-        position.Option_Price =rowData.Call_LTP.toString().replace(",","");
+        position.Option_Price = rowData.Call_Price.toString().replace(",", "");
       }
 
 
@@ -432,6 +555,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
       position.IV = rowData.Call_IV;
 
       position.Strike_Price = rowData.Strike_Price;
+      position.iv_adjustment=rowData.iv_adjustment;
       positionList.push(position);
     })
 
@@ -441,7 +565,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Put || rowData.Sell_Put) {
         position.CE_PE = "PE";
-        position.Option_Price =  rowData.Put_LTP.toString().replace(",","");
+        console.log(rowData);
+        position.Option_Price = rowData.Put_Price.toString().replace(",", "");
       }
 
 
@@ -467,18 +592,19 @@ export class StrategyBuilder extends React.Component<Props, State> {
     this.setState({ records: this.state.records }, () => {
       //let positionList = this.generateStrategyList();
       let legList = param == null ? positionListfunc() : positionListfunc(param);
-
-      this.setState({ legEntityList: legList }, () => {
-        let chartData = PLCalc.chartData(this.state, this.state.chartData?.whatif);
+      let exitedLegList = legList.filter(p => p.exited);
+      this.setState({ legEntityList: legList, exitedLegList: exitedLegList }, () => {   
+        let chartData = new PLCalc().chartData(this.state);
         this.setState({ chartData: chartData });
       })
     });
   }
 
   convertLegToOptionChain = () => {
-    let legList: Array<LegEntity> = this.state.legEntityList;
+    let legList: Array<LegEntity> = this.state.legEntityList.filter(p => p.exited != true);
 
     let optionList: Array<OptionChain> = this.state.records;
+    if (optionList == null) return;
     //reset to inital state so it can be set by legs
     optionList.forEach(p => {
       p.Buy_Call = null;
@@ -511,6 +637,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
             optionSelected.Put_Lot = leg.Position_Lot;
           }
         }
+        optionSelected.iv_adjustment=leg.iv_adjustment;
       }
     });
 

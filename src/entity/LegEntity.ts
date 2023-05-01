@@ -5,4 +5,6 @@ export class LegEntity {
    Buy_Sell: string;
    Option_Price: string;
    IV: number;
+   exited: boolean;
+   iv_adjustment:number
 }

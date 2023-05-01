@@ -22,7 +22,7 @@ const AppMenu = (props) => {
                 items: [
                     {
                         label: 'Strategy Builder',
-                        command: () => {navigate('/strategyBuilder') },
+                        command: () => {navigate('/strategy') },
                         icon: 'pi pi-fw pi-chart-bar',
                     },
                     {

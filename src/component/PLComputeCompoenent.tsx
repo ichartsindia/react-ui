@@ -5,13 +5,15 @@ import { PLCalc } from "src/utils/PLCalc";
 import axios from "axios";
 import { ProfitLoss } from "src/entity/ProfitLoss";
 import { Column, DataTable } from "primereact";
+import { WhatIf } from "src/entity/OptData";
+import { LOV } from "../entity/LOV";
 interface Props {
     passedData
 }
 
 interface State {
     isBusy: boolean,
-    margin: Number,
+    margin: number,
     selectedsymbol
 }
 
@@ -22,11 +24,13 @@ export class Qty {
 }
 
 export class PLComputeCompoenent extends React.Component<Props, State> {
+    passedData
     qtyList: Qty[] = [];
     margin: Number;
+    whatif: WhatIf = new WhatIf();
     constructor(props) {
         super(props);
-
+     
         this.state = {
             isBusy: false,
             margin: null,
@@ -88,99 +92,102 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
     }
 
     render() {
+        this.passedData=JSON.parse(JSON.stringify(this.props.passedData));
 
-        if (this.props.passedData == null || this.props.passedData.legEntityList.length == 0) return null;
-
+        if (this.passedData == null || this.passedData.legEntityList.length == 0) return null;
+        
         this.qtyList = this.totalQty();
         this.marginRequired();
-        let data: ProfitLoss[] = [];
-        let item: ProfitLoss = new ProfitLoss();
-        item.maxProfit = this.maxProfit();
-        item.maxLoss = this.maxLoss();
-        item.breakevenExpiry = this.breakevenExpiry();
-        item.breakevenT0 = this.breakevenT();
-        item.netDebit = this.netDebt();
-        item.marginRquired = this.state.margin>0?"₹ " + this.state.margin:null;
-        item.fundsRequired = this.state.margin>0?"₹ " + this.fundRequired():null;
-       
-        item.projectedPL = this.totalPL();
+        let data = [];
+        //let item: ProfitLoss = new ProfitLoss();
+        let item=new LOV();
+        
+        item['label']="Max Profit"
+        item['value'] = this.maxProfit();
+           
         data.push(item);
+        let item2=new LOV(); 
+        item2['label']="Max Loss"
+        item2['value'] = this.maxLoss();
+        data.push(item2);
+     
+        let item3=new LOV();     
+        item3['label']="Breakeven (Expiry)"
+        item3['value'] = this.breakevenExpiry()
+        data.push(item3);
 
+        let item4=new LOV();     
+        item4['label']="Breakeven (T+0)"
+        item4['value'] = this.breakevenT();
+        data.push(item4);
+
+        let item5=new LOV();     
+        item5['label']="Net Debit"
+        item5['value'] = this.netDebt();
+        data.push(item5);
+
+        let item6=new LOV();     
+        item6['label']="Margin Rquired"
+        item6['value'] = this.state.margin > 0 ? "₹ " + this.state.margin : null;
+        data.push(item6);
+
+        let item7=new LOV();     
+        item7['label']="Funds Rquired"
+        item7['value'] = this.state.margin > 0 ? "₹ " + this.fundRequired() : null;
+        data.push(item7);
+
+        let item8=new LOV();     
+        item8['label']="Current Projected P/L"
+        item8['value'] = this.totalPL();
+        data.push(item8);
+
+        // item.maxLoss = this.maxLoss();
+        // item.breakevenExpiry = this.breakevenExpiry();
+        // item.breakevenT0 = this.breakevenT();
+        // item.netDebit = this.netDebt();
+        // item.marginRquired = this.state.margin > 0 ? "₹ " + this.state.margin : null;
+        // item.fundsRequired = this.state.margin > 0 ? "₹ " + this.fundRequired() : null;
+
+        // item.projectedPL = this.totalPL();
+     
         return (
-            <div className="p-card" id="computePLList" key={'computePL_' + this.props.passedData.selectedsymbol}>
+            <div className="p-card" id="computePLList" key={'computePL_' + this.props.passedData.selectedsymbol} >
                 <DataTable value={data} responsiveLayout="scroll" >
-                    <Column field="maxProfit" header='Max Profit' align="center"></Column>
-                    <Column field="maxLoss" header='Max Loss' align="center"></Column>
-                    <Column field="breakevenExpiry" header='Breakeven (Expiry)' align="center"></Column>
+                    <Column field="label" align="left"></Column>
+                    <Column field="value" align="right"></Column>
+                    {/* <Column field="breakevenExpiry" header='Breakeven (Expiry)' align="center"></Column>
                     <Column field="breakevenT0" header='Breakeven (T+0)' align="center"></Column>
                     <Column field="netDebit" header='Net Debit' align="center" ></Column>
                     <Column field="marginRquired" header='Margin Rquired' align="center"></Column>
                     <Column field="fundsRequired" header='Funds Rquired' align="center"></Column>
-                    <Column field="projectedPL" header='Current Projected P/L' align="center"></Column>
+                    <Column field="projectedPL" header='Current Projected P/L' align="center"></Column> */}
                 </DataTable>
             </div>
-               )
-            }
- 
+        )
+    }
 
-            // <div key={'strategyCalculation_' + this.state.selectedsymbol}>
-            //     <div className='flex flex-space-between'>
-            //         <div>Max Profit</div>
-            //         <div>{this.maxProfit()}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Max Loss</div>
-            //         <div style={{ color: "red" }}>{this.maxLoss()}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Max Reward/Risk Ratio</div>
-            //         <div>{this.RR()}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Breakevens (Expiry)</div>
-            //         <div>{this.breakevenExpiry()}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Breakevens (T+0)</div>
-            //         <div>{this.breakevenT()}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Net Debit</div>
-            //         <div style={{ color: this.netDebt() != null && Number.parseFloat(this.netDebt().replace("₹", "")) < 0 ? 'red' : 'black' }}>{this.netDebt()}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Margin Required</div>
-            //         <div>{this.state.margin == null ? null : "₹ " + this.state.margin.toFixed(2)}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Funds Required</div>
-            //         <div>{this.state.margin == null ? null : "₹ " + (this.state.margin.valueOf() + +this.allBuyLegs()).toFixed(2)}</div>
-            //     </div>
-            //     <div className='flex flex-space-between'>
-            //         <div>Current Projected P/L</div>
-            //         <div style={{ color: this.totalPL() != null && Number.parseFloat(this.totalPL().replace("₹", "")) < 0 ? 'red' : 'black' }}>{this.totalPL()}</div>
-            //     </div>
-            // </div>
-      
-     
+
     netDebtTemplate = (rowData: ProfitLoss) => {
         // if(Number.parseFloat(rowData.netDebit.replace("₹",''))<0)
 
     }
 
     maxProfit = () => {
-        if (this.state == null || this.qtyList == null) return null;
+         if (this.state == null || this.qtyList == null) return null;
 
-        if (this.qtyList.filter(p => p.netCEQty > 0).length > 0)
-            return "- Undefined -";
+         let netCE=0;  
+         let netPE=0     
+         this.qtyList.forEach(p => netCE += p.netCEQty);
+         this.qtyList.forEach(p => netPE += p.netPEQty);
+ 
+         if(netCE>0 || netPE>0)     
+             return "Undefined";
+        
 
-        if (this.qtyList.filter(p => p.netPEQty > 0 && p.netCEQty <= 0).length > 0)
-            return "- Undefined -";
-
-        let chartData = this.props.passedData.chartData;
+        let chartData = this.passedData.chartData;
 
         if (chartData != null) {
-            let max =  Math.max(...chartData[2]);
+            let max = Math.max(...chartData[2]);
 
             return "₹ " + max.toFixed(2);
         } else {
@@ -192,13 +199,15 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
     maxLoss = () => {
         if (this.state == null || this.qtyList == null) return null;
 
-        if (this.qtyList.filter(p => p.netCEQty < 0).length > 0)
-            return "Undefined";
+        let netCE=0;  
+        let netPE=0     
+        this.qtyList.forEach(p => netCE += p.netCEQty);
+        this.qtyList.forEach(p => netPE += p.netPEQty);
 
-        if (this.qtyList.filter(p => p.netPEQty < 0 && p.netCEQty >= 0).length > 0)
+        if(netCE<0 || netPE<0)     
             return "Undefined";
-
-        let chartData = this.props.passedData.chartData;
+      
+        let chartData = this.passedData.chartData;
 
         if (chartData != null) {
             let min = Math.min(...chartData[2]);
@@ -210,7 +219,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
     }
 
     RR = () => {
-        if (this.maxLoss() != '- Undefined -' && this.maxProfit() != '- Undefined -' && this.maxLoss() != null && this.maxProfit() != null) {
+        if (this.maxLoss() != '-Undefined-' && this.maxProfit() != '-Undefined-' && this.maxLoss() != null && this.maxProfit() != null) {
             return +this.maxProfit() / +this.maxLoss();
         }
         return null;
@@ -218,36 +227,24 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
 
     breakevenExpiry = () => {
 
-        if (this.props.passedData == null || this.props.passedData.chartData == null
-            || this.props.passedData.legEntityList == null || this.props.passedData.legEntityList.length == 0) return null;
+        if (this.passedData == null || this.passedData.chartData == null
+            || this.passedData.legEntityList == null || this.passedData.legEntityList.length == 0) return null;
 
-        let dataX = this.props.passedData.chartData[0];
-        let dataY = this.props.passedData.chartData[2];
+        let dataX = this.passedData.chartData[0];
+        let dataY = this.passedData.chartData[2];
 
         if (dataY == null || dataY.length == 0) return null;
 
         let closestY = PLCalc.findClosest(dataY, 0);
-        console.log("closestY",closestY);
-        
         let closestIndex = dataY.indexOf(closestY);
-    
-        console.log("closestIndex",closestIndex);
-    
         let closestX = dataX[closestIndex];
-       
-        console.log("closestX",closestX);
-    
 
         if (dataY.length > 0) {
             let minY = min(...dataY);
             let minYIndex = dataY.indexOf(minY);
-             console.log("minY", minY);
-             console.log("minYIndex",minYIndex);
-            // console.log("dataY[minYIndex - 50]",dataY[minYIndex - 10]);
-            // console.log("dataY[minYIndex + 50]",dataY[minYIndex + 50]);
-            let step:number=200;
+            let step: number = 50;
 
-            if (minYIndex - step > 0 && minYIndex + step < dataX.length && dataY[minYIndex - step] > minY && dataY[minYIndex +step] > minY) {
+            if (minYIndex - step > 0 && minYIndex + step < dataX.length && dataY[minYIndex - step] > minY && dataY[minYIndex + step] > minY) {
                 dataY.splice(closestIndex, 1);
                 let closestYSecond = PLCalc.findClosest(dataY, 0);
                 let closestIndexSecond = dataY.indexOf(closestYSecond);
@@ -260,17 +257,17 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
             }
             let maxY = max(...dataY);
             let maxYIndex = dataY.indexOf(maxY);
-            if (maxYIndex - step > 0 && maxYIndex + step < dataX.length && dataY[maxYIndex - step] < maxY && dataY[maxYIndex +step] < maxY) {
-               dataY.splice(closestIndex, 1);
-               let closestYSecond = PLCalc.findClosest(dataY, 0);
-               let closestIndexSecond = dataY.indexOf(closestYSecond);
-               let closestXSecond = dataX[closestIndexSecond];
+            if (maxYIndex - step > 0 && maxYIndex + step < dataX.length && dataY[maxYIndex - step] < maxY && dataY[maxYIndex + step] < maxY) {
+                dataY.splice(closestIndex, 1);
+                let closestYSecond = PLCalc.findClosest(dataY, 0);
+                let closestIndexSecond = dataY.indexOf(closestYSecond);
+                let closestXSecond = dataX[closestIndexSecond];
 
-               if (closestX > closestXSecond)
-                   return "₹ " + closestXSecond.toFixed(2) + " / ₹ " + closestX.toFixed(2);
-               else
-                   return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
-           }
+                if (closestX > closestXSecond)
+                    return "₹ " + closestXSecond.toFixed(2) + " / ₹ " + closestX.toFixed(2);
+                else
+                    return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
+            }
         }
 
         return "₹ " + closestX.toFixed(2);
@@ -279,16 +276,16 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
 
     breakevenT = () => {
 
-        if (this.props.passedData == null || this.props.passedData.chartData == null
-            || this.props.passedData.legEntityList == null || this.props.passedData.legEntityList.length == 0) return null;
+        if (this.passedData == null || this.passedData.chartData == null
+            || this.passedData.legEntityList == null || this.passedData.legEntityList.length == 0) return null;
 
-        let dataX = this.props.passedData.chartData[0];
-        let dataY = this.props.passedData.chartData[1];
+        let dataX = this.passedData.chartData[0];
+        let dataY = this.passedData.chartData[1];
 
         let closestY = PLCalc.findClosest(dataY, 0);
         let closestIndex = dataY.indexOf(closestY);
         let closestX = dataX[closestIndex];
-        let step:number=200;
+        let step: number = 200;
         if (dataY.length > 0) {
             let minY = min(...dataY);
             let minYIndex = dataY.indexOf(minY);
@@ -307,21 +304,21 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
 
             let maxY = max(...dataY);
             let maxYIndex = dataY.indexOf(maxY);
-            if (maxYIndex - step > 0 && maxYIndex + step < dataX.length && dataY[maxYIndex - step] < maxY && dataY[maxYIndex +step] < maxY) {
-               dataY.splice(closestIndex, 1);
-               let closestYSecond = PLCalc.findClosest(dataY, 0);
-               let closestIndexSecond = dataY.indexOf(closestYSecond);
-               let closestXSecond = dataX[closestIndexSecond];
+            if (maxYIndex - step > 0 && maxYIndex + step < dataX.length && dataY[maxYIndex - step] < maxY && dataY[maxYIndex + step] < maxY) {
+                dataY.splice(closestIndex, 1);
+                let closestYSecond = PLCalc.findClosest(dataY, 0);
+                let closestIndexSecond = dataY.indexOf(closestYSecond);
+                let closestXSecond = dataX[closestIndexSecond];
 
-               if (closestX > closestXSecond)
-                   return "₹ " + closestXSecond.toFixed(2) + " / ₹ " + closestX.toFixed(2);
-               else
-                   return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
-           }
+                if (closestX > closestXSecond)
+                    return "₹ " + closestXSecond.toFixed(2) + " / ₹ " + closestX.toFixed(2);
+                else
+                    return "₹ " + closestX.toFixed(2) + " / ₹ " + closestXSecond.toFixed(2);
+            }
         }
 
-        if(closestX)
-        return "₹ " + closestX.toFixed(2);
+        if (closestX)
+            return "₹ " + closestX.toFixed(2);
 
         return null;
     }
@@ -350,12 +347,12 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (totalShortPremium - totalLongPremium == 0)
             return null;
 
-        return "₹ " + (totalLongPremium-totalShortPremium).toFixed(2);
+        return "₹ " + (totalLongPremium - totalShortPremium).toFixed(2);
     }
 
-    totalPL = (): string => {
+    totalPL2 = (): string => {
         let data = this.props.passedData;
-        let legList = data.legEntityList;
+        let legList = data.legEntityList.filter(p => p.exited != true);
         if (legList == null || legList.length == 0) return null;
 
         let curPL = 0;
@@ -406,21 +403,39 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (curPL == 0)
             return null;
 
-        return "₹ " + curPL.toFixed(2);
+        return "₹ " + (curPL * this.props.passedData?.lotSize).toFixed(2);
+    }
+
+    totalPL = (): string => {
+        if (this.passedData && this.passedData.chartData) {
+            let t0Data = this.passedData.chartData[0];
+            let t1Data=this.passedData.chartData[1]
+            let closest = PLCalc.findClosest(t0Data, this.passedData.fairPrice);
+         //   console.log(closest);
+            let inx = t0Data.indexOf(closest);
+       //      console.log(t1Data)
+      //      console.log(inx);
+            let val=t1Data[inx];
+       //     console.log(val)
+             let pl = val.toFixed(2);
+            return "₹ " + pl;
+        }
+
+        return null;
     }
 
     marginRequired = async () => {
-        if (this.props.passedData == null) return null;
+        if (this.passedData == null) return null;
         let posList = [];
-        this.props.passedData.legEntityList.forEach(element => {
+        this.passedData.legEntityList.forEach(element => {
             let pos = {
                 "prd": "M",
                 "exch": "NFO",
-                "symname": this.props.passedData.selectedsymbol,
+                "symname": this.passedData.selectedsymbol,
                 "instname": 'OPTIDX',
-                "exd": this.props.passedData.selectedExpiryDate.substring(0, 2) + "-" + this.props.passedData.selectedExpiryDate.substring(2, 5) + "-20" + this.props.passedData.selectedExpiryDate.substring(5),
-                "netqty": (element.Buy_Sell == 'S' ? -element.Position_Lot * this.props.passedData.lotSize : (element.Position_Lot * this.props.passedData.lotSize)).toString(),
-                "lotSize": this.props.passedData.lotSize,
+                "exd": this.passedData.selectedExpiryDate.substring(0, 2) + "-" + this.passedData.selectedExpiryDate.substring(2, 5) + "-20" + this.passedData.selectedExpiryDate.substring(5),
+                "netqty": (element.Buy_Sell == 'S' ? -element.Position_Lot * this.passedData.lotSize : (element.Position_Lot * this.passedData.lotSize)).toString(),
+                "lotSize": this.passedData.lotSize,
                 "optt": element.CE_PE,
                 "strprc": element.Strike_Price
             }
@@ -441,11 +456,11 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
             headers: headers
         }).then(response => {
             let dataReturned = response.data;
-            if (dataReturned == 0){
+            if (dataReturned == 0) {
                 return 0;
             }
-                
-            let margin: Number = +Number.parseFloat(dataReturned.expo_trade) + Number.parseFloat(dataReturned.span_trade);
+
+            let margin: number = +Number.parseFloat(dataReturned.expo_trade) + Number.parseFloat(dataReturned.span_trade);
 
             if (margin != null && this.state.margin !== margin) {
                 this.setState({ margin: margin })
@@ -466,7 +481,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
 
     allBuyLegs = () => {
         let total = 0;
-        this.props.passedData.legEntityList.filter(p => p.Buy_Sell == 'B').forEach(p => {
+        this.passedData.legEntityList.filter(p => p.Buy_Sell == 'B').forEach(p => {
             total += +p.Option_Price;
         });
 

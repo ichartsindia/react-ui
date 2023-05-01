@@ -1,39 +1,12 @@
 import { i, mean, round, std, erf } from 'mathjs';
 import { LegEntity } from 'src/entity/LegEntity';
 import { OptData, OptHeader, OptLeg, WhatIf } from 'src/entity/OptData';
-import { DateUtility } from './DateUtility';
+
 import bs from 'black-scholes';
+import { Utility } from './Utility';
+import { LegPL } from 'src/entity/LegPL';
 
 export class PLCalc {
-
-    // static calcN = (d1) => {
-    //     let d1d = Math.exp((Math.pow(d1, 2) / -2.0)) / (Math.sqrt(2 * Math.PI));
-    //     return d1d;
-    //   }
-      
-    // static getCallPrice(S, K, r, T, v) {
-    //     let d1 = (Math.log(S / K) + (r + Math.pow(v, 2) / 2.0) * T) / (v * Math.sqrt(T));
-    
-    //     let nd1 = PLCalc.calcN(d1);
-
-    //     let d2 = d1 - v * Math.sqrt(T);
-
-    //     let nd2 = PLCalc.calcN(d2);
-
-    //     return S * nd1 - K * Math.exp(-r * T) * nd2;
-    // }
-
-    // static getPutPrice(S, K, r, T, v) {
-    //     let d1 = (Math.log(S / K) + (r + Math.pow(v, 2) / 2.0)) / (v * Math.sqrt(T));
-
-    //     let nmd1 = PLCalc.calcN(-d1);
-
-    //     let d2 = d1 - v * Math.sqrt(T);
-
-    //     let nmd2 = PLCalc.calcN(-d2);
-
-    //     return K * Math.exp(-r * T) * nmd2 - S * nmd1
-    // }
 
     static getImpliedVolatility(S, K, r, T, expectedCost, callPut: string) {
         let estimate = 0.1
@@ -43,9 +16,9 @@ export class PLCalc {
 
         for (let i = 0; i < 100; i++) {
             if (callPut.toLowerCase() == 'ce') {
-                actualCost =bs.blackScholes(S, K, T, estimate, r, "call");  
+                actualCost = bs.blackScholes(S, K, T, estimate, r, "call");
             } else {
-                actualCost = bs.blackScholes(S, K, T, estimate, r, "put");  
+                actualCost = bs.blackScholes(S, K, T, estimate, r, "put");
             }
 
             if (expectedCost * 100 == Math.floor(actualCost * 100)) {
@@ -152,9 +125,6 @@ export class PLCalc {
             pdiff = Math.ceil(S * 0.00015)
         }
 
-        // console.log(pdiff)
-        //try to see the performance
-
         let cdt = Date.parse(optheader.dealDate);
 
         let expdt = Date.parse(optleg.expdt);
@@ -175,7 +145,7 @@ export class PLCalc {
         let r = optheader.intrate;
         r = 0;
 
-        let xdata = this.range(xstart, xend, pdiff / 2);
+        let xdata = this.range(xstart, xend, pdiff / 3);
 
         // Compute Leg Data
         let curdata = []
@@ -187,6 +157,8 @@ export class PLCalc {
                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
                     strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
                 }
+
+
                 let p = bs.blackScholes(strike, X, T, v, r, "call");
                 // let p = PLCalc.getCallPrice(strike, X, T, v, r)
 
@@ -196,8 +168,9 @@ export class PLCalc {
                     curdata.push((entryprice - p) * qty)
 
                 //  Expiry Data
-                if (optleg["expdt"] == mexpdt) {
-                    if (stkprice <= X) {
+                if (optleg["expdt"] === mexpdt) {
+
+                    if (Number.parseFloat(stkprice) <= Number.parseFloat(X)) {
                         if (tradetype == 'B')
                             expdata.push(-(entryprice * qty));
                         else
@@ -206,17 +179,13 @@ export class PLCalc {
                         if (tradetype == 'B') {
                             expdata.push(((stkprice - X) - entryprice) * qty);
                         }
-
-                        else
+                        else {
                             expdata.push((entryprice - (stkprice - X)) * qty);
+                        }
+
                     }
 
                 } else {
-                    // let expdt1 = Date.parse(optleg["expdt"]);
-                    // let dealdt1 = Date.parse(mexpdt);
-                    // let tsecs1 = (expdt1 - dealdt1) / 1000;
-                    // let T1 = tsecs1 / (365.0 * 24.0 * 60.0 * 60.0);
-
                     let strike = stkprice;
                     if (optleg.futuresPrice)
                         strike = stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice));
@@ -225,32 +194,22 @@ export class PLCalc {
                     // p = PLCalc.getCallPrice(strike, X, T, v, r);
                     if (tradetype == 'B') {
                         expdata.push((p - entryprice) * qty);
-                    } else
+                    } else {
                         expdata.push((entryprice - p) * qty);
+                    }
+
                 }
             }
 
         } else if (PutCallFlag == 'P') {
-            let p;
             for (var stkprice of xdata) {
-                // if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate)
-                //     //    p = PLCalc.getPutPrice(stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice)), X, r, T, v)
-                //  //  p = PLCalc.getPutPrice(stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice)), X, T, v, r)
-                //     p = bs.blackScholes(stkprice, X, T, v, r, "put");
-                // else
-                //   //  p = PLCalc.getPutPrice(stkprice, X, T, v, r);
-                //     p = bs.blackScholes(stkprice, X, T, v, r, "put");
-
-
-
-                     let strike = stkprice;
+                let strike = stkprice;
                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
                     strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
                 }
                 let p = bs.blackScholes(strike, X, T, v, r, "put");
 
                 if (tradetype == 'B') {
-                    // console.log(stkprice,X, entryprice); 
                     curdata.push((p - entryprice) * qty)
                 }
                 else
@@ -260,22 +219,26 @@ export class PLCalc {
                     if (stkprice >= X) {
                         if (tradetype == 'B')
                             expdata.push(-(entryprice * qty))
-                        else
+                        else {
                             expdata.push(entryprice * qty)
+                        }
+
                     } else {
                         if (tradetype == 'B') {
                             expdata.push(((X - stkprice) - entryprice) * qty)
                         }
-                        else
-                            expdata.push((entryprice - (X - stkprice)) * qty)
+                        else {
+                            expdata.push((entryprice - (X - stkprice)) * qty);
+                        }
+
                     }
                 } else {
                     // let expdt1 = Date.parse(optleg.expdt);
                     // let dealdt1 = Date.parse(mexpdt);
                     // let tsecs1 = (expdt1 - dealdt1) / 1000;
                     // let T1 = tsecs1 / (365.0 * 24.0 * 60.0 * 60.0);
-                //    s, k, t, v, r, callPut)
-                    p = bs.blackScholes(optleg.futuresPrice ? stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice)) : stkprice, X, T, r,v,"put")
+                    //    s, k, t, v, r, callPut)
+                    p = bs.blackScholes(optleg.futuresPrice ? stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice)) : stkprice, X, T, r, v, "put")
                     // p = bs.blackScholes(stkprice, X, T, v, r, "put");
                     if (tradetype == 'B')
                         expdata.push((p - entryprice) * qty);
@@ -294,7 +257,6 @@ export class PLCalc {
         let xdata = []
         let expdata = []
         let curdata = []
-
         let isCur = PLCalc.isCurSymbol(optheader.symbol);
 
         let MarketCloseTime = 17;
@@ -318,38 +280,31 @@ export class PLCalc {
         }
 
         //  WHATIF ADJUSTMENTS
+        if (optdata.whatif !== null) {
+            if (optdata.whatif.price != 0 || optdata.whatif.days.toLocaleString() != new Date(optheader.dealDate).toLocaleDateString()) {
+                // Adjust underlying price
 
-        if (optdata.whatif != null) {
-            try {
-                let whatif = optdata.whatif;
-
-                if (whatif.price != 0 || whatif.IV != 0 || whatif.days > 0) {
-                    // Adjust underlying price
-
-                    let optheader = optdata.optheader;
-                    if (whatif.price != 0) {
-                        optheader.symbolPrice = optheader.symbolPrice * (1 + (whatif.price / 100.0));;
-                    }
-
-                    if (whatif.IV != 0) {
-                        //Adjust IV
-                        optheader.avgiv = optheader.avgiv * (1 + whatif.IV / 100.0);;
-
-                        let legs = optdata.optlegs;
-
-                        legs.forEach(p => {
-                            p.iv = p.iv * (1 + whatif.IV / 100.0);
-                        })
-                    }
-
-                    if (whatif.days > 0) {
-                        optheader.dealDate = ((new Date(optheader.dealDate)).getDate() + whatif.days).toLocaleString();
-                        console.log(optheader.dealDate);
-                    }
+                let optheader = optdata.optheader;
+                if (optdata.whatif.price != 0) {
+                    //    console.log(whatif.price)
+                    optheader.symbolPrice = optheader.symbolPrice * (1 + (optdata.whatif.price / 100.0));;
                 }
 
-            } catch (e) {
-                console.log(e)
+                if (optdata.whatif.IV != 0 && !optdata.whatif.allowLegAdjustment) {
+                    //Adjust IV
+                    optheader.avgiv = optheader.avgiv * (1 + optdata.whatif.IV / 100.0);;
+
+                    let legs = optdata.optlegs;
+
+                    legs.forEach(p => {
+                        p.iv = p.iv * (1 + optdata.whatif.IV / 100.0);
+                    })
+                }
+                // if (whatif.days > 0) {
+                // let dealDate= new Date(optheader.dealDate);
+                // let newDate=dealDate.setDate(dealDate.getDate()+whatif.days);
+                // optheader.dealDate = new Date(newDate).toLocaleDateString();
+                optheader.dealDate = optdata.whatif.days?.toLocaleString();
             }
         }
 
@@ -363,7 +318,7 @@ export class PLCalc {
         let S = optheader.symbolPrice;
         let avgiv = optheader.avgiv / 100.0;
 
-        let expdt = mexpdt ? DateUtility.timeFromString(mexpdt) : null;//MarketCloseTime,"%Y-%m-%d %H:%M:%S")
+        let expdt = mexpdt ? Utility.timeFromString(mexpdt) : null;//MarketCloseTime,"%Y-%m-%d %H:%M:%S")
         let dealdt = Date.parse(optheader.dealDate);
 
         let tsecs = (expdt - dealdt) / 1000 + MarketCloseTime * 60 * 60;
@@ -379,10 +334,9 @@ export class PLCalc {
         let mstart = Math.min(mstrikes['minstrike'], m2sd)
         let mend = Math.max(mstrikes['maxstrike'], p2sd)
 
-
         let xstart = isCur ? Math.floor((mstart * 0.998) / DivFactor) * DivFactor : Math.ceil((mstart * 0.97) / DivFactor) * DivFactor;
         let xend = isCur ? Math.ceil((mend * 1.002) / DivFactor) * DivFactor : Math.ceil((mend * 1.03) / DivFactor) * DivFactor
-
+        let legPLList = new Array<LegPL>();
 
         if (legsize == 0) {
             // # IF NO LEGS ARE PASSED, IT MEANS STRATEGY IS CLOSED. SEND DATA ARRAYS ACCORDINGLY
@@ -403,17 +357,20 @@ export class PLCalc {
         } else {
             // Compute data for each leg and add up the P/Ls for each leg
             let firstleg = true;
-
             for (var optleg of optlegs) {
 
                 let tdata = PLCalc.ComputeDataForLeg(optheader, optleg, mexpdt, xstart, xend);
-                // console.log(tdata);
+       
+                 let legPL = new LegPL();
+                 legPL = PLCalc.getlegPL(optleg, tdata);
+                 legPLList.push(legPL);
+                console.log(legPLList);
+           
                 if (firstleg) {
                     let firstLegObj = tdata[0];
                     for (let j = 0; j < firstLegObj.length; j++)
                         xdata.push(tdata[0][j])
                 }
-
 
                 for (let l = 0; l < tdata[1].length; l++) {
                     if (firstleg)
@@ -456,10 +413,20 @@ export class PLCalc {
         curdata = curdata.map(p => round(p, 2));
         expdata = expdata.map(p => round(p, 2));
 
-        return [xdata, curdata, expdata, { "sd": sd }]
+        return [xdata, curdata, expdata, { "sd": sd }, legPLList]
     }
 
-    static chartData(data, whatif) {
+    static getlegPL(optleg: OptLeg, tdata: any[][]) {
+        let curData = tdata[1];
+      
+        let legPL = new LegPL();
+        legPL.LegKey = optleg.pcflag.toLowerCase() === 'p' ? 'PE' + optleg.strikePrice.toString() : 'CE' + optleg.strikePrice.toString();
+        legPL.LegData=curData;
+
+        return legPL;
+    }
+
+    chartData(data) {
 
         // if (data==null || data.legEntityList == null || (data && data.legEntityList!=null && data.legEntityList==0)) return null;
 
@@ -470,7 +437,7 @@ export class PLCalc {
         let optheader = new OptHeader();
         optheader.avgiv = data.avgiv;
         optheader.symbol = data.selectedsymbol;
-        optheader.symbolPrice = data.spotPrice;
+        optheader.symbolPrice = data.fairPrice;
         optheader.dealDate = new Date().toLocaleString();
         optheader.payoffdate = data.selectedExpiryDate;
         optheader.futuresPrice = data.futPrice;
@@ -480,20 +447,22 @@ export class PLCalc {
         // whatif.price = this.state.finalPrice;
         // whatif.IV = this.state.finalIV;
         // whatif.days = this.state.finalDays;
-        optdata.whatif = whatif;
+
+        optdata.whatif = data.whatif;
 
         // assinging option legs
         let optlegs = new Array<OptLeg>();
-        for (let opt of data.legEntityList) {
+        let legList = data.legEntityList.filter(p => !p.exited);
+        for (let opt of legList) {
             let optleg: OptLeg = new OptLeg();
             optleg.entryPrice = Number.parseFloat((opt.Option_Price).toString().replace(',', ''));
             optleg.pcflag = opt.CE_PE == 'CE' ? 'C' : 'P';
             optleg.expdt = data.selectedExpiryDate;
-            optleg.iv = opt.IV;
             optleg.qty = opt.Position_Lot * data.lotSize;
             optleg.strikePrice = opt.Strike_Price;
             optleg.tradeType = opt.Buy_Sell;
             optleg.futuresPrice = data.futPrice;
+            optleg.iv = opt.iv_adjustment ? opt.IV * (1 + opt.iv_adjustment / 100) : opt.IV;
             optlegs.push(optleg);
         }
 
@@ -503,20 +472,19 @@ export class PLCalc {
         return result;
     };
 
+
     static findClosest(arrayData, fairPrice) {
-       
-if(arrayData && arrayData.length>0){
-    
-        const closest = arrayData.reduce((a, b) => {
-            return Math.abs(b - fairPrice) < Math.abs(a - fairPrice) ? b : a;
-        });
 
-        return closest;} else {
-        return 0
+        if (arrayData && arrayData.length > 0) {
+
+            const closest = arrayData.reduce((a, b) => {
+                return Math.abs(b - fairPrice) < Math.abs(a - fairPrice) ? b : a;
+            });
+
+            return closest;
+        } else {
+            return 0
+        }
     }
-}
-    
-
-    
 }
 
