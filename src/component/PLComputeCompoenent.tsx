@@ -408,17 +408,22 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
 
     totalPL = (): string => {
         if (this.passedData && this.passedData.chartData) {
-            let t0Data = this.passedData.chartData[0];
-            let t1Data=this.passedData.chartData[1]
-            let closest = PLCalc.findClosest(t0Data, this.passedData.fairPrice);
-         //   console.log(closest);
-            let inx = t0Data.indexOf(closest);
-       //      console.log(t1Data)
-      //      console.log(inx);
-            let val=t1Data[inx];
-       //     console.log(val)
-             let pl = val.toFixed(2);
-            return "₹ " + pl;
+            //     let t0Data = this.passedData.chartData[0];
+            //     let t1Data=this.passedData.chartData[1]
+            //     let closest = PLCalc.findClosest(t0Data, this.passedData.fairPrice);
+            //  //   console.log(closest);
+            //     let inx = t0Data.indexOf(closest);
+            //      console.log(t1Data)
+            //   console.log(inx);
+            // let val=t1Data[inx];
+            //     console.log(val)
+            //  let pl = val.toFixed(2);
+            let total = 0;
+            let legList = this.passedData.legEntityList;
+            legList.forEach(element => {
+                total += element.Current_PL;
+            });
+            return "₹ " + total.toFixed(2);
         }
 
         return null;

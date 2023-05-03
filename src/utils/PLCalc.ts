@@ -6,8 +6,25 @@ import bs from 'black-scholes';
 import { Utility } from './Utility';
 import { LegPL } from 'src/entity/LegPL';
 
-export class PLCalc {
+ export class PLCalc {
+  
+    // static getCallPrice(S,K,r,T,v){
+    //     let d1=(Math.log(S/K)+(r+Math.pow(v,2)/2.0))/(v*Math.sqrt(T));
+    //     let nd1=bs.stdNormCDF(d1);
+    //     let d2=d1-v*Math.sqrt(T);
+    //     let nd2=bs.stdNormCDF(d2);
 
+    //     return S*nd1-K*Math.exp(-r*T)*nd2;
+    // }
+
+    // static getPutPrice(S,K,r,T,v){
+    //     let d1 = (Math.log(S/K) + (r + (Math.pow(v,2)/2.0))*T)/(v*Math.sqrt(T));
+	//     let nmd1 = bs.stdNormCDF(-d1);
+	//     let d2 = d1 - v*Math.sqrt(T);
+	//     let nmd2 = bs.stdNormCDF(-d2);
+	//     return K*Math.exp(-r*T)*nmd2 - S*nmd1
+    // }
+	
     static getImpliedVolatility(S, K, r, T, expectedCost, callPut: string) {
         let estimate = 0.1
         let low = 0
@@ -134,8 +151,8 @@ export class PLCalc {
         if (tsecs == 0.0)
             tsecs = 60.0
 
-        let T = tsecs / (365.0 * 24.0 * 60.0 * 60.0);
-
+        let day =  Math.ceil( tsecs / (24.0 * 60.0 * 60.0));
+        let T=day/365;
         let PutCallFlag = optleg.pcflag;
         let X = optleg.strikePrice;
         let entryprice = optleg.entryPrice;
@@ -158,7 +175,6 @@ export class PLCalc {
                     strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
                 }
 
-
                 let p = bs.blackScholes(strike, X, T, v, r, "call");
                 // let p = PLCalc.getCallPrice(strike, X, T, v, r)
 
@@ -170,11 +186,13 @@ export class PLCalc {
                 //  Expiry Data
                 if (optleg["expdt"] === mexpdt) {
 
-                    if (Number.parseFloat(stkprice) <= Number.parseFloat(X)) {
+                    if (parseFloat(stkprice) <= parseFloat(X)) {
                         if (tradetype == 'B')
                             expdata.push(-(entryprice * qty));
-                        else
-                            expdata.push(entryprice * qty);
+                        else{
+                             expdata.push(entryprice * qty);
+                        }
+                           
                     } else {
                         if (tradetype == 'B') {
                             expdata.push(((stkprice - X) - entryprice) * qty);
@@ -207,13 +225,16 @@ export class PLCalc {
                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
                     strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
                 }
-                let p = bs.blackScholes(strike, X, T, v, r, "put");
+              
+                let p = bs.blackScholes(strike, X, T, v.toFixed(4), r, "put");
 
                 if (tradetype == 'B') {
                     curdata.push((p - entryprice) * qty)
                 }
-                else
+                else {
                     curdata.push((entryprice - p) * qty)
+                }
+                  
 
                 if (optleg["expdt"] == mexpdt) {
                     if (stkprice >= X) {
@@ -364,7 +385,7 @@ export class PLCalc {
                  let legPL = new LegPL();
                  legPL = PLCalc.getlegPL(optleg, tdata);
                  legPLList.push(legPL);
-                console.log(legPLList);
+            //    console.log(legPLList);
            
                 if (firstleg) {
                     let firstLegObj = tdata[0];
@@ -485,6 +506,12 @@ export class PLCalc {
         } else {
             return 0
         }
+    }
+
+    static calcNormalDistribution=(val)=>{
+        var cdf = require( '@stdlib/stats-base-dists-normal-cdf' );
+        var p = cdf( val, 0.0, 1.0 );
+        return p;
     }
 }
 

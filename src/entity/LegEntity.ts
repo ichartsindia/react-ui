@@ -6,5 +6,6 @@ export class LegEntity {
    Option_Price: string;
    IV: number;
    exited: boolean;
-   iv_adjustment:number
+   iv_adjustment:number;
+   Current_PL:number;
 }

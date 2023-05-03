@@ -253,7 +253,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
         let data = response.data;
         if (this.state.records != null && data != null) {
           let isEqual = Utility.objectsEqual(data,this.state.records);
-          console.log(isEqual)
+       //   console.log(isEqual)
           if (isEqual) {
             this.setState({
               isBusy: false,
@@ -565,7 +565,6 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Put || rowData.Sell_Put) {
         position.CE_PE = "PE";
-        console.log(rowData);
         position.Option_Price = rowData.Put_Price.toString().replace(",", "");
       }
 

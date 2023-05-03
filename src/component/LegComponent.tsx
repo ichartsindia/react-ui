@@ -8,7 +8,6 @@ import { Greeks } from "src/entity/Greeks";
 import { WhatIf } from "src/entity/OptData";
 import { LegPL } from "src/entity/LegPL";
 
-
 interface Props {
   passedData,
   callback
@@ -20,15 +19,18 @@ interface State {
 }
 
 export class LegComponent extends React.Component<Props, State> {
+ 
   greeks;
   fairPrice
   previouslegEntityList;
+  entryPrice: { [key: string] : string; } = {};
+
   constructor(props) {
     super(props);
 
     this.state = {
       exit: null,
-      reminder: null
+      reminder: null,
     }
   }
 
@@ -82,20 +84,48 @@ export class LegComponent extends React.Component<Props, State> {
   legPLTemplate = (rowData: LegEntity): string => {
     if (this.props.passedData.chartData == null) return null;
 
-    let clone =JSON.parse(JSON.stringify(this.props.passedData));
-    let legPLList = clone.chartData[4] as LegPL[];
-    let key = rowData.CE_PE + rowData.Strike_Price.toString();
-    let legPL = legPLList.filter(element => element.LegKey == key)[0];
-    
-    if(legPL==null) return null;
+    let clone = JSON.parse(JSON.stringify(this.props.passedData));
 
-    let closest = PLCalc.findClosest(clone.chartData[0], this.fairPrice);
-    //console.log(closest);
-    let inx = clone.chartData[0].indexOf(closest);
-    let val=legPL.LegData[inx];
-    let pl = val.toFixed(2);
-    return "₹ " + pl;
+    // let optionPrice = parseFloat(rowData.Option_Price);
+    let key = rowData.CE_PE + rowData.Strike_Price;
+    let optionPrice = parseFloat(this.entryPrice[key]);
 
+    let records = clone.records;
+    let chainCEList = records.filter(rec => rec.Strike_Price == rowData.Strike_Price && rowData.CE_PE == 'CE');
+
+    //this is CALL
+    if (chainCEList != null && chainCEList.length > 0) {
+      let chainCE = chainCEList[0];
+      //SELL
+      if (chainCE.Sell_Call != null && chainCE.Sell_Call == true) {
+        rowData.Current_PL=optionPrice - parseFloat(chainCE.Call_LTP)
+        return "₹ " + (rowData.Current_PL).toFixed(2);
+      }
+      //BUY
+      if (chainCE.Buy_Call != null && chainCE.Buy_Call == true) {
+        rowData.Current_PL=parseFloat(chainCE.Call_LTP) - optionPrice
+        return "₹ " + (rowData.Current_PL).toFixed(2);
+      }
+    }
+
+    let chainPEList = records.filter(rec => rec.Strike_Price == rowData.Strike_Price && rowData.CE_PE == 'PE');
+
+    if (chainPEList != null && chainPEList.length > 0) {
+      let chainPE = chainPEList[0];
+      //SELL
+      if (chainPE.Sell_Put != null && chainPE.Sell_Put == true) {
+        rowData.Current_PL=parseFloat(chainPE.Put_LTP) - optionPrice;
+        return "₹ " + (rowData.Current_PL).toFixed(2);
+      }
+      //BUY
+      if (chainPE.Buy_Put != null && chainPE.Buy_Put == true) {
+        rowData.Current_PL=optionPrice - parseFloat(chainPE.Put_LTP)
+        return "₹ " + (rowData.Current_PL).toFixed(2);
+      }
+this.props.callback(this.props.passedData.legEntityList);
+    }
+
+    return null;
   }
 
   //#region templates
@@ -185,12 +215,20 @@ export class LegComponent extends React.Component<Props, State> {
   }
 
   optionPriceTemplate = (rowData: LegEntity) => {
+    let key=rowData.CE_PE+rowData.Strike_Price;
+    if (this.entryPrice[key]==null){
+      this.entryPrice[key]=rowData.Option_Price;
+    }
+    
     return (
       <InputText value={parseFloat(rowData.Option_Price).toFixed(2)} style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px' }}
         onChange={(event) => {
           rowData.Option_Price = event.target.value;
-          if (rowData.Option_Price)
+          if (rowData.Option_Price){
+            this.entryPrice[key]=event.target.value;
             this.props.callback(this.props.passedData.legEntityList);
+          }
+            
         }} ></InputText>
     )
   }
@@ -263,13 +301,12 @@ export class LegComponent extends React.Component<Props, State> {
         <Button icon="pi pi-trash" className='p-button-text' style={{ height: '20px' }}
           onClick={() => {
             let list = this.props.passedData.legEntityList;
-            console.log(list);
-            console.log(rowData);
             const index = list.indexOf(rowData, 0);
             if (index > -1) {
               list.splice(index, 1);
             }
-
+            let key=rowData.CE_PE+rowData.Strike_Price;
+            this.entryPrice[key]=null;
             let newList = list.filter(p => !(p.Strike_Price == rowData.Strike_Price && p.CE_PE == rowData.CE_PE));
             this.props.callback(newList);
             // this.setState({ legEntityList: list });
@@ -290,7 +327,7 @@ export class LegComponent extends React.Component<Props, State> {
 
     for (let leg of legs) {
 
-      let iv = PLCalc.getImpliedVolatility(this.props.passedData.fairPrice, leg.Strike_Price, 0, T, leg.Option_Price, leg.CE_PE);
+      let iv =  PLCalc.getImpliedVolatility(this.props.passedData.fairPrice, leg.Strike_Price, 0, T, leg.Option_Price, leg.CE_PE);
       let greeks = new Greeks();
       greeks.lots = leg.Position_Lot;
       greeks.iv = this.roundTo(iv);
@@ -326,8 +363,9 @@ export class LegComponent extends React.Component<Props, State> {
 
   callLegDelta = (S, K, r, T, v) => {
     let d1 = this.calcD1(S, K, r, T, v);
-
+   
     let nd1 = bs.stdNormCDF(d1);
+   
     return this.roundTo(nd1);
   }
 
@@ -389,5 +427,9 @@ export class LegComponent extends React.Component<Props, State> {
     return num.toFixed(4);
   }
 
-
+   calcNormalDistribution=(val)=>{
+    var cdf = require( '@stdlib/stats-base-dists-normal-cdf' );
+    var p = cdf( val, 0.0, 1.0 );
+    return p;
+}
 }
