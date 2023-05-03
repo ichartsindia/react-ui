@@ -32,6 +32,7 @@ export class LegComponent extends React.Component<Props, State> {
       exit: null,
       reminder: null,
     }
+    this.entryPrice = {};
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -87,7 +88,7 @@ export class LegComponent extends React.Component<Props, State> {
     let clone = JSON.parse(JSON.stringify(this.props.passedData));
 
     // let optionPrice = parseFloat(rowData.Option_Price);
-    let key = rowData.CE_PE + rowData.Strike_Price;
+    let key=rowData.CE_PE+ this.props.passedData.selectedExpiryDate+rowData.Strike_Price;
     let optionPrice = parseFloat(this.entryPrice[key]);
 
     let records = clone.records;
@@ -98,12 +99,12 @@ export class LegComponent extends React.Component<Props, State> {
       let chainCE = chainCEList[0];
       //SELL
       if (chainCE.Sell_Call != null && chainCE.Sell_Call == true) {
-        rowData.Current_PL=optionPrice - parseFloat(chainCE.Call_LTP)
+        rowData.Current_PL=(optionPrice - parseFloat(chainCE.Call_LTP))*this.props.passedData.lotSize*rowData.Position_Lot
         return "₹ " + (rowData.Current_PL).toFixed(2);
       }
       //BUY
       if (chainCE.Buy_Call != null && chainCE.Buy_Call == true) {
-        rowData.Current_PL=parseFloat(chainCE.Call_LTP) - optionPrice
+        rowData.Current_PL=(parseFloat(chainCE.Call_LTP) - optionPrice)*this.props.passedData.lotSize*rowData.Position_Lot
         return "₹ " + (rowData.Current_PL).toFixed(2);
       }
     }
@@ -114,15 +115,17 @@ export class LegComponent extends React.Component<Props, State> {
       let chainPE = chainPEList[0];
       //SELL
       if (chainPE.Sell_Put != null && chainPE.Sell_Put == true) {
-        rowData.Current_PL=parseFloat(chainPE.Put_LTP) - optionPrice;
+        rowData.Current_PL=(optionPrice - parseFloat(chainPE.Put_LTP))*this.props.passedData.lotSize*rowData.Position_Lot;
         return "₹ " + (rowData.Current_PL).toFixed(2);
       }
       //BUY
       if (chainPE.Buy_Put != null && chainPE.Buy_Put == true) {
-        rowData.Current_PL=optionPrice - parseFloat(chainPE.Put_LTP)
+        rowData.Current_PL=(parseFloat(chainPE.Put_LTP) -optionPrice )*this.props.passedData.lotSize*rowData.Position_Lot
         return "₹ " + (rowData.Current_PL).toFixed(2);
       }
-this.props.callback(this.props.passedData.legEntityList);
+
+      this.props.callback(this.props.passedData.legEntityList);
+
     }
 
     return null;
@@ -215,17 +218,19 @@ this.props.callback(this.props.passedData.legEntityList);
   }
 
   optionPriceTemplate = (rowData: LegEntity) => {
-    let key=rowData.CE_PE+rowData.Strike_Price;
+    let key=rowData.CE_PE+ this.props.passedData.selectedExpiryDate+rowData.Strike_Price;
     if (this.entryPrice[key]==null){
       this.entryPrice[key]=rowData.Option_Price;
     }
     
     return (
-      <InputText value={parseFloat(rowData.Option_Price).toFixed(2)} style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px' }}
-        onChange={(event) => {
-          rowData.Option_Price = event.target.value;
+      <InputText value={parseFloat(this.entryPrice[key]).toFixed(2)} style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px' }}
+      onChange={(event) => {
+        console.log(event.target.value)
+          // rowData.Option_Price = event.target.value;
+          this.entryPrice[key]=event.target.value;
           if (rowData.Option_Price){
-            this.entryPrice[key]=event.target.value;
+          
             this.props.callback(this.props.passedData.legEntityList);
           }
             
@@ -305,7 +310,7 @@ this.props.callback(this.props.passedData.legEntityList);
             if (index > -1) {
               list.splice(index, 1);
             }
-            let key=rowData.CE_PE+rowData.Strike_Price;
+            let key=rowData.CE_PE+ this.props.passedData.selectedExpiryDate+rowData.Strike_Price;
             this.entryPrice[key]=null;
             let newList = list.filter(p => !(p.Strike_Price == rowData.Strike_Price && p.CE_PE == rowData.CE_PE));
             this.props.callback(newList);

@@ -421,6 +421,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
             let total = 0;
             let legList = this.passedData.legEntityList;
             legList.forEach(element => {
+                // console.log(element);
                 total += element.Current_PL;
             });
             return "₹ " + total.toFixed(2);

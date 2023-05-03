@@ -396,7 +396,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
               }} />
           </div>
           <div className={this.classLeg} style={{display:'flex'}}>
-            <div style={{width:'20%', marginRight:'20px', display:this.state.chartData!=null?'block':'none'}}>
+            <div style={{width:'20%', marginRight:'20px', display:this.state.legEntityList.length>0?'block':'none'}}>
               <PLComputeCompoenent passedData={this.state} />
             </div>
             <div style={{width:this.state.chartData==null? '100%':'80%'}}>
