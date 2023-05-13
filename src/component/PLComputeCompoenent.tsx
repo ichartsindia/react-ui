@@ -159,7 +159,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
             <div className="p-card" id="computePLList" key={'computePL_' + this.props.passedData.selectedsymbol} >
                 <DataTable value={data} responsiveLayout="scroll" >
                     <Column field="label" align="left"></Column>
-                    <Column field="value" align="right"></Column>
+                    <Column body={this.valueTemplate} align="right"></Column>
                     {/* <Column field="breakevenExpiry" header='Breakeven (Expiry)' align="center"></Column>
                     <Column field="breakevenT0" header='Breakeven (T+0)' align="center"></Column>
                     <Column field="netDebit" header='Net Debit' align="center" ></Column>
@@ -171,7 +171,25 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         )
     }
 
+    valueTemplate = (rowData) => {
+        console.log(rowData);
+        if (rowData.label == 'Current Projected P/L') {
+            if (rowData.value > 0) {
+                return <div style={{ color: 'green' }}>{"₹ " + rowData.value}</div>
+            } else if (rowData.value < 0) {
+                return <div style={{ color: 'red' }}>{"₹ " + rowData.value}</div>
+            } else{
+                return "₹ 0.00";
+            }
+        }
 
+        if(rowData.value!=null){
+            return rowData.value;
+        } else{
+            return null;
+        }
+        
+    }
     netDebtTemplate = (rowData: ProfitLoss) => {
         // if(Number.parseFloat(rowData.netDebit.replace("₹",''))<0)
 
@@ -430,7 +448,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
                 // console.log(element);
                 total += element.Current_PL;
             });
-            return "₹ " + total.toFixed(2);
+            return  total.toFixed(2);
         }
 
         return null;
