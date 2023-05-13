@@ -7,6 +7,7 @@ import { ProfitLoss } from "src/entity/ProfitLoss";
 import { Column, DataTable } from "primereact";
 import { WhatIf } from "src/entity/OptData";
 import { LOV } from "../entity/LOV";
+import { color } from "highcharts";
 interface Props {
     passedData
 }
@@ -122,8 +123,12 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         data.push(item4);
 
         let item5=new LOV();     
-        item5['label']="Net Debit"
         item5['value'] = this.netDebt();
+        if(parseFloat(item5['value'])>0){
+             item5['label']="Net Debit"
+        } else {
+            item5['label']="Net Credit"
+        }
         data.push(item5);
 
         let item6=new LOV();     
@@ -241,7 +246,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
 
         if (dataY.length > 0) {
             let minY = min(...dataY);
-            let minYIndex = dataY.indexOf(minY);
+             let minYIndex = dataY.indexOf(minY);
             let step: number = 50;
 
             if (minYIndex - step > 0 && minYIndex + step < dataX.length && dataY[minYIndex - step] > minY && dataY[minYIndex + step] > minY) {
@@ -287,6 +292,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         let closestX = dataX[closestIndex];
         let step: number = 200;
         if (dataY.length > 0) {
+            // console.log(dataY)
             let minY = min(...dataY);
             let minYIndex = dataY.indexOf(minY);
             if (minYIndex - step > 0 && minYIndex + step < dataX.length && dataY[minYIndex - step] > minY && dataY[minYIndex + step] > minY) {
@@ -331,13 +337,13 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         let shortLotList = legList.filter(p => p.Buy_Sell == 'S');
         let totalShort = 0
         shortLotList.forEach(element => {
-            totalShort += element.Position_Lot * element.Option_Price;
+            totalShort += element.Position_Lot * element.Entry_Price;
         });
 
         let longLotList = legList.filter(p => p.Buy_Sell == 'B');
         let totalLong = 0
         longLotList.forEach(element => {
-            totalLong += element.Position_Lot * element.Option_Price;
+            totalLong += element.Position_Lot * element.Entry_Price;
         });
 
 
