@@ -387,7 +387,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                         incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
                 </div>
                 <div style={{marginLeft:'5px',textAlign:'center'}}>
-                    <Checkbox inputId="allowId" checked={this.whatif.allowLegAdjustment} onChange={(e)=>{
+                    <Checkbox style={{marginLeft:'5px'}} inputId="allowId" checked={this.whatif.allowLegAdjustment} onChange={(e)=>{
                         this.whatif.allowLegAdjustment= e.checked;
                         this.whatif.IV=0;
                         this.props.callback(this.whatif);

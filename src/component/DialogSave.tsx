@@ -78,7 +78,7 @@ export class DialogSave extends React.Component<Props, State> {
         "strprc": leg.Strike_Price,
         "opttype": leg.CE_PE,
         "exd": this.props.passedData.selectedExpiryDate,
-        "entry_price": leg.Option_Price,
+        "entry_price": leg.Entry_Price,
         "exit_price": leg.exited==true?1000000:0, ////temp
         "optleg_status": 1,
         "lots": leg.Position_Lot,

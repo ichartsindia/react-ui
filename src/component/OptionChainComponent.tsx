@@ -123,13 +123,7 @@ export class OptionChainComponent extends React.Component<Props, State> {
             rowData.Call_Lot = 1;
             rowData.Call_Price = rowData.Call_LTP;
           } else {
-            let clone = JSON.parse(JSON.stringify(this.previousRecords));
-            let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
-            let previousTotalAmount = parseFloat(foundPreviousRow.Call_Price) * parseFloat(foundPreviousRow.Call_Lot);
-            let totalAmout = previousTotalAmount + parseFloat(rowData.Call_LTP.toString());
-            let totalLeg = foundPreviousRow.Call_Lot + 1;
-            rowData.Call_Price = parseFloat((totalAmout / totalLeg).toFixed(2));
-            console.log(rowData.Call_Price);
+            rowData.Call_Price = this.newPrice(rowData, "CE");
             rowData.Call_Lot += 1;
           }
           rowData.Buy_Call = true;
@@ -149,12 +143,8 @@ export class OptionChainComponent extends React.Component<Props, State> {
             rowData.Call_Lot = 1;
             rowData.Call_Price = rowData.Call_LTP;
           } else {
-            let clone = JSON.parse(JSON.stringify(this.previousRecords));
-            let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
-            let previousTotalAmount = Number.parseFloat(foundPreviousRow.Call_Price) * Number.parseFloat(foundPreviousRow.Call_Lot);
-            let totalAmout = previousTotalAmount + Number.parseFloat(rowData.Call_LTP.toString());
-            let totalLeg = foundPreviousRow.Call_Lot + 1;
-            rowData.Call_Price = Number.parseFloat((totalAmout / totalLeg).toFixed(2));
+           
+            rowData.Call_Price = this.newPrice(rowData, "CE");
             rowData.Call_Lot += 1;
           }
           rowData.Sell_Call = true;
@@ -185,19 +175,15 @@ export class OptionChainComponent extends React.Component<Props, State> {
       <div style={{marginTop:'4px'}}>
         <button className='smallGreenButton' style={{ backgroundColor: rowData.Buy_Put == true ? 'green' : 'white', color: rowData.Buy_Put == true ? 'white' : 'black' }}
           onClick={() => {
-            if(rowData.Sell_Put){
-              rowData.Put_Lot=null;
-            }
+            // if(rowData.Sell_Put){
+            //   rowData.Put_Lot=null;
+            // }
+      //      console.log(rowData)
             if (rowData.Put_Lot == null) {
               rowData.Put_Price = rowData.Put_LTP;
               rowData.Put_Lot = 1;
             } else {
-              let clone = JSON.parse(JSON.stringify(this.previousRecords));
-              let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
-              let previousTotalAmount = parseFloat(foundPreviousRow.Put_Price) * parseFloat(foundPreviousRow.Put_Lot);
-              let totalAmout = previousTotalAmount + parseFloat(rowData.Put_LTP.toString());
-              let totalLeg = foundPreviousRow.Put_Lot + 1;
-              rowData.Put_Price = parseFloat((totalAmout / totalLeg).toFixed(2));
+              rowData.Put_Price = this.newPrice(rowData, "PE")
               rowData.Put_Lot += 1;
             }
             rowData.Buy_Put = true;
@@ -218,14 +204,9 @@ export class OptionChainComponent extends React.Component<Props, State> {
             rowData.Put_Lot = 1;
             rowData.Put_Price = rowData.Put_LTP;
           } else {
-            let clone = JSON.parse(JSON.stringify(this.previousRecords));
-            let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
-            let previousTotalAmount = parseFloat(foundPreviousRow.Put_Price) * parseFloat(foundPreviousRow.Put_Lot);
-            let totalAmout = previousTotalAmount + parseFloat(rowData.Put_LTP.toString());
-            let totalLeg = foundPreviousRow.Put_Lot + 1;
-            rowData.Put_Price = parseFloat((totalAmout / totalLeg).toFixed(2));
+            rowData.Put_Price =  this.newPrice(rowData, "PE")
             rowData.Put_Lot += 1;
-          }
+           }
           rowData.Sell_Put = true;
           rowData.Buy_Put = null;
        //   rowData.Call_Price = null;
@@ -234,6 +215,31 @@ export class OptionChainComponent extends React.Component<Props, State> {
       </div>
     </div>
   )
+  }
+
+  newPrice = (rowData, CE_PE) => {
+    let clone = JSON.parse(JSON.stringify(this.previousRecords));
+    let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
+    let legs = this.props.passedData.legEntityList.filter((leg) => leg.CE_PE == CE_PE && leg.Strike_Price - rowData.Strike_Price == 0);
+    let previousLeg;
+    if (legs.length > 0) {
+      previousLeg = legs[0];
+    }
+    let previousPrice = previousLeg.Entry_Price;
+    let totalAmout;
+    let totalLeg
+    if (CE_PE == "CE") {
+      let previousTotalAmount = parseFloat(previousPrice) * parseFloat(foundPreviousRow.Call_Lot);
+      totalAmout = previousTotalAmount + parseFloat(rowData.Call_LTP.toString());
+      totalLeg = foundPreviousRow.Call_Lot + 1;
+    } else {
+      let previousTotalAmount = parseFloat(previousPrice) * parseFloat(foundPreviousRow.Put_Lot);
+      totalAmout = previousTotalAmount + parseFloat(rowData.Put_LTP.toString());
+      totalLeg = foundPreviousRow.Put_Lot + 1;
+
+    }
+    return parseFloat((totalAmout / totalLeg).toFixed(2));
+
   }
   
   strikeTemplate=(rowData: OptionChain)=>{

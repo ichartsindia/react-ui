@@ -8,4 +8,5 @@ export class LegEntity {
    exited: boolean;
    iv_adjustment:number;
    Current_PL:number;
+   Entry_Price:number;
 }

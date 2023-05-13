@@ -6,54 +6,15 @@ import bs from 'black-scholes';
 import { Utility } from './Utility';
 import { LegPL } from 'src/entity/LegPL';
 
- export class PLCalc {
-  
-    // static getCallPrice(S,K,r,T,v){
-    //     let d1=(Math.log(S/K)+(r+Math.pow(v,2)/2.0))/(v*Math.sqrt(T));
-    //     let nd1=bs.stdNormCDF(d1);
-    //     let d2=d1-v*Math.sqrt(T);
-    //     let nd2=bs.stdNormCDF(d2);
+export class PLCalc {
 
-    //     return S*nd1-K*Math.exp(-r*T)*nd2;
-    // }
+    static getSigma(expectedCost, s, k, t, r, callPut, estimate) {
+        var iv = require("implied-volatility");
 
-    // static getPutPrice(S,K,r,T,v){
-    //     let d1 = (Math.log(S/K) + (r + (Math.pow(v,2)/2.0))*T)/(v*Math.sqrt(T));
-	//     let nmd1 = bs.stdNormCDF(-d1);
-	//     let d2 = d1 - v*Math.sqrt(T);
-	//     let nmd2 = bs.stdNormCDF(-d2);
-	//     return K*Math.exp(-r*T)*nmd2 - S*nmd1
-    // }
-	
-    static getImpliedVolatility(S, K, r, T, expectedCost, callPut: string) {
-        let estimate = 0.1
-        let low = 0
-        let high = Infinity;
-        let actualCost;
+        return iv.getImpliedVolatility(expectedCost, s, k, t, r, callPut, estimate);
 
-        for (let i = 0; i < 100; i++) {
-            if (callPut.toLowerCase() == 'ce') {
-                actualCost = bs.blackScholes(S, K, T, estimate, r, "call");
-            } else {
-                actualCost = bs.blackScholes(S, K, T, estimate, r, "put");
-            }
-
-            if (expectedCost * 100 == Math.floor(actualCost * 100)) {
-                continue;
-            } else if (actualCost > expectedCost) {
-                high = estimate;
-                estimate = (estimate - low) / 2 + low;
-            } else {
-                low = estimate;
-                estimate = (high - estimate) / 2 + estimate;
-                if (Infinity == estimate) {
-                    estimate = low * 2;
-                }
-            }
-        }
-
-        return estimate;
     }
+
 
     static GetEarliestExp(optlegs) {
         let mexpdt = '';
@@ -151,18 +112,32 @@ import { LegPL } from 'src/entity/LegPL';
         if (tsecs == 0.0)
             tsecs = 60.0
 
-        let day =  Math.ceil( tsecs / (24.0 * 60.0 * 60.0));
-        let T=day/365;
+        let day = Math.ceil(tsecs / (24.0 * 60.0 * 60.0));
+        let T = day / 365;
         let PutCallFlag = optleg.pcflag;
         let X = optleg.strikePrice;
         let entryprice = optleg.entryPrice;
+        let optionPrice=optleg.optionPrice;
         let tradetype = optleg.tradeType;
         let qty = optleg.qty;
         let v = optleg.iv / 100;
+
         let r = optheader.intrate;
         r = 0;
 
-        let xdata = this.range(xstart, xend, pdiff / 3);
+
+        if (PutCallFlag == 'C') {
+            v = this.getSigma(optionPrice, S, X, T, 0, 'call', 0.1);
+            // console.log(v);
+            // if(optdata.whatif.IV != 0 && !optdata.whatif.allowLegAdjustment)
+        }
+        else {
+            v = this.getSigma(optionPrice, S, X, T, 0, 'put', 0.1);
+            // console.log(v);
+        }
+
+        // console.log(v)
+        let xdata = this.range(xstart, xend, pdiff / 4);
 
         // Compute Leg Data
         let curdata = []
@@ -189,10 +164,10 @@ import { LegPL } from 'src/entity/LegPL';
                     if (parseFloat(stkprice) <= parseFloat(X)) {
                         if (tradetype == 'B')
                             expdata.push(-(entryprice * qty));
-                        else{
-                             expdata.push(entryprice * qty);
+                        else {
+                            expdata.push(entryprice * qty);
                         }
-                           
+
                     } else {
                         if (tradetype == 'B') {
                             expdata.push(((stkprice - X) - entryprice) * qty);
@@ -225,7 +200,7 @@ import { LegPL } from 'src/entity/LegPL';
                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
                     strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
                 }
-              
+
                 let p = bs.blackScholes(strike, X, T, v.toFixed(4), r, "put");
 
                 if (tradetype == 'B') {
@@ -234,7 +209,7 @@ import { LegPL } from 'src/entity/LegPL';
                 else {
                     curdata.push((entryprice - p) * qty)
                 }
-                  
+
 
                 if (optleg["expdt"] == mexpdt) {
                     if (stkprice >= X) {
@@ -299,7 +274,7 @@ import { LegPL } from 'src/entity/LegPL';
                     optlegs[i]['qty'] = optlegs[i]['qty'] * lotsize
             }
         }
-
+// console.log(optdata);
         //  WHATIF ADJUSTMENTS
         if (optdata.whatif !== null) {
             if (optdata.whatif.price != 0 || optdata.whatif.days.toLocaleString() != new Date(optheader.dealDate).toLocaleDateString()) {
@@ -320,6 +295,8 @@ import { LegPL } from 'src/entity/LegPL';
                     legs.forEach(p => {
                         p.iv = p.iv * (1 + optdata.whatif.IV / 100.0);
                     })
+                } else{
+                    console.log(optdata.optlegs);
                 }
                 // if (whatif.days > 0) {
                 // let dealDate= new Date(optheader.dealDate);
@@ -381,12 +358,12 @@ import { LegPL } from 'src/entity/LegPL';
             for (var optleg of optlegs) {
 
                 let tdata = PLCalc.ComputeDataForLeg(optheader, optleg, mexpdt, xstart, xend);
-       
-                 let legPL = new LegPL();
-                 legPL = PLCalc.getlegPL(optleg, tdata);
-                 legPLList.push(legPL);
-            //    console.log(legPLList);
-           
+
+                let legPL = new LegPL();
+                legPL = PLCalc.getlegPL(optleg, tdata);
+                legPLList.push(legPL);
+                //    console.log(legPLList);
+
                 if (firstleg) {
                     let firstLegObj = tdata[0];
                     for (let j = 0; j < firstLegObj.length; j++)
@@ -439,10 +416,10 @@ import { LegPL } from 'src/entity/LegPL';
 
     static getlegPL(optleg: OptLeg, tdata: any[][]) {
         let curData = tdata[1];
-      
+
         let legPL = new LegPL();
         legPL.LegKey = optleg.pcflag.toLowerCase() === 'p' ? 'PE' + optleg.strikePrice.toString() : 'CE' + optleg.strikePrice.toString();
-        legPL.LegData=curData;
+        legPL.LegData = curData;
 
         return legPL;
     }
@@ -474,9 +451,11 @@ import { LegPL } from 'src/entity/LegPL';
         // assinging option legs
         let optlegs = new Array<OptLeg>();
         let legList = data.legEntityList.filter(p => !p.exited);
+        // console.log(legList);
         for (let opt of legList) {
             let optleg: OptLeg = new OptLeg();
-            optleg.entryPrice = Number.parseFloat((opt.Option_Price).toString().replace(',', ''));
+            optleg.optionPrice = Number.parseFloat((opt.Option_Price).toString().replace(',', ''));
+            optleg.entryPrice = opt.Entry_Price;
             optleg.pcflag = opt.CE_PE == 'CE' ? 'C' : 'P';
             optleg.expdt = data.selectedExpiryDate;
             optleg.qty = opt.Position_Lot * data.lotSize;
@@ -484,6 +463,7 @@ import { LegPL } from 'src/entity/LegPL';
             optleg.tradeType = opt.Buy_Sell;
             optleg.futuresPrice = data.futPrice;
             optleg.iv = opt.iv_adjustment ? opt.IV * (1 + opt.iv_adjustment / 100) : opt.IV;
+            optleg.ivAdjustment=opt.iv_adjustment;
             optlegs.push(optleg);
         }
 
@@ -507,11 +487,6 @@ import { LegPL } from 'src/entity/LegPL';
             return 0
         }
     }
-
-    static calcNormalDistribution=(val)=>{
-        var cdf = require( '@stdlib/stats-base-dists-normal-cdf' );
-        var p = cdf( val, 0.0, 1.0 );
-        return p;
-    }
 }
+
 

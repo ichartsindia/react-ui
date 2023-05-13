@@ -23,6 +23,7 @@
     "fs": "^0.0.1-security",
     "highcharts": "^10.3.2",
     "highcharts-react-official": "^3.1.0",
+    "implied-volatility": "^1.0.0",
     "jstat": "^1.9.6",
     "mathjs": "^11.5.0",
     "primeflex": "^3.1.2",

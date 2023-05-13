@@ -10,8 +10,8 @@ export class Utility {
         let monNumber = "JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC".indexOf(month) / 3;
         let date1 = new Date(year, monNumber, day).getTime();
         let date2 = (new Date()).getTime();
-        const diffTime =  Math.abs(date2 - date1);
-        const diffDays=Math.ceil(diffTime/1000 * 60 * 60 * 24);
+         const diffTime =  Math.abs(date2 - date1);
+        const diffDays=Math.ceil(diffTime/(1000 * 60 * 60 * 24));
         const diffYear = diffDays / 365;
 
         return diffYear;

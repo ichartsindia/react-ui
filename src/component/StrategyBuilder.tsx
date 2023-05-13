@@ -166,10 +166,12 @@ export class StrategyBuilder extends React.Component<Props, State> {
         //      console.log(data);
         if (data.length > 0) {
           let record = data[0];
+    //      console.log(record);
           let latestRefreshDate = new Date();
           if (latestRefreshDate > new Date(record.last_updated)) {
             latestRefreshDate = new Date(record.last_updated);
           }
+
           this.setState({
             //       spotPrice: record.spot_price,
             futPrice: record.fut_price,
@@ -248,19 +250,22 @@ export class StrategyBuilder extends React.Component<Props, State> {
   refreshOptionData = (fromTimer=false) => {
     let urlDetail = "https://www.icharts.in/opt/api/OptionChain_Api.php?sym=" + this.state.symbol[0].symbol + "&exp_date=" + this.state.selectedExpiryDate + "&sym_type=" + this.state.symbol[0].symbol_type;
     // this.setState({ isBusy: true });
-    axios(urlDetail, { withCredentials: false })
+ 
+     axios(urlDetail, { withCredentials: false })
       .then(response => {
         let data = response.data;
-        if (this.state.records != null && data != null) {
-          let isEqual = Utility.objectsEqual(data,this.state.records);
-       //   console.log(isEqual)
-          if (isEqual) {
-            this.setState({
-              isBusy: false,
-            });
-            return;
-          }
-        }
+        // if (this.state.records != null && data != null) {
+        //   let isEqual = Utility.objectsEqual(data,this.state.records);
+        //   console.log(isEqual)
+        //   if (isEqual) {
+        //     this.setState({
+        //       isBusy: false,
+        //     });
+        //     return;
+        //   }
+        // }
+
+  // new OptionService().getOptions().then(data=>{
 
         this.setState({
           records: data,
@@ -268,6 +273,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
         }, () => {
            // console.log(this.state);
             this.convertLegToOptionChain();
+            this.updateRecord(null, this.generateLegList);
             if (data == null) return;
             if(fromTimer) return;
 
@@ -381,7 +387,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
             selectedsymbol={this.state.selectedsymbol}
               latestRefreshDate={this.state.latestRefreshDate}
               callback={(p) => {
-                console.log(p);
+       //         console.log(p);
                 this.setState({ whatif: p });
                 this.updateRecord(null, this.generateLegList);
               }}
@@ -402,10 +408,11 @@ export class StrategyBuilder extends React.Component<Props, State> {
             <div style={{width:this.state.chartData==null? '100%':'80%'}}>
               <LegComponent passedData={this.state} callback={
                 legEntityList => {
+                  // console.log(legEntityList);
                   let exitedList = legEntityList.filter(p => p.exited);
                   this.setState({ legEntityList: legEntityList, exitedLegList: exitedList },
                     () => {
-                      console.log(this.state.legEntityList)
+            //          console.log(this.state.legEntityList)
                       this.convertLegToOptionChain();
                        let chartData = new PLCalc().chartData(this.state);
                       this.setState({ chartData: chartData });
@@ -446,7 +453,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
           this.state.openLoadDialog ? <div>
             <DialogLoad passedData={this.state} closed={(closed, data) => {
               if (closed == null) {
-                console.log(data);
+        //        console.log(data);
                 this.setState({ strategyId: data.strategy_id })
                 this.loadOptionChain(data)
               } else {
@@ -461,7 +468,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
 
   loadOptionChain = (data) => {
-    console.log(data);
+//console.log(data);
     let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == data.symbol);
     this.setState({
       openLoadDialog: false,
@@ -504,14 +511,18 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
   generateLegFromLoaded = (ret) => {
     let positionList = [];
+    // console.log(this.state.records)
     ret.data.forEach(p => {
       let legList = p.strategy_details;
       legList.forEach(element => {
-        console.log(element)
+      //  console.log(element)
         let position = new LegEntity();
         position.Buy_Sell = element.trade_type;
         position.CE_PE = element.option_type;
-        position.Option_Price = Number.parseFloat(element.entry_price).toFixed(2);
+        let optionPrice=this.retrieveOptionPrice(element);
+     //   console.log(optionPrice);
+        position.Option_Price = optionPrice.toString();
+        position.Entry_Price=parseFloat(parseFloat(element.entry_price).toFixed(2));
         position.Strike_Price = Number.parseFloat(element.strike_price);
         position.Position_Lot = element.lots;
         position.IV = this.state.avgiv;
@@ -526,8 +537,23 @@ export class StrategyBuilder extends React.Component<Props, State> {
     return positionList;
   }
 
+  retrieveOptionPrice=(leg)=>{
+     let chainList = this.state.records.filter(ele=> ele.Strike_Price-leg.strike_price==0);
+    if(chainList.length>0){
+      if(leg.option_type=='PE')
+        return chainList[0].Put_LTP;
+      else {
+        return chainList[0].Call_LTP;
+      }
+    } 
+
+    return null;
+  }
+  
   generateLegList = () => {
-    let list1 = this.state.records.filter(p => p.Buy_Call == true || p.Sell_Call == true);
+   let legList = this.state.legEntityList; 
+  //  console.log(legList);
+   let list1 = this.state.records.filter(p => p.Buy_Call == true || p.Sell_Call == true);
     let list2 = this.state.records.filter(p => p.Buy_Put == true || p.Sell_Put == true);
 
     let positionList = [];
@@ -541,7 +567,14 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Call || rowData.Sell_Call) {
         position.CE_PE = "CE";
-        position.Option_Price = rowData.Call_Price.toString().replace(",", "");
+        position.Option_Price =  rowData.Call_LTP.toString().replace(",", "");
+        let oldLegList=legList.filter(p=>p.Strike_Price-rowData.Strike_Price==0 && p.CE_PE=='CE');
+        if(oldLegList.length>0){
+           position.Entry_Price=oldLegList[0].Entry_Price;
+           position.iv_adjustment=oldLegList[0].iv_adjustment;
+           
+        }
+       
       }
 
 
@@ -555,7 +588,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
       position.IV = rowData.Call_IV;
 
       position.Strike_Price = rowData.Strike_Price;
-      position.iv_adjustment=rowData.iv_adjustment;
+      //position.iv_adjustment=rowData.iv_adjustment;
       positionList.push(position);
     })
 
@@ -565,9 +598,14 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       if (rowData.Buy_Put || rowData.Sell_Put) {
         position.CE_PE = "PE";
-        position.Option_Price = rowData.Put_Price.toString().replace(",", "");
+        position.Option_Price = rowData.Put_LTP.toString().replace(",", "");
       }
 
+      let oldLegList=legList.filter(p=>p.Strike_Price-rowData.Strike_Price==0 && p.CE_PE=='PE');
+      if(oldLegList.length>0){
+         position.Entry_Price=oldLegList[0].Entry_Price;
+         position.iv_adjustment=oldLegList[0].iv_adjustment;
+      }
 
       if (rowData.Buy_Put) {
         position.Buy_Sell = "B";
@@ -579,6 +617,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
       position.IV = rowData.Put_IV;
       position.Strike_Price = rowData.Strike_Price;
+    
       positionList.push(position);
     })
 

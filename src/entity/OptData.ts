@@ -21,9 +21,11 @@ export class OptLeg{
     pcflag: string;
     strikePrice:number;
     entryPrice:number;
+    optionPrice:number;
     tradeType:string;
     qty:number;
     iv:number;
+    ivAdjustment:number;
 }
 
 export class WhatIf{

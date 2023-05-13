@@ -3,7 +3,7 @@ import axios from 'axios'
 export default class OptionService {
 
     getOptions() {
-        return axios.get('assets/data/oct06.json')
-            .then(res => res.data.data);
+        return axios.get('http://localhost:3001/strategy/sample.json')
+            .then(res => res.data);
     }
 }
