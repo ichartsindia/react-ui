@@ -102,6 +102,7 @@ body{
   color: white;
   border-radius: 5px;
   font-size: smaller;
+  cursor: pointer;
 }
 
 .selected-button-sell{
@@ -109,6 +110,7 @@ body{
   color: white;
   border-radius: 5px;
   font-size: smaller;
+  cursor: pointer;
 }
 
 .dialog{
@@ -276,3 +278,48 @@ font-size: small;
 .p-fluid .p-inputtext{
   font-size: small!important;
 }
+.button-above-option-chain{
+  font-size:small;
+  border-radius:13px; 
+  border-bottom-style:none; 
+  border-top-style:none;
+  border-left-style:none;
+  border-right-style:none;
+  cursor:pointer; 
+}
+.button-above-option-chain-orange{
+  font-size:small;
+  border-radius:13px; 
+  border-bottom-style:none; 
+  border-top-style:none;
+  border-left-style:none;
+  border-right-style:none;
+  cursor:pointer; 
+  background-color:orange;
+}
+/* .clicked{
+  background-color:orange;
+} */
+
+
+button:hover{background-color:orange;}
+
+button:focus{background-color:orange;} 
+
+/* a {
+  color: orange;
+} */
+
+/* a.button{
+  color:green;
+ 
+  text-decoration: none;
+} 
+*/
+/* a:visited {
+  background-color:orange;
+} */
+
+button:active {
+  background-color:orange;
+}  

@@ -55,6 +55,7 @@ export class DialogLoad extends React.Component<Props, State> {
   }
 
   rowClicked = (e) => {
+    console.log(e.data);
     this.props.closed(null, e.data);
   }
 

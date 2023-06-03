@@ -172,7 +172,6 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
     }
 
     valueTemplate = (rowData) => {
-        console.log(rowData);
         if (rowData.label == 'Current Projected P/L') {
             if (rowData.value > 0) {
                 return <div style={{ color: 'green' }}>{"₹ " + rowData.value}</div>

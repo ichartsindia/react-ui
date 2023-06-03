@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Column, DataTable, Panel, TabPanel, TabView } from "primereact";
 import React from "react";
+import { Button } from "react-bootstrap";
 import { OptionChain } from "src/entity/OptionChain";
 import { PLCalc } from "src/utils/PLCalc";
 
@@ -8,10 +9,11 @@ interface Props {
   passedData
   callback;
   callbackHide;
+  callbackExpiryChange;
 }
 
 interface State {
- 
+  expiryList
 }
 
 export class OptionChainComponent extends React.Component<Props, State> {
@@ -19,8 +21,10 @@ export class OptionChainComponent extends React.Component<Props, State> {
  previousRecords; 
  constructor(props: Props) {
     super(props);
-
-   
+    
+    this.state={
+      expiryList: []
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -30,14 +34,30 @@ export class OptionChainComponent extends React.Component<Props, State> {
   render() {
     if (this.props.passedData.records == null) return null;
     let records = this.props.passedData.records;
-
-    let strikePriceArray=records.map(p=>p.Strike_Price);
-
-    this.closest = PLCalc.findClosest(strikePriceArray,this.props.passedData.fairPrice);
+    let strikePriceArray = records.map(p => p.Strike_Price);
+    this.closest = PLCalc.findClosest(strikePriceArray, this.props.passedData.fairPrice);
+    let expiryList = [];  
+    if (this.props.passedData.expiryDateList != null && this.props.passedData.expiryDateList.length > 4) {
+      for (let i = 0; i < 4; i++) {
+      
+    let strikePriceArray = records.map(p => p.Strike_Price);
+    expiryList.push(<button key={"button_" + this.props.passedData.expiryDateList[i]["expiry_dates"]} 
+    className= {this.props.passedData.selectedExpiryDate!=this.props.passedData.expiryDateList[i]["expiry_dates"]?'button-above-option-chain':'button-above-option-chain-orange'} onClick={(e) => {
+          this.props.passedData.selectedExpiryDate = e.target["innerText"];
+          e.target['className']='button-above-option-chain-orange';
+          this.props.callbackExpiryChange(this.props.passedData.selectedExpiryDate);
+        }
+        }>{this.props.passedData.expiryDateList[i]["expiry_dates"]} </button>);
+      }
+      // console.log("after",expiryList);
+    }
 
     return (
        <div>
-        <div className="alignedCenter">Option Chain<img src='./hide_left.svg'  onClick={this.props.callbackHide}></img></div>    
+        <div className="alignedCenter">Option Chain<img src='./hide_left.svg'  onClick={this.props.callbackHide}></img></div> 
+          <div style={{display:'flex', justifyContent: 'space-evenly', marginBottom:'3px', marginTop:'3px'}}>      
+            {expiryList}
+          </div> 
           <div key={'optionList_' + this.props.passedData.selectedsymbol}>
             <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight="calc(100vh - 182px)" showGridlines >
               {/* <Column style={{ width: '6%',  backgroundColor:  '#FFFF00' }} align="right" field='Call_Delta' header="Delta"></Column> */}

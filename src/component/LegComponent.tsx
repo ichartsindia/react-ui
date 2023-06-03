@@ -30,7 +30,7 @@ export class LegComponent extends React.Component<Props, State> {
   greeks;
   fairPrice
   previouslegEntityList;
-
+ expiryList
 
   constructor(props) {
     super(props);
@@ -40,15 +40,20 @@ export class LegComponent extends React.Component<Props, State> {
       reminder: null,
       entryPrice :{}
     }
-  
+  this.expiryList=this.props.passedData
   }
 
+ 
+
   componentDidUpdate(prevProps, prevState) {
-    this.previouslegEntityList = prevProps.passedData.legEntityList;
+    if(this.props.passedData.expiryDateList!=null){
+      this.expiryList=this.props.passedData.expiryDateList.slice(0, 4).map(p=>p.expiry_dates);
+    }
+    this.previouslegEntityList = prevProps.passedData.legEntityList
   }
 
   render() {
-
+  if(this.props.passedData==null) return null;
     this.greeks = this.generateGreeks();
     let clone = JSON.parse(JSON.stringify(this.props.passedData.fairPrice));
     this.fairPrice = clone;
@@ -65,7 +70,8 @@ export class LegComponent extends React.Component<Props, State> {
               <Column body={this.expiryTemplate} header='Expiry' align="center"></Column>
               <Column body={this.strikeTemplate} header='Strike' align="center"></Column>
               <Column body={this.entryPriceTemplate} header='Entry Price' align="center"></Column>
-              <Column field="Option_Price" header='Current Price' align="center"></Column>
+              <Column body={this.currentPriceTemplate} header='Current Price' align="center"></Column>
+              {/* <Column field="Option_Price" header='Current Price' align="center"></Column> */}
               <Column body={this.legPLTemplate} align="center" header="Current P/L"></Column>
               <Column body={this.ivTemplate} header='IV' align="center"></Column>
               <Column body={this.deleteTemplate} header="Action"></Column>
@@ -95,71 +101,98 @@ export class LegComponent extends React.Component<Props, State> {
   legPLTemplate = (rowData: LegEntity) => {
     if (this.props.passedData.chartData == null) return null;
 
-    let clone = JSON.parse(JSON.stringify(this.props.passedData));
+//     let clone = JSON.parse(JSON.stringify(this.props.passedData));
+// console.log(clone)
+//     // let optionPrice = parseFloat(rowData.Option_Price);
+//     let key = rowData.CE_PE + this.props.passedData.selectedExpiryDate + rowData.Strike_Price;
+//     let optionPrice = parseFloat(this.state.entryPrice[key]);
+// console.log(this.state.entryPrice)
+//     let records = clone.records;
+//     console.log(rowData)
+//     if(records==null) return null;
 
-    // let optionPrice = parseFloat(rowData.Option_Price);
-    let key = rowData.CE_PE + this.props.passedData.selectedExpiryDate + rowData.Strike_Price;
-    let optionPrice = parseFloat(this.state.entryPrice[key]);
-
-    let records = clone.records;
-    let chainCEList = records.filter(rec => rec.Strike_Price == rowData.Strike_Price && rowData.CE_PE == 'CE');
-
-    //this is CALL
-    if (chainCEList != null && chainCEList.length > 0) {
-      let chainCE = chainCEList[0];
-      //SELL
-      if (chainCE.Sell_Call != null && chainCE.Sell_Call == true) {
-        rowData.Current_PL = (optionPrice - parseFloat(chainCE.Call_LTP)) * this.props.passedData.lotSize * rowData.Position_Lot
-   //     return "₹ " + (rowData.Current_PL).toFixed(2);
-      }
-      //BUY
-      if (chainCE.Buy_Call != null && chainCE.Buy_Call == true) {
-        rowData.Current_PL = (parseFloat(chainCE.Call_LTP) - optionPrice) * this.props.passedData.lotSize * rowData.Position_Lot
-    //    return "₹ " + (rowData.Current_PL).toFixed(2);
-      }
+//     //#region non-exited
+//     let chainCEList = records.filter(rec => rec.Strike_Price == rowData.Strike_Price && rowData.CE_PE == 'CE' && rowData.exited==null);
+// console.log(chainCEList)
+//     //this is CALL
+//     if (chainCEList != null && chainCEList.length > 0) {
+//       let chainCE = chainCEList[0];
+//       //SELL
+//       if (chainCE.Sell_Call != null && chainCE.Sell_Call == true) {
+//         rowData.Current_PL = (optionPrice - parseFloat(chainCE.Call_LTP)) * this.props.passedData.lotSize * rowData.Position_Lot
+//    //     return "₹ " + (rowData.Current_PL).toFixed(2);
+//       }
+//       //BUY
+//       if (chainCE.Buy_Call != null && chainCE.Buy_Call == true) {
+//         rowData.Current_PL = (parseFloat(chainCE.Call_LTP) - optionPrice) * this.props.passedData.lotSize * rowData.Position_Lot
+//     //    return "₹ " + (rowData.Current_PL).toFixed(2);
+//       }
 
      
-    }
+//     }
 
-    let chainPEList = records.filter(rec => rec.Strike_Price == rowData.Strike_Price && rowData.CE_PE == 'PE');
+//     let chainPEList = records.filter(rec => rec.Strike_Price == rowData.Strike_Price && rowData.CE_PE == 'PE' && rowData.exited==null);
 
-    if (chainPEList != null && chainPEList.length > 0) {
-      let chainPE = chainPEList[0];
-      //SELL
-      if (chainPE.Sell_Put != null && chainPE.Sell_Put == true) {
-        rowData.Current_PL = (optionPrice - parseFloat(chainPE.Put_LTP)) * this.props.passedData.lotSize * rowData.Position_Lot;
-    //    return "₹ " + (rowData.Current_PL).toFixed(2);
-      }
-      //BUY
-      if (chainPE.Buy_Put != null && chainPE.Buy_Put == true) {
-        rowData.Current_PL = (parseFloat(chainPE.Put_LTP) - optionPrice) * this.props.passedData.lotSize * rowData.Position_Lot
+//     if (chainPEList != null && chainPEList.length > 0) {
+//       let chainPE = chainPEList[0];
+//       //SELL
+//       if (chainPE.Sell_Put != null && chainPE.Sell_Put == true) {
+//         rowData.Current_PL = (optionPrice - parseFloat(chainPE.Put_LTP)) * this.props.passedData.lotSize * rowData.Position_Lot;
+//     //    return "₹ " + (rowData.Current_PL).toFixed(2);
+//       }
+//       //BUY
+//       if (chainPE.Buy_Put != null && chainPE.Buy_Put == true) {
+//         rowData.Current_PL = (parseFloat(chainPE.Put_LTP) - optionPrice) * this.props.passedData.lotSize * rowData.Position_Lot
        
-      }
+//       }}
+// //#endregion
 
-//  return "₹ " + (rowData.Current_PL).toFixed(2);
-     
-//  this.props.callback(this.props.passedData.legEntityList);
+// //#region exited
 
-    }
-  if(rowData.Current_PL>0)
-        return <div style={{color:'green'}}>{"₹ " + (rowData.Current_PL).toFixed(2)}</div> 
-      else if(rowData.Current_PL<0)
-        return <div style={{color:'red'}}>{"₹ " + (rowData.Current_PL).toFixed(2)}</div> 
+let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price);
+
+  //SELL
+  if(rowData.CE_PE=='PE'){
+    if(rowData.Buy_Sell=='S')
+    rowData.Current_PL = (optionPrice - parseFloat(rowData.Option_Price)) * this.props.passedData.lotSize * rowData.Position_Lot
+  //BUY
+  if(rowData.Buy_Sell=='B')
+    rowData.Current_PL =  (parseFloat(rowData.Option_Price) - optionPrice)* this.props.passedData.lotSize * rowData.Position_Lot
+  }
+  
+  //SELL
+  if(rowData.CE_PE=='CE'){
+    if(rowData.Buy_Sell=='B')
+    rowData.Current_PL = (optionPrice - parseFloat(rowData.Option_Price)) * this.props.passedData.lotSize * rowData.Position_Lot
+  //BUY
+  if(rowData.Buy_Sell=='S')
+    rowData.Current_PL =  (parseFloat(rowData.Option_Price) - optionPrice)* this.props.passedData.lotSize * rowData.Position_Lot
+  }
+  //  this.props.callback(this.props.passedData.legEntityList);
+    //#endregion
+      if (rowData.Current_PL > 0)
+        return <div style={{ color: 'green' }}>{"₹ " + (rowData.Current_PL).toFixed(2)}</div>
+      else if (rowData.Current_PL < 0)
+        return <div style={{ color: 'red' }}>{"₹ " + (rowData.Current_PL).toFixed(2)}</div>
       else {
         return "₹ 0.00";
       }
+     
     // return null;
   }
 
   strikeTemplate = (rowData: LegEntity) => {
-    if (rowData.exited) {
-      return rowData.Strike_Price;
+    if (rowData.CE_PE=='FU') {
+      return 'Futures';//rowData.Strike_Price;
     } else {
       return rowData.Strike_Price;
     }
   }
 
   ivTemplate = (rowData: LegEntity) => {
+    if(rowData.CE_PE=='FU')
+      return null;
+
     return <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'space-evenly', marginBottom: '3px' }}>
       <div>{rowData.IV}</div>
       <div style={{ visibility:rowData.exited?'hidden':'visible',marginRight: '5px' }}><InputNumber disabled={(!this.props.passedData.whatif?.allowLegAdjustment) || rowData.exited==true} className='smallText' max={20} min={-20} style={{ width: '65px', height: '24px', fontSize: 'smaller' }} value={rowData.iv_adjustment}
@@ -172,7 +205,19 @@ export class LegComponent extends React.Component<Props, State> {
 
   expiryTemplate = (rowData: LegEntity) => {
     if (rowData.exited == null) {
-      return this.props.passedData.selectedExpiryDate
+      if (rowData.CE_PE == 'FU') {
+        return rowData.Expiry;
+      }
+      else {
+        return <div className='leglot-dropdown'>
+          <Dropdown id="expiryDropdown" value={rowData.Expiry} onChange={(e) => {
+            rowData.Expiry = e.value;
+            this.props.callback(this.props.passedData.legEntityList);
+          }} options={this.expiryList} />
+        </div>
+      }
+
+      // return 
     } else {
       return null
     }
@@ -188,13 +233,19 @@ export class LegComponent extends React.Component<Props, State> {
 
   buttonTemplate = (rowData: LegEntity) => {
     if (rowData.Buy_Sell == 'B') {
-      return <div style={{ width: '15px' }}>
-        <button className='selected-button-buy'>B</button>
+      return <div style={{ width: '15px'}}>
+        <button className='selected-button-buy' onClick={(e)=>{
+          rowData.Buy_Sell='S';
+          this.props.callback(this.props.passedData.legEntityList);
+        }}>B</button>
       </div>
     }
     if (rowData.Buy_Sell == 'S') {
-      return <div style={{ width: '15px' }}>
-        <button className='selected-button-sell'>S</button>
+      return <div style={{ width: '15px'}}>
+        <button className='selected-button-sell' onClick={(e)=>{
+            rowData.Buy_Sell='B';
+            this.props.callback(this.props.passedData.legEntityList);
+        }}>S</button>
       </div>
 
     }
@@ -258,22 +309,48 @@ export class LegComponent extends React.Component<Props, State> {
     }></i>
   }
 
+  currentPriceTemplate = (rowData: LegEntity) => {
+    if(rowData.exited==true){
+      if(rowData.Exit_Price==null){
+        rowData.Exit_Price=parseFloat(parseFloat(rowData.Option_Price).toFixed(2));
+      }
+
+      return (
+        <InputText value={parseFloat(rowData.Exit_Price.toFixed(2))} style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px'}}
+          onChange={(event) => {
+            rowData.Exit_Price = parseFloat(event.target.value);
+            // this.state.entryPrice[key] = event.target.value;
+            console.log(this.props.passedData.legEntityList);
+
+            this.props.callback(this.props.passedData.legEntityList);
+          }} ></InputText>
+      )
+    } else {
+      return rowData.Option_Price;
+    }
+ }
+
   entryPriceTemplate = (rowData: LegEntity) => {
-    // console.log(rowData);
     let key = rowData.CE_PE + this.props.passedData.selectedExpiryDate + rowData.Strike_Price;
     if(rowData.Entry_Price==null){
       rowData.Entry_Price=parseFloat(rowData.Option_Price);
-      this.props.callback(this.props.passedData.legEntityList);
+       this.props.callback(this.props.passedData.legEntityList);
     }
-    this.state.entryPrice[key] = rowData.Entry_Price.toString();
-  
+    // this.state.entryPrice[key] = rowData.Entry_Price.toString();
+   console.log(rowData)
     return (
-      <InputText disabled={rowData.exited} value={parseFloat(this.state.entryPrice[key]).toFixed(2)} style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px'}}
+      <div className='leglot-dropdown'>
+        <InputNumber disabled={rowData.exited} minFractionDigits={2} maxFractionDigits={2}
+        value={parseFloat(rowData.Entry_Price.toString()).toFixed(2)} 
+        style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px', }}
         onChange={(event) => {
-          rowData.Entry_Price = parseFloat(event.target.value);
-          this.state.entryPrice[key] = event.target.value;
+          console.log(event);
+          rowData.Entry_Price = Number(event.value);//==null? "": parseFloat(event.value);
+          this.state.entryPrice[key] = event.value;
           this.props.callback(this.props.passedData.legEntityList);
-        }} ></InputText>
+        }} ></InputNumber>
+      </div>
+      
     )
   }
 
@@ -471,7 +548,6 @@ export class LegComponent extends React.Component<Props, State> {
     if (Math.abs(num) < 1 && Math.abs(num) >= 0.1) {
       return num.toFixed(2)
     }
-
 
     return num.toFixed(4);
   }

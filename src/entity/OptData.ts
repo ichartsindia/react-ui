@@ -26,6 +26,8 @@ export class OptLeg{
     qty:number;
     iv:number;
     ivAdjustment:number;
+    exited:boolean;
+    exitPrice:number;
 }
 
 export class WhatIf{

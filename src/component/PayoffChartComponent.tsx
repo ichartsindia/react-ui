@@ -12,14 +12,9 @@ import * as fs from 'fs';
 
 HighchartMore(Highcharts)
 interface Props {
-    data;
-    selectedsymbol: string;
-    expiryDate: string;
-    callback: any;
-    fairPrice: number;
-    callbackShow,
-    chainShowed: boolean;
-    latestRefreshDate:Date;
+    passedStateData,
+    callback,
+    callbackShow
 }
 
 interface State {
@@ -33,7 +28,7 @@ interface State {
 
 export class PayoffChartComponent extends React.Component<Props, State> {
     whatif: WhatIf = new WhatIf();
-
+i=0;
     constructor(props) {
         super(props);
         this.state = {
@@ -47,27 +42,28 @@ export class PayoffChartComponent extends React.Component<Props, State> {
         };
 
         // this.whatif.IV = 0;
-        this.whatif.days = this.props.latestRefreshDate;
+        this.whatif.days = this.props.passedStateData.latestRefreshDate;
         this.whatif.IV=0;
         this.whatif.price = 0;
         this.whatif.allowLegAdjustment=false;
     }
 
     render() {
-        if (this.props.data == null) return null;
+        this.i++;
+        if (this.props.passedStateData.chartData == null) return null;
         // let fileName=new Date().toISOString();
         // fs.writeFileSync(fileName, this.props.data);
         
        
-        this.whatif.days=this.props.latestRefreshDate;
+        this.whatif.days=this.props.passedStateData.latestRefreshDate;
         let arr1 = [];
         let arr2 = [];
 
-        let xAxisData = this.props.data[0] as Array<number>;
+        let xAxisData = this.props.passedStateData.chartData[0] as Array<number>;
         let len = xAxisData.length;
 
-        let sd = this.props.data[3]["sd"];
-        let fairPrice: number = this.props.fairPrice;
+        let sd = this.props.passedStateData.chartData[3]["sd"];
+        let fairPrice: number = this.props.passedStateData.fairPrice;
         let mean = len == 0 ? 0 : math.mean(xAxisData);
         let leftSigma1 = Math.round(mean - +sd);
         let leftSigma2 = Math.round(mean - 2 * +sd);
@@ -77,10 +73,10 @@ export class PayoffChartComponent extends React.Component<Props, State> {
         for (let i = 0; i < len; i++) {
             let item1 = [];
             let item2 = [];
-            item1.push(this.props.data[0][i], this.props.data[1][i]);
+            item1.push(this.props.passedStateData.chartData[0][i], this.props.passedStateData.chartData[1][i]);
             arr1.push(item1);
 
-            item2.push(this.props.data[0][i], this.props.data[2][i]);
+            item2.push(this.props.passedStateData.chartData[0][i], this.props.passedStateData.chartData[2][i]);
             arr2.push(item2);
         }
 
@@ -91,7 +87,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
             },
 
             title: {
-                text: this.props.selectedsymbol,
+                text: this.props.passedStateData.selectedsymbol,
                 margin: 30,
                 align: 'center',
                 x: 50,
@@ -346,13 +342,15 @@ export class PayoffChartComponent extends React.Component<Props, State> {
 
         let totalDays = 14;
         let dayStep = 1;
-        if (this.props.expiryDate) {
-            totalDays = Math.ceil((Utility.timeFromString(this.props.expiryDate) - (new Date()).getTime()) / (1000 * 60 * 60 * 24));
+        if (this.props.passedStateData.expiryDate) {
+            totalDays = Math.ceil((Utility.timeFromString(this.props.passedStateData.expiryDate) - (new Date()).getTime()) / (1000 * 60 * 60 * 24));
             dayStep = Math.floor(100 / totalDays);
         }
 
-        return <div key={'payoffChart_' + this.props.selectedsymbol + this.props.expiryDate}>
-            <div style={{ display: this.props.chainShowed ? 'none' : 'flex' }} className='alignedLeft' >Option Chain<img src='./show_left.svg' onClick={this.props.callbackShow}></img></div>
+        console.log("how many times " , this.i)
+  
+        return <div key={'payoffChart_' + this.props.passedStateData.selectedsymbol + this.props.passedStateData.expiryDate}>
+            <div style={{ display: this.props.passedStateData.chainShowed ? 'none' : 'flex' }} className='alignedLeft' >Option Chain<img src='./show_left.svg' onClick={this.props.callbackShow}></img></div>
             <div>
                 <HighchartsReact highcharts={Highcharts} options={options} containerProps={{ style: { hight: '100%', width: '100%' } }} />
             </div>
@@ -404,7 +402,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                             finalIV: 0,
                             finalDays: 0
                         }, () => {
-                            this.whatif.days = this.props.latestRefreshDate;
+                            this.whatif.days = this.props.passedStateData.latestRefreshDate;
                             this.whatif.price = 0;
                             this.whatif.IV=0;
                             this.whatif.allowLegAdjustment=false;

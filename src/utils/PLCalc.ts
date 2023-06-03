@@ -89,7 +89,6 @@ export class PLCalc {
 
     static ComputeDataForLeg(optheader, optleg, mexpdt, xstart, xend) {
         let S = optleg.futuresPrice;
-
         if (!S) {
             S = optheader.futuresPrice;
         }
@@ -116,8 +115,8 @@ export class PLCalc {
         let T = day / 365;
         let PutCallFlag = optleg.pcflag;
         let X = optleg.strikePrice;
-        let entryprice = optleg.entryPrice;
-        let optionPrice=optleg.optionPrice;
+        let entryprice = optleg.exited==true? optleg.exitPrice: optleg.entryPrice;
+        let optionPrice= optleg.optionPrice;
         let tradetype = optleg.tradeType;
         let qty = optleg.qty;
         let v = optleg.iv / 100;
@@ -125,13 +124,12 @@ export class PLCalc {
         let r = optheader.intrate;
         r = 0;
 
-
         if (PutCallFlag == 'C') {
             v = this.getSigma(optionPrice, S, X, T, 0, 'call', 0.1);
             // console.log(v);
             // if(optdata.whatif.IV != 0 && !optdata.whatif.allowLegAdjustment)
         }
-        else {
+        else if (PutCallFlag == 'P'){
             v = this.getSigma(optionPrice, S, X, T, 0, 'put', 0.1);
             // console.log(v);
         }
@@ -242,8 +240,18 @@ export class PLCalc {
                         expdata.push((entryprice - p) * qty);
                 }
             }
+        } 
+        else{
+            for (var stkprice of xdata) {
+                if (tradetype == 'B') {
+                    curdata.push((stkprice - entryprice) * qty)
+                    expdata.push((stkprice - entryprice) * qty)
+                } else {
+                    curdata.push((entryprice - stkprice) * qty)
+                    expdata.push((entryprice - stkprice) * qty)
+                }
+            }
         }
-
         return [xdata, curdata, expdata];
     }
 
@@ -334,7 +342,7 @@ export class PLCalc {
 
         let xstart = isCur ? Math.floor((mstart * 0.998) / DivFactor) * DivFactor : Math.ceil((mstart * 0.97) / DivFactor) * DivFactor;
         let xend = isCur ? Math.ceil((mend * 1.002) / DivFactor) * DivFactor : Math.ceil((mend * 1.03) / DivFactor) * DivFactor
-        let legPLList = new Array<LegPL>();
+        // let legPLList = new Array<LegPL>();
 
         if (legsize == 0) {
             // # IF NO LEGS ARE PASSED, IT MEANS STRATEGY IS CLOSED. SEND DATA ARRAYS ACCORDINGLY
@@ -359,9 +367,9 @@ export class PLCalc {
 
                 let tdata = PLCalc.ComputeDataForLeg(optheader, optleg, mexpdt, xstart, xend);
 
-                let legPL = new LegPL();
-                legPL = PLCalc.getlegPL(optleg, tdata);
-                legPLList.push(legPL);
+                // let legPL = new LegPL();
+                // legPL = PLCalc.getlegPL(optleg, tdata);
+                // legPLList.push(legPL);
                 //    console.log(legPLList);
 
                 if (firstleg) {
@@ -373,8 +381,11 @@ export class PLCalc {
                 for (let l = 0; l < tdata[1].length; l++) {
                     if (firstleg)
                         curdata.push(Number.parseFloat(tdata[1][l]));
-                    else
+                    else{
+                        if(optleg.exited!=true)
                         curdata[l] += +Number.parseFloat(tdata[1][l]);
+                    }
+                        
                 }
 
                 for (let k = 0; k < tdata[2].length; k++) {
@@ -411,26 +422,31 @@ export class PLCalc {
         curdata = curdata.map(p => round(p, 2));
         expdata = expdata.map(p => round(p, 2));
 
-        return [xdata, curdata, expdata, { "sd": sd }, legPLList]
+        return [xdata, curdata, expdata, { "sd": sd }]
+        // return [xdata, curdata, expdata, { "sd": sd }, legPLList]
     }
 
-    static getlegPL(optleg: OptLeg, tdata: any[][]) {
-        let curData = tdata[1];
+    // static getlegPL(optleg: OptLeg, tdata: any[][]) {
+    //     let curData = tdata[1];
 
-        let legPL = new LegPL();
-        legPL.LegKey = optleg.pcflag.toLowerCase() === 'p' ? 'PE' + optleg.strikePrice.toString() : 'CE' + optleg.strikePrice.toString();
-        legPL.LegData = curData;
+    //     let legPL = new LegPL();
+    //     if(optleg.pcflag.toLowerCase() === 'p'){
+    //         legPL.LegKey =  'PE' + optleg.strikePrice.toString()
+    //     } else if (optleg.pcflag.toLowerCase() === 'c'){
+    //         legPL.LegKey =  'CE' + optleg.strikePrice.toString()
+    //     } else {
+    //         legPL.LegKey =  'FU' + optleg.strikePrice.toString()
+    //     }
+    //     legPL.LegData = curData;
 
-        return legPL;
-    }
+    //     return legPL;
+    // }
 
-    chartData(data) {
-
-        // if (data==null || data.legEntityList == null || (data && data.legEntityList!=null && data.legEntityList==0)) return null;
-
+    static chartData(data) {
+        console.log("chartdata calc");
+     
         let optdata: OptData = new OptData();
-        // console.log(data)
-
+      
         // assigning header
         let optheader = new OptHeader();
         optheader.avgiv = data.avgiv;
@@ -450,13 +466,20 @@ export class PLCalc {
 
         // assinging option legs
         let optlegs = new Array<OptLeg>();
-        let legList = data.legEntityList.filter(p => !p.exited);
-        // console.log(legList);
+        //need to take exited into consideration for T+0
+        let legList = data.legEntityList;//.filter(p => !p.exited);
+         console.log(legList);
         for (let opt of legList) {
             let optleg: OptLeg = new OptLeg();
             optleg.optionPrice = Number.parseFloat((opt.Option_Price).toString().replace(',', ''));
-            optleg.entryPrice = opt.Entry_Price;
-            optleg.pcflag = opt.CE_PE == 'CE' ? 'C' : 'P';
+            optleg.entryPrice =Number.parseFloat((opt.Entry_Price).toString().replace(',', '')); 
+            if(opt.CE_PE == 'CE'){
+                 optleg.pcflag = 'C';
+            } else if(opt.CE_PE == 'PE'){
+                optleg.pcflag = 'P';
+            } else {
+                optleg.pcflag = 'F';
+            }
             optleg.expdt = data.selectedExpiryDate;
             optleg.qty = opt.Position_Lot * data.lotSize;
             optleg.strikePrice = opt.Strike_Price;
@@ -464,12 +487,16 @@ export class PLCalc {
             optleg.futuresPrice = data.futPrice;
             optleg.iv = opt.iv_adjustment ? opt.IV * (1 + opt.iv_adjustment / 100) : opt.IV;
             optleg.ivAdjustment=opt.iv_adjustment;
+            optleg.exited=opt.exited;
+            optleg.exitPrice=opt.Exit_Price;
+         
             optlegs.push(optleg);
         }
 
         optdata.optlegs = optlegs;
-
+      
         let result = PLCalc.ComputePayoffData(optdata);
+       
         return result;
     };
 
