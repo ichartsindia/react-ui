@@ -193,7 +193,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
     if(rowData.CE_PE=='FU')
       return null;
 
-    return <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'space-evenly', marginBottom: '3px' }}>
+    return <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'space-evenly', marginBottom: '2px' }}>
       <div>{rowData.IV}</div>
       <div style={{ visibility:rowData.exited?'hidden':'visible',marginRight: '5px' }}><InputNumber disabled={(!this.props.passedData.whatif?.allowLegAdjustment) || rowData.exited==true} className='smallText' max={20} min={-20} style={{ width: '65px', height: '24px', fontSize: 'smaller' }} value={rowData.iv_adjustment}
         onChange={(e) => {
@@ -319,10 +319,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
         <InputText value={parseFloat(rowData.Exit_Price.toFixed(2))} style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px'}}
           onChange={(event) => {
             rowData.Exit_Price = parseFloat(event.target.value);
-            // this.state.entryPrice[key] = event.target.value;
-            console.log(this.props.passedData.legEntityList);
-
-            this.props.callback(this.props.passedData.legEntityList);
+             this.props.callback(this.props.passedData.legEntityList);
           }} ></InputText>
       )
     } else {
@@ -336,16 +333,13 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
       rowData.Entry_Price=parseFloat(rowData.Option_Price);
        this.props.callback(this.props.passedData.legEntityList);
     }
-    // this.state.entryPrice[key] = rowData.Entry_Price.toString();
-   console.log(rowData)
     return (
       <div className='leglot-dropdown'>
         <InputNumber disabled={rowData.exited} minFractionDigits={2} maxFractionDigits={2}
         value={parseFloat(rowData.Entry_Price.toString()).toFixed(2)} 
         style={{ textAlign: 'right', fontSize: 'small', height: '22px', width: '80px', }}
         onChange={(event) => {
-          console.log(event);
-          rowData.Entry_Price = Number(event.value);//==null? "": parseFloat(event.value);
+           rowData.Entry_Price = Number(event.value);//==null? "": parseFloat(event.value);
           this.state.entryPrice[key] = event.value;
           this.props.callback(this.props.passedData.legEntityList);
         }} ></InputNumber>
@@ -390,6 +384,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
                 leg.Option_Price = rowData.Option_Price;
                 leg.Strike_Price = rowData.Strike_Price;
                 leg.Entry_Price=rowData.Entry_Price;
+                leg.Exit_Price=rowData.Entry_Price;
                 leg.Position_Lot = this.state.exit == null ? rowData.Position_Lot : this.state.exit;
                 leg.exited = true;
                 rowData.Position_Lot = this.state.reminder;

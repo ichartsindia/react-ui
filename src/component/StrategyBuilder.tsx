@@ -403,8 +403,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
           <div className={this.classPayoff} style={{ marginBottom: '10px' }} hidden={this.state.legEntityList.length == 0 || !this.state.payoffChartShowed}>
             <PayoffChartComponent 
               passedStateData={this.state}
-              callback={(p) => {
-                this.setState({ whatif: p });
+              callback={(p,q) => {
+                this.setState({ whatif: p, legEntityList:q });
                 this.updateRecord(null, this.generateLegList, this.state.records);
               }}
               callbackShow={() => {
@@ -422,9 +422,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
               <PLComputeCompoenent key={"plcompute_" + JSON.stringify(this.state.legEntityList)} passedData={this.state} />
             </div>
             <div style={{ width: this.state.legEntityList.length == 0 ? '100%' : '80%' }}>
-              <LegComponent key={"legComponent" + this.state.latestRefreshDate} passedData={this.state} callback={
+              <LegComponent  passedData={this.state} callback={
                 legEntityList => {
-
                   let exitedList = legEntityList.filter(p => p.exited);
                   let stateValue = JSON.parse(JSON.stringify(this.state));
                   stateValue.legEntityList = legEntityList;
@@ -445,7 +444,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
           <div className="p-card flex flex-column" >
             <OptionChainComponent passedData={this.state}
               callback={data => {
-                this.updateRecord(null, this.generateLegList, data.records)
+                this.updateRecord(null, this.generateLegList, data.records);
+                console.log(this.state.legEntityList);
               }}
               callbackExpiryChange={(expiry) => {
                  this.onExpiryDateChange(expiry, false)
@@ -571,7 +571,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
   generateLegList = () => {
     let legList = this.state.legEntityList;
-
+console.log(legList);
     if (this.state.records == null) return [];
     let allPreviousLegList = JSON.parse(JSON.stringify(legList));
 
@@ -651,6 +651,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
     previousLegList.push(...positionList);
     previousLegList.push(...fuLegList);
+    console.log(previousLegList);
+   
     return previousLegList;
 
   }

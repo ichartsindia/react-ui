@@ -302,9 +302,9 @@ font-size: small;
 } */
 
 
-button:hover{background-color:orange;}
+/* button:hover{background-color:orange;}
 
-button:focus{background-color:orange;} 
+button:focus{background-color:orange;}  */
 
 /* a {
   color: orange;
@@ -320,6 +320,6 @@ button:focus{background-color:orange;}
   background-color:orange;
 } */
 
-button:active {
+/* button:active {
   background-color:orange;
-}  
+}   */
