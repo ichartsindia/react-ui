@@ -406,7 +406,8 @@ i=0;
                             this.whatif.price = 0;
                             this.whatif.IV=0;
                             this.whatif.allowLegAdjustment=false;
-                            this.props.callback(this.whatif)
+                            this.props.passedStateData.legEntityList.forEach(p=>p.iv_adjustment=null);  
+                            this.props.callback(this.whatif,this.props.passedStateData.legEntityList)
                         });
                     }} />
                 </div>
