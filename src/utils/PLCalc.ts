@@ -10,9 +10,7 @@ export class PLCalc {
 
     static getSigma(expectedCost, s, k, t, r, callPut, estimate) {
         var iv = require("implied-volatility");
-
         return iv.getImpliedVolatility(expectedCost, s, k, t, r, callPut, estimate);
-
     }
 
 
@@ -127,15 +125,11 @@ export class PLCalc {
 
         if (PutCallFlag == 'C') {
             v = this.getSigma(optionPrice, S, X, T, 0, 'call', 0.1);
-            // console.log(v);
-            // if(optdata.whatif.IV != 0 && !optdata.whatif.allowLegAdjustment)
-        }
+         }
         else if (PutCallFlag == 'P') {
             v = this.getSigma(optionPrice, S, X, T, 0, 'put', 0.1);
-            // console.log(v);
-        }
+         }
 
-        // console.log(v)
         let xdata = this.range(xstart, xend, pdiff / 4);
 
         // Compute Leg Data
@@ -145,13 +139,13 @@ export class PLCalc {
         if (PutCallFlag == 'C') {
             for (var stkprice of xdata) {
                 let strike = stkprice;
-                if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
-                    strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
+                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
+                    strike = stkprice * ((parseFloat(optleg.futuresPrice)) / parseFloat(optheader.futuresPrice));
+                    console.log(strike);
                 }
-
                 let p = bs.blackScholes(strike, X, T, v, r, "call");
-                // let p = PLCalc.getCallPrice(strike, X, T, v, r)
-
+    
+                //T+0
                 if (tradetype == 'B')
                     curdata.push((p - entryprice) * qty)
                 else
@@ -159,14 +153,12 @@ export class PLCalc {
 
                 //  Expiry Data
                 if (optleg["expdt"] === mexpdt) {
-
                     if (parseFloat(stkprice) <= parseFloat(X)) {
                         if (tradetype == 'B')
                             expdata.push(-(entryprice * qty));
                         else {
                             expdata.push(entryprice * qty);
                         }
-
                     } else {
                         if (tradetype == 'B') {
                             expdata.push(((stkprice - X) - entryprice) * qty);
@@ -174,22 +166,18 @@ export class PLCalc {
                         else {
                             expdata.push((entryprice - (stkprice - X)) * qty);
                         }
-
                     }
-
                 } else {
                     let strike = stkprice;
                     if (optleg.futuresPrice)
-                        strike = stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice));
+                        strike = stkprice * (parseFloat(optleg.futuresPrice) / parseFloat(optheader.futuresPrice));
 
                     p = bs.blackScholes(strike, X, T, v, r, "call");
-                    // p = PLCalc.getCallPrice(strike, X, T, v, r);
-                    if (tradetype == 'B') {
+                     if (tradetype == 'B') {
                         expdata.push((p - entryprice) * qty);
                     } else {
                         expdata.push((entryprice - p) * qty);
                     }
-
                 }
             }
 
@@ -197,7 +185,7 @@ export class PLCalc {
             for (var stkprice of xdata) {
                 let strike = stkprice;
                 if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
-                    strike = stkprice * ((Number.parseFloat(optleg.futuresPrice)) / Number.parseFloat(optheader.futuresPrice));
+                    strike = stkprice * ((parseFloat(optleg.futuresPrice)) / parseFloat(optheader.futuresPrice));
                 }
 
                 let p = bs.blackScholes(strike, X, T, v.toFixed(4), r, "put");
@@ -228,13 +216,7 @@ export class PLCalc {
 
                     }
                 } else {
-                    // let expdt1 = Date.parse(optleg.expdt);
-                    // let dealdt1 = Date.parse(mexpdt);
-                    // let tsecs1 = (expdt1 - dealdt1) / 1000;
-                    // let T1 = tsecs1 / (365.0 * 24.0 * 60.0 * 60.0);
-                    //    s, k, t, v, r, callPut)
-                    p = bs.blackScholes(optleg.futuresPrice ? stkprice * (Number.parseFloat(optleg.futuresPrice) / Number.parseFloat(optheader.futuresPrice)) : stkprice, X, T, r, v, "put")
-                    // p = bs.blackScholes(stkprice, X, T, v, r, "put");
+                    p = bs.blackScholes(optleg.futuresPrice ? stkprice * (parseFloat(optleg.futuresPrice) / parseFloat(optheader.futuresPrice)) : stkprice, X, T, r, v, "put")
                     if (tradetype == 'B')
                         expdata.push((p - entryprice) * qty);
                     else
@@ -330,15 +312,12 @@ export class PLCalc {
 
         let tsecs = (expdt - dealdt) / 1000 + MarketCloseTime * 60 * 60;
         let tdays = tsecs / (24.0 * 60.0 * 60.0);
-        // console.log(tdays)
         let T = tdays / 365.0;
 
         let sd = round(S * avgiv * Math.sqrt(T), 4);
         let p2sd = +S + (3.0 * +sd);
         let m2sd = +S - (3.0 * +sd);
-
-        // console.log(m2sd,p2sd)
-        let mstart = Math.min(mstrikes['minstrike'], m2sd)
+     let mstart = Math.min(mstrikes['minstrike'], m2sd)
         let mend = Math.max(mstrikes['maxstrike'], p2sd)
 
         let xstart = isCur ? Math.floor((mstart * 0.998) / DivFactor) * DivFactor : Math.ceil((mstart * 0.97) / DivFactor) * DivFactor;
@@ -435,11 +414,6 @@ export class PLCalc {
         optheader.payoffdate = data.selectedExpiryDate;
         optheader.futuresPrice = data.futPrice;
         optdata.optheader = optheader;
-
-        // let whatif = new WhatIf();
-        // whatif.price = this.state.finalPrice;
-        // whatif.IV = this.state.finalIV;
-        // whatif.days = this.state.finalDays;
 
         optdata.whatif = data.whatif;
 

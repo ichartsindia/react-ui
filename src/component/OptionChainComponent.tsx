@@ -42,7 +42,8 @@ export class OptionChainComponent extends React.Component<Props, State> {
       
     let strikePriceArray = records.map(p => p.Strike_Price);
     expiryList.push(<button key={"button_" + this.props.passedData.expiryDateList[i]["expiry_dates"]} 
-    className= {this.props.passedData.selectedExpiryDate!=this.props.passedData.expiryDateList[i]["expiry_dates"]?'button-above-option-chain':'button-above-option-chain-orange'} onClick={(e) => {
+    className= {this.props.passedData.selectedExpiryDate!=this.props.passedData.expiryDateList[i]["expiry_dates"]?'button-above-option-chain':'button-above-option-chain-orange'} 
+    onClick={(e) => {
           this.props.passedData.selectedExpiryDate = e.target["innerText"];
           e.target['className']='button-above-option-chain-orange';
           this.props.callbackExpiryChange(this.props.passedData.selectedExpiryDate);

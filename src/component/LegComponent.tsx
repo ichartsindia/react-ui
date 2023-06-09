@@ -10,7 +10,8 @@ import { LegPL } from "src/entity/LegPL";
 
 interface Props {
   passedData,
-  callback
+  callback,
+  callbackExpiryChange
 }
 
 interface State {
@@ -212,7 +213,8 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
         return <div className='leglot-dropdown'>
           <Dropdown id="expiryDropdown" value={rowData.Expiry} onChange={(e) => {
             rowData.Expiry = e.value;
-            this.props.callback(this.props.passedData.legEntityList);
+            // this.props.callback();
+            this.props.callbackExpiryChange(rowData, this.props.passedData.legEntityList);
           }} options={this.expiryList} />
         </div>
       }

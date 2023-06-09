@@ -153,7 +153,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
     })
   }
 
-  onExpiryDateChange = (date, displayBusy = true) => {
+  onExpiryDateChange = (date, displayBusy = true, leg=null) => {
     let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == this.state.selectedsymbol);
     this.setState({ symbol: symbol })
     let url = "https://www.icharts.in/opt/api/SymbolDetails_Api.php?sym=" + symbol[0].symbol + "&exp_date=" + date + "&sym_type=" + symbol[0].symbol_type;
@@ -162,7 +162,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
     axios.get(url, { withCredentials: false })
       .then(response => {
         let data = response.data;
-         if (data.length > 0) {
+        if (data.length > 0) {
           let record = data[0];
           let latestRefreshDate = new Date();
           if (latestRefreshDate > new Date(record.last_updated)) {
@@ -170,7 +170,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
           }
 
           this.setState({
-            selectedExpiryDate: date ,
+            selectedExpiryDate: date,
             futPrice: record.fut_price,
             lotSize: record.lot_size,
             avgiv: record.avgiv,
@@ -181,7 +181,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
             strategyProfile: null,
             lastUpdate: latestRefreshDate,
             latestRefreshDate: latestRefreshDate
-          }, () => this.refreshOptionData(false));
+          }, () => this.refreshOptionData(false,leg));
 
         }
 
@@ -243,10 +243,12 @@ export class StrategyBuilder extends React.Component<Props, State> {
       });
   }
 
-  refreshOptionData = (fromTimer = false) => {
+  refreshOptionData = (fromTimer = false, leg=null) => {
     let urlDetail = "https://www.icharts.in/opt/api/OptionChain_Api.php?sym=" + this.state.symbol[0].symbol + "&exp_date=" + this.state.selectedExpiryDate + "&sym_type=" + this.state.symbol[0].symbol_type;
     // this.setState({ isBusy: true });
-    axios(urlDetail, { withCredentials: false })
+  console.log(this.state.selectedExpiryDate);    
+  
+  axios(urlDetail, { withCredentials: false })
       .then(response => {
         let data = response.data;
         if (data != null) {
@@ -254,14 +256,21 @@ export class StrategyBuilder extends React.Component<Props, State> {
             chain.Expiry_Date = this.state.selectedExpiryDate;
           });
         }
-       let records= this.convertLegToOptionChain(data,this.state.legEntityList, this.state.selectedExpiryDate);
+      
+        let records = this.convertLegToOptionChain(data, this.state.legEntityList, this.state.selectedExpiryDate);
         this.setState({
           isBusy: false,
-          records:records
+          records: records
         }, () => {
-        //  console.log(records);
-        //   this.updateRecord(null, this.generateLegList, records);
-          // console.log(this.state.legEntityList);
+           if(leg!=null) {
+            this.generateNewLeg(leg);
+            let legs = this.state.legEntityList.filter(p=>p.Expiry==leg.Expiry && p.Strike_Price-leg.Strike_Price==0);
+            if(legs.length>0){
+              legs[0]=leg;
+              this.setState({legEntityList: this.state.legEntityList});
+            }
+          }
+            
           if (data == null) return;
           if (fromTimer) return;
 
@@ -401,10 +410,10 @@ export class StrategyBuilder extends React.Component<Props, State> {
             <img src={this.state.payoffChartShowed ? './hide_up.svg' : './show_down.svg'} />
           </div>
           <div className={this.classPayoff} style={{ marginBottom: '10px' }} hidden={this.state.legEntityList.length == 0 || !this.state.payoffChartShowed}>
-            <PayoffChartComponent 
+            <PayoffChartComponent
               passedStateData={this.state}
-              callback={(p,q) => {
-                this.setState({ whatif: p, legEntityList:q });
+              callback={(p, q) => {
+                this.setState({ whatif: p, legEntityList: q });
                 this.updateRecord(null, this.generateLegList, this.state.records);
               }}
               callbackShow={() => {
@@ -422,18 +431,24 @@ export class StrategyBuilder extends React.Component<Props, State> {
               <PLComputeCompoenent key={"plcompute_" + JSON.stringify(this.state.legEntityList)} passedData={this.state} />
             </div>
             <div style={{ width: this.state.legEntityList.length == 0 ? '100%' : '80%' }}>
-              <LegComponent  passedData={this.state} callback={
-                legEntityList => {
-                  let exitedList = legEntityList.filter(p => p.exited);
-                  let stateValue = JSON.parse(JSON.stringify(this.state));
-                  stateValue.legEntityList = legEntityList;
-                  stateValue.exitedLegList = exitedList;
+              <LegComponent passedData={this.state}
+                callback={
+                  legEntityList => {
+                    let exitedList = legEntityList.filter(p => p.exited);
+                    let stateValue = JSON.parse(JSON.stringify(this.state));
+                    stateValue.legEntityList = legEntityList;
+                    stateValue.exitedLegList = exitedList;
 
-                  let records = this.convertLegToOptionChain(stateValue.records, legEntityList, this.state.selectedExpiryDate);
+                    let records = this.convertLegToOptionChain(stateValue.records, legEntityList, this.state.selectedExpiryDate);
 
-                  let chartData = PLCalc.chartData(stateValue);
-                  this.setState({ chartData: chartData, records: records, legEntityList: legEntityList,exitedLegList: exitedList });
-                }}
+                    let chartData = PLCalc.chartData(stateValue);
+                    this.setState({ chartData: chartData, records: records, legEntityList: legEntityList, exitedLegList: exitedList });
+                  }}
+                callbackExpiryChange={
+                  (leg) => {
+                    this.onExpiryDateChange(leg.Expiry, true,leg);
+                  }
+                }
               />
             </div>
           </div>
@@ -448,7 +463,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
                 console.log(this.state.legEntityList);
               }}
               callbackExpiryChange={(expiry) => {
-                 this.onExpiryDateChange(expiry, false)
+                this.onExpiryDateChange(expiry, true);
               }}
               callbackHide={() => {
                 this.classPayoff = "p-card col-6";
@@ -501,7 +516,6 @@ export class StrategyBuilder extends React.Component<Props, State> {
   }
 
   setupLeg = (dataFrom) => {
-
     let url = "https://www.icharts.in/opt/api/LoadStrategy_Api.php";
     this.setState({ isBusy: true })
     let data = {
@@ -569,9 +583,20 @@ export class StrategyBuilder extends React.Component<Props, State> {
     return null;
   }
 
+  generateNewLeg = (leg: LegEntity) => {
+    console.log(leg);
+    let optionChains: OptionChain[] = this.state.records.filter(p => p.Strike_Price == leg.Strike_Price);
+    console.log(optionChains)
+    let optionChain=optionChains[0];
+    console.log(optionChain);
+    let price = leg.CE_PE == 'CE' ? optionChain.Call_LTP : optionChain.Put_LTP;
+    leg.Option_Price=price.toString();
+    leg.Entry_Price = parseFloat(leg.Option_Price);
+  }
+
   generateLegList = () => {
     let legList = this.state.legEntityList;
-console.log(legList);
+
     if (this.state.records == null) return [];
     let allPreviousLegList = JSON.parse(JSON.stringify(legList));
 
@@ -651,8 +676,7 @@ console.log(legList);
 
     previousLegList.push(...positionList);
     previousLegList.push(...fuLegList);
-    console.log(previousLegList);
-   
+
     return previousLegList;
 
   }
@@ -660,32 +684,33 @@ console.log(legList);
   updateRecord = (param, positionListfunc, records) => {
 
     // this.setState({ records: this.state.records }, () => {
-      //let positionList = this.generateStrategyList();
-  
-      let legList = param == null ? positionListfunc() : positionListfunc(param);
-      let exitedLegList = legList.filter(p => p.exited);
+    //let positionList = this.generateStrategyList();
 
-      let stateValue=JSON.parse(JSON.stringify(this.state));
-      stateValue.legEntityList=legList;
-      stateValue.exitedLegList=exitedLegList;
-      stateValue.records=records;
-      
-      // this.setState({ legEntityList: legList, exitedLegList: exitedLegList }, () => {
-        console.log("from updare record");
-        let chartData = PLCalc.chartData(stateValue);
-        // console.log(chartData)
-        this.setState({ 
-          chartData: chartData,
-          legEntityList:legList, 
-          exitedLegList: exitedLegList, 
-          records:records, 
-          selectedExpiryDate:stateValue.selectedExpiryDate});
-        // this.setState({ legEntityList:legList, exitedLegList: exitedLegList});
-      // })
+    let legList = param == null ? positionListfunc() : positionListfunc(param);
+    let exitedLegList = legList.filter(p => p.exited);
+
+    let stateValue = JSON.parse(JSON.stringify(this.state));
+    stateValue.legEntityList = legList;
+    stateValue.exitedLegList = exitedLegList;
+    stateValue.records = records;
+
+    // this.setState({ legEntityList: legList, exitedLegList: exitedLegList }, () => {
+    console.log("from updare record");
+    let chartData = PLCalc.chartData(stateValue);
+    // console.log(chartData)
+    this.setState({
+      chartData: chartData,
+      legEntityList: legList,
+      exitedLegList: exitedLegList,
+      records: records,
+      selectedExpiryDate: stateValue.selectedExpiryDate
+    });
+    // this.setState({ legEntityList:legList, exitedLegList: exitedLegList});
+    // })
     // });
   }
 
-  convertLegToOptionChain = (optionList,legEntityList ,expiry) => {
+  convertLegToOptionChain = (optionList, legEntityList, expiry) => {
     // console.log(legEntityList);
     // let legList: Array<LegEntity> = this.state.legEntityList.filter(p => p.exited != true && p.Expiry === this.state.selectedExpiryDate);
     let legList: Array<LegEntity> = legEntityList.filter(p => p.exited != true && p.Expiry === expiry);
