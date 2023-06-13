@@ -245,10 +245,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
   refreshOptionData = (fromTimer = false, leg=null) => {
     let urlDetail = "https://www.icharts.in/opt/api/OptionChain_Api.php?sym=" + this.state.symbol[0].symbol + "&exp_date=" + this.state.selectedExpiryDate + "&sym_type=" + this.state.symbol[0].symbol_type;
-    // this.setState({ isBusy: true });
-  console.log(this.state.selectedExpiryDate);    
-  
-  axios(urlDetail, { withCredentials: false })
+    axios(urlDetail, { withCredentials: false })
       .then(response => {
         let data = response.data;
         if (data != null) {
@@ -434,6 +431,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
               <LegComponent passedData={this.state}
                 callback={
                   legEntityList => {
+                    console.log(legEntityList);
                     let exitedList = legEntityList.filter(p => p.exited);
                     let stateValue = JSON.parse(JSON.stringify(this.state));
                     stateValue.legEntityList = legEntityList;
@@ -487,8 +485,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
           this.state.openLoadDialog ? <div>
             <DialogLoad passedData={this.state} closed={(closed, data) => {
               if (closed == null) {
-                //        console.log(data);
-                this.setState({ strategyId: data.strategy_id })
+               this.setState({ strategyId: data.strategy_id })
                 this.loadOptionChain(data)
               } else {
                 this.setState({ openLoadDialog: false })
@@ -616,7 +613,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
       if (rowData.Buy_Call || rowData.Sell_Call) {
         position.CE_PE = "CE";
         position.Option_Price = rowData.Call_LTP.toString().replace(",", "");
-        let oldLegList = legList.filter(p => p.Strike_Price - rowData.Strike_Price == 0 && p.CE_PE == 'CE');
+        let oldLegList = legList.filter(p => p.Strike_Price - rowData.Strike_Price == 0 && p.CE_PE == 'CE' && p.Expiry== this.state.selectedExpiryDate);
         if (oldLegList.length > 0) {
           position.Entry_Price = oldLegList[0].Entry_Price;
           position.iv_adjustment = oldLegList[0].iv_adjustment;
@@ -648,7 +645,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
         position.Option_Price = rowData.Put_LTP.toString().replace(",", "");
       }
 
-      let oldLegList = legList.filter(p => p.Strike_Price - rowData.Strike_Price == 0 && p.CE_PE == 'PE');
+      let oldLegList = legList.filter(p => p.Strike_Price - rowData.Strike_Price == 0 && p.CE_PE == 'PE'  && p.Expiry== this.state.selectedExpiryDate);
       if (oldLegList.length > 0) {
         position.Entry_Price = oldLegList[0].Entry_Price;
         position.iv_adjustment = oldLegList[0].iv_adjustment;
@@ -695,7 +692,7 @@ export class StrategyBuilder extends React.Component<Props, State> {
     stateValue.records = records;
 
     // this.setState({ legEntityList: legList, exitedLegList: exitedLegList }, () => {
-    console.log("from updare record");
+    console.log(stateValue);
     let chartData = PLCalc.chartData(stateValue);
     // console.log(chartData)
     this.setState({

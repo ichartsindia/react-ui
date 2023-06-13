@@ -5,6 +5,7 @@ import { OptData, OptHeader, OptLeg, WhatIf } from 'src/entity/OptData';
 import bs from 'black-scholes';
 import { Utility } from './Utility';
 import { LegPL } from 'src/entity/LegPL';
+import moment from 'moment';
 
 export class PLCalc {
 
@@ -99,13 +100,20 @@ export class PLCalc {
             MarketCloseTime = 15.5;
             pdiff = Math.ceil(S * 0.00015)
         }
+        console.log(optheader.dealDate)
+        console.log(Date.parse(optleg.dealDate));
 
-        let cdt = Date.parse(optheader.dealDate);
-
+        // let cdt = Date.parse(optheader.dealDate);
+        let dateFormat
+        if(optheader.dealDate.indexOf("-")>0)
+            dateFormat="YYYY-MM-DD, h:mm:ss a";
+        else 
+            dateFormat="MM/DD/YYYY, h:mm:ss a";
+        let cdt = moment(optheader.dealDate, dateFormat).toDate().getTime();
         let expdt = Date.parse(optleg.expdt);
 
         let tsecs = (expdt - cdt) / 1000 + MarketCloseTime * 60 * 60;
-
+        console.log(tsecs)
         if (tsecs == 0.0)
             tsecs = 60.0
 
@@ -129,7 +137,7 @@ export class PLCalc {
         else if (PutCallFlag == 'P') {
             v = this.getSigma(optionPrice, S, X, T, 0, 'put', 0.1);
          }
-
+console.log(xstart)
         let xdata = this.range(xstart, xend, pdiff / 4);
 
         // Compute Leg Data
@@ -265,7 +273,6 @@ export class PLCalc {
                     optlegs[i]['qty'] = optlegs[i]['qty'] * lotsize
             }
         }
-        // console.log(optdata);
         //  WHATIF ADJUSTMENTS
         if (optdata.whatif !== null) {
             if (optdata.whatif.price != 0 || optdata.whatif.days.toLocaleString() != new Date(optheader.dealDate).toLocaleDateString()) {
@@ -308,8 +315,18 @@ export class PLCalc {
         let avgiv = optheader.avgiv / 100.0;
 
         let expdt = mexpdt ? Utility.timeFromString(mexpdt) : null;//MarketCloseTime,"%Y-%m-%d %H:%M:%S")
-        let dealdt = Date.parse(optheader.dealDate);
+        console.log(optheader.dealDate)
+        // let dealdt = Date.parse(optheader.dealDate);
 
+        let dateFormat
+        if(optheader.dealDate.indexOf("-")>0)
+            dateFormat="YYYY-MM-DD, h:mm:ss a";
+        else 
+            dateFormat="MM/DD/YYYY, h:mm:ss a";
+        let dealdt = moment(optheader.dealDate, dateFormat).toDate().getTime();
+
+console.log(expdt)
+console.log(dealdt)
         let tsecs = (expdt - dealdt) / 1000 + MarketCloseTime * 60 * 60;
         let tdays = tsecs / (24.0 * 60.0 * 60.0);
         let T = tdays / 365.0;
@@ -342,6 +359,7 @@ export class PLCalc {
             expdata.push(...xdata);
         } else {
             // Compute data for each leg and add up the P/Ls for each leg
+         
             let firstleg = true;
             for (var optleg of optlegs) {
 
@@ -401,8 +419,6 @@ export class PLCalc {
     }
 
     static chartData(data) {
-        console.log("chartdata calc");
-
         let optdata: OptData = new OptData();
 
         // assigning header

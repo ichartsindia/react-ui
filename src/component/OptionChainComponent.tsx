@@ -199,7 +199,7 @@ export class OptionChainComponent extends React.Component<Props, State> {
             // if(rowData.Sell_Put){
             //   rowData.Put_Lot=null;
             // }
-      //      console.log(rowData)
+            console.log(rowData)
             if (rowData.Put_Lot == null) {
               rowData.Put_Price = rowData.Put_LTP;
               rowData.Put_Lot = 1;
@@ -239,8 +239,9 @@ export class OptionChainComponent extends React.Component<Props, State> {
   }
 
   newPrice = (rowData, CE_PE) => {
+    console.log(rowData);
     let clone = JSON.parse(JSON.stringify(this.previousRecords));
-    let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
+    let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0] ;
     let legs = this.props.passedData.legEntityList.filter((leg) => leg.CE_PE == CE_PE && leg.Strike_Price - rowData.Strike_Price == 0);
     let previousLeg;
     if (legs.length > 0) {

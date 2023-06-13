@@ -343,6 +343,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
         onChange={(event) => {
            rowData.Entry_Price = Number(event.value);//==null? "": parseFloat(event.value);
           this.state.entryPrice[key] = event.value;
+          console.log(this.props.passedData.legEntityList);
           this.props.callback(this.props.passedData.legEntityList);
         }} ></InputNumber>
       </div>
@@ -419,6 +420,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
       <div>
         <Button icon="pi pi-trash" className='p-button-text' style={{ height: '20px' }}
           onClick={() => {
+            console.log(this.props.passedData.legEntityList)
             let list = this.props.passedData.legEntityList;
             const index = list.indexOf(rowData, 0);
             if (index > -1) {
@@ -426,7 +428,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
             }
             let key = rowData.CE_PE + this.props.passedData.selectedExpiryDate + rowData.Strike_Price;
             // this.entryPrice[key] = null;
-            let newList = list.filter(p => !(p.Strike_Price == rowData.Strike_Price && p.CE_PE == rowData.CE_PE));
+            let newList = list.filter(p => !(p.Strike_Price == rowData.Strike_Price && p.CE_PE == rowData.CE_PE && p.Expiry== rowData.Expiry));
             this.props.callback(newList);
             // this.setState({ legEntityList: list });
             // this.convertLegToOptionChain();

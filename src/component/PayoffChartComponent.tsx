@@ -28,7 +28,7 @@ interface State {
 
 export class PayoffChartComponent extends React.Component<Props, State> {
     whatif: WhatIf = new WhatIf();
-i=0;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -49,7 +49,6 @@ i=0;
     }
 
     render() {
-        this.i++;
         if (this.props.passedStateData.chartData == null) return null;
         // let fileName=new Date().toISOString();
         // fs.writeFileSync(fileName, this.props.data);
@@ -347,8 +346,6 @@ i=0;
             dayStep = Math.floor(100 / totalDays);
         }
 
-        console.log("how many times " , this.i)
-  
         return <div key={'payoffChart_' + this.props.passedStateData.selectedsymbol + this.props.passedStateData.expiryDate}>
             <div style={{ display: this.props.passedStateData.chainShowed ? 'none' : 'flex' }} className='alignedLeft' >Option Chain<img src='./show_left.svg' onClick={this.props.callbackShow}></img></div>
             <div>
