@@ -1,12 +1,11 @@
 import { Button, Column, DataTable, Dropdown, InputNumber, InputText, TabPanel, TabView } from "primereact";
 import React from "react";
-import { LegEntity } from "src/entity/LegEntity";
-import { PLCalc } from "src/utils/PLCalc";
+import { LegEntity } from "../entity/LegEntity";
+
 import { Utility } from "../utils/Utility";
 import bs from 'black-scholes';
-import { Greeks } from "src/entity/Greeks";
-import { WhatIf } from "src/entity/OptData";
-import { LegPL } from "src/entity/LegPL";
+import { Greeks } from "../entity/Greeks";
+
 
 interface Props {
   passedData,

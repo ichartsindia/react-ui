@@ -1,28 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Chart } from 'primereact/chart';
-import OptionService from '../service/OptionService';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
 import { Button, Calendar, Checkbox, Dialog, Dropdown, InputNumber, InputText, Panel, SelectButton, Splitter, SplitterPanel, TabPanel, TabView } from 'primereact';
-import { v4 as uuidv4 } from 'uuid';
+
 import { DialogSave } from './DialogSave';
 import axios from "axios";
-import { OptionChain } from 'src/entity/OptionChain';
-import { CircleSpinnerOverlay, FerrisWheelSpinner } from 'react-spinner-overlay';
-import { OptData, OptHeader, OptLeg, WhatIf } from 'src/entity/OptData';
-import { PLCalc } from 'src/utils/PLCalc';
+import { OptionChain } from '../entity/OptionChain';
+import { CircleSpinnerOverlay } from 'react-spinner-overlay';
+import { OptData, OptHeader, OptLeg, WhatIf } from '../entity/OptData';
+import { PLCalc } from '../utils/PLCalc';
 import { PayoffChartComponent } from './PayoffChartComponent';
-import { LegEntity } from 'src/entity/LegEntity';
+import { LegEntity } from '../entity/LegEntity';
 import '../component/Simulator.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import { chain, clone, number } from 'mathjs';
-import { threadId } from 'worker_threads';
 import { PLComputeCompoenent } from './PLComputeCompoenent';
 import { LegComponent } from './LegComponent';
 import { OptionChainComponent } from './OptionChainComponent';
 import { DialogLoad } from './DialogLoad';
-import { StrategyProfile } from 'src/entity/StretegyProfile';
-import { Utility } from 'src/utils/Utility';
+import { StrategyProfile } from '../entity/StretegyProfile';
+import { Utility } from '../utils/Utility';
 interface Props {
 
 }

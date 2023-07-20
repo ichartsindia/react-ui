@@ -16,12 +16,11 @@
     "noImplicitThis": true,
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": false,
     "allowSyntheticDefaultImports": true,
     "baseUrl": "."
   },
-  "include": ["src", "index.d.ts"],
+  "include": ["src", "index.d.ts", "public/tvChart.js"],
   "exclude": [
     "node_modules",
     "dist",

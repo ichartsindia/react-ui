@@ -1,4 +1,4 @@
-import { OptionChain } from "src/entity/OptionChain";
+import { OptionChain } from "../entity/OptionChain";
 
 export class Utility {
 

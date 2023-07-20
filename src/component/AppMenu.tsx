@@ -26,11 +26,8 @@ const AppMenu = (props) => {
                         icon: 'pi pi-fw pi-chart-bar',
                     },
                     {
-                        label: 'Short ATM+/- 1%',
-                        icon: 'pi pi-fw pi-minus'
-                    },
-                    {
-                        label: 'Short CP 100',
+                        label: 'TradingView Chart',
+                        command: () => {navigate('/tvChart') },
                         icon: 'pi pi-fw pi-minus'
                     }
                 ]

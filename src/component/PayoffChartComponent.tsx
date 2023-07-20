@@ -4,9 +4,9 @@ import HighchartsReact from 'highcharts-react-official';
 import HighchartMore from 'highcharts/highcharts-more'
 import { Button } from 'primereact/button';
 import * as math from 'mathjs';
-import { Utility } from 'src/utils/Utility';
+import { Utility } from '../utils/Utility';
 import { Calendar, Checkbox, Dropdown, InputNumber, InputText } from 'primereact';
-import { WhatIf } from 'src/entity/OptData';
+import { WhatIf } from '../entity/OptData';
 
 import * as fs from 'fs';
 

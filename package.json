@@ -10,8 +10,6 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/quill": "^2.0.9",
-    "@types/react": "^18.0.21",
-    "@types/react-dom": "^18.0.6",
     "@types/react-icons": "3.0.0",
     "@types/react-sidebar": "^3.0.2",
     "axios": "^1.0.0",
@@ -39,13 +37,13 @@
     "react-scripts": "5.0.1",
     "react-sidebar": "^3.0.2",
     "react-spinner-overlay": "^0.1.33",
-    "typescript": "^4.8.4",
+    "typescript": "^4.9.5",
     "uuid": "^9.0.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "webpack-dev-server --mode development --port=3000",
+    "build": "webpack --mode development --env dev",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -53,7 +51,10 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "no-unused-expressions": "off"
+    }
   },
   "browserslist": {
     "production": [
@@ -68,6 +69,15 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^18.16.2"
+    "@types/jest": "^29.4.0",
+    "@types/jquery": "^3.5.16",
+    "@types/node": "^18.16.2",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "awesome-typescript-loader": "^5.2.1",
+    "dotenv-webpack": "^8.0.1",
+    "ts-loader": "^9.4.4",
+    "typescript": "^4.9.5",
+    "webpack-cli": "^5.1.4"
   }
 }

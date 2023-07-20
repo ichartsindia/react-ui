@@ -2,8 +2,8 @@ import axios from "axios";
 import { Column, DataTable, Panel, TabPanel, TabView } from "primereact";
 import React from "react";
 import { Button } from "react-bootstrap";
-import { OptionChain } from "src/entity/OptionChain";
-import { PLCalc } from "src/utils/PLCalc";
+import { OptionChain } from "../entity/OptionChain";
+import { PLCalc } from "../utils/PLCalc";
 
 interface Props {
   passedData

@@ -1,11 +1,11 @@
 import React from "react";
-import { LegEntity } from "src/entity/LegEntity";
+import { LegEntity } from "../entity/LegEntity";
 import { max, mean, min } from 'mathjs';
-import { PLCalc } from "src/utils/PLCalc";
+import { PLCalc } from "../utils/PLCalc";
 import axios from "axios";
-import { ProfitLoss } from "src/entity/ProfitLoss";
+import { ProfitLoss } from "../entity/ProfitLoss";
 import { Column, DataTable } from "primereact";
-import { WhatIf } from "src/entity/OptData";
+import { WhatIf } from "../entity/OptData";
 import { LOV } from "../entity/LOV";
 import { color } from "highcharts";
 interface Props {

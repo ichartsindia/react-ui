@@ -1,10 +1,8 @@
 import { i, mean, round, std, erf } from 'mathjs';
-import { LegEntity } from 'src/entity/LegEntity';
-import { OptData, OptHeader, OptLeg, WhatIf } from 'src/entity/OptData';
+import { OptData, OptHeader, OptLeg, WhatIf } from '../entity/OptData';
 
 import bs from 'black-scholes';
 import { Utility } from './Utility';
-import { LegPL } from 'src/entity/LegPL';
 import moment from 'moment';
 
 export class PLCalc {
