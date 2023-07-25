@@ -1,12 +1,17 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
+
 console.log(path.resolve(__dirname, 'build'));
-module.exports = {
-  entry: './src/index.tsx',
+module.exports =(env)=> {
+  console.log(`./.env.${env.prod? "prod": "dev"}`);
+  return {
+    entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
-    publicPath: '/',
+    publicPath: '/strategy/',
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -33,12 +38,18 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html',
     }),
+    new Dotenv({
+       path: `./.env.${env.prod? "prod": "dev"}`,
+    }),
+    new NodePolyfillPlugin(),
   ],
   devServer: {
     static: {
       directory: path.join(__dirname, 'build'),
     },
+    historyApiFallback: true,
     port: 3000,
     open: true,
-  },
-};
+  }
+  }
+}
