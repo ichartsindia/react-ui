@@ -8,6 +8,7 @@ import {
 	ResolutionString,
 } from '../../charting_library';
 import * as React from 'react';
+import Datafeed from './api/'
 
 export interface ChartContainerProps {
 	symbol: ChartingLibraryWidgetOptions['symbol'];
@@ -50,11 +51,13 @@ export const TVChartContainer = () => {
 	};
 
 	useEffect(() => {
+		console.log('userEffec')
 		const widgetOptions: ChartingLibraryWidgetOptions = {
 			symbol: defaultProps.symbol as string,
 			// BEWARE: no trailing slash is expected in feed URL
 			// tslint:disable-next-line:no-any
-			datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(defaultProps.datafeedUrl),
+			// datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(defaultProps.datafeedUrl),
+			datafeed:Datafeed,
 			interval: defaultProps.interval as ChartingLibraryWidgetOptions['interval'],
 			container: chartContainerRef.current,
 			library_path: defaultProps.libraryPath as string,
