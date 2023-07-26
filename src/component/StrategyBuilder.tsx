@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button, Calendar, Checkbox, Dialog, Dropdown, InputNumber, InputText, Panel, SelectButton, Splitter, SplitterPanel, TabPanel, TabView } from 'primereact';
 
 import { DialogSave } from './DialogSave';
 import axios from "axios";
 import { OptionChain } from '../entity/OptionChain';
-import { CircleSpinnerOverlay } from 'react-spinner-overlay';
 import { OptData, OptHeader, OptLeg, WhatIf } from '../entity/OptData';
 import { PLCalc } from '../utils/PLCalc';
 import { PayoffChartComponent } from './PayoffChartComponent';
@@ -16,7 +15,7 @@ import { LegComponent } from './LegComponent';
 import { OptionChainComponent } from './OptionChainComponent';
 import { DialogLoad } from './DialogLoad';
 import { StrategyProfile } from '../entity/StretegyProfile';
-import { Utility } from '../utils/Utility';
+import { CircleSpinnerOverlay } from 'react-spinner-overlay'
 interface Props {
 
 }
@@ -58,7 +57,7 @@ interface State {
 export class StrategyBuilder extends React.Component<Props, State> {
   basicData: { labels: string[]; datasets: { label: string; data: number[]; fill: boolean; borderColor: string; tension: number; }[]; };
   SymbolWithMarketSegments: any;
-  interval: NodeJS.Timer;
+  interval;
 
   classPayoff: string;
   classLeg: string;

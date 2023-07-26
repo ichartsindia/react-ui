@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { StrategyBuilder } from './StrategyBuilder';
-import { TVChartContainer } from "./TVChartContainer";
+import TVChartContainer from "./TVChartContainer";
 
 
 const AppRoutes = (props) => {
