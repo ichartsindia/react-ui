@@ -29,7 +29,15 @@ module.exports =(env)=> {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: 'babel-loader',
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env', // Handles ES6+ features
+              '@babel/preset-react', // Handles JSX
+            ],
+          },
+        },
       },
       {
         test: /\.css$/,

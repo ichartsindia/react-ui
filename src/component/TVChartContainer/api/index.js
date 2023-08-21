@@ -16,6 +16,7 @@ export default {
 		console.log('====Search Symbols running')
 	},
 	resolveSymbol: (symbolName, onSymbolResolvedCallback, onResolveErrorCallback) => {
+		console.log(symbolName)
 		// expects a symbolInfo object in response
 		console.log('======resolveSymbol running')
 		// console.log('resolveSymbol:',{symbolName})
@@ -69,9 +70,12 @@ export default {
 	},
 	subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscribeUID, onResetCacheNeededCallback) => {
 		console.log('=====subscribeBars runnning')
+		stream.subscribeBars(symbolInfo, resolution, onRealtimeCallback, subscribeUID, onResetCacheNeededCallback)
 	},
 	unsubscribeBars: subscriberUID => {
 		console.log('=====unsubscribeBars running')
+
+		stream.unsubscribeBars(subscriberUID)
 	},
 	calculateHistoryDepth: (resolution, resolutionBack, intervalBack) => {
 		//optional

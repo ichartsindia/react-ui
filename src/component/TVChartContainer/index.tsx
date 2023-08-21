@@ -35,9 +35,9 @@ class TVChartContainer extends React.PureComponent<ChartContainerProps> {
 	chartContainerRef = React.createRef<HTMLDivElement>();
 
   static defaultProps: Partial<ChartContainerProps> = {
-    symbol: 'AAPL',
+    symbol: 'Coinbase:BTC/USD',
     interval: 'D' as ResolutionString,
-    datafeedUrl: 'https://demo_feed.tradingview.com',
+    // datafeedUrl: 'https://demo_feed.tradingview.com',
     libraryPath: '/charting_library/',
     chartsStorageUrl: 'https://saveload.tradingview.com',
     chartsStorageApiVersion: '1.1',
@@ -51,9 +51,7 @@ class TVChartContainer extends React.PureComponent<ChartContainerProps> {
   componentDidMount() {
     const widgetOptions: ChartingLibraryWidgetOptions = {
       symbol: this.props.symbol as string,
-      datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(
-        this.props.datafeedUrl
-      ),
+      datafeed: Datafeed,
       interval: this.props.interval as ChartingLibraryWidgetOptions['interval'],
       container: this.chartContainerRef.current!,
       library_path: this.props.libraryPath as string,
