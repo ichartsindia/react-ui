@@ -1,5 +1,5 @@
 {
-  "name": "ichart-ui",
+  "name": "ichart",
   "version": "0.1.0",
   "private": true,
   "homepage": "/strategy/",
@@ -35,7 +35,7 @@
     "react": ">=16.8.0",
     "react-bootstrap": "^2.5.0",
     "react-dom": ">=16.8.0",
-    "react-icons": "^4.4.0",
+    "react-icons": "^4.10.1",
     "react-router-dom": "^6.4.1",
     "react-scripts": "5.0.1",
     "react-sidebar": "^3.0.2",

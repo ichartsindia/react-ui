@@ -25,11 +25,11 @@ const AppMenu = (props) => {
                         command: () => {navigate('/strategy') },
                         icon: 'pi pi-fw pi-chart-bar',
                     },
-                    {
-                        label: 'TradingView Chart',
-                        command: () => {navigate('/tvChart') },
-                        icon: 'pi pi-fw pi-minus'
-                    }
+                    // {
+                    //     label: 'TradingView Chart',
+                    //     command: () => {navigate('/tvChart') },
+                    //     icon: 'pi pi-fw pi-minus'
+                    // }
                 ]
             },
             {
