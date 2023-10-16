@@ -9,13 +9,13 @@ function getLanguageFromURL() {
 	return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-export const TVChartContainer = () => {
+export const TVChartContainer = (symbol) => {
 	const chartContainerRef = useRef();
-
+console.log(symbol);
 	const defaultProps = {
-		symbol: 'Bitfinex:BTC/USD',
+		symbol: symbol.symbol,
 		interval: 'D',
-		datafeedUrl: 'https://demo_feed.tradingview.com',
+		datafeedUrl: 'https://www.icharts.in/opt/api/tv/SymbolsDataForTV_API.php',
 		libraryPath: '/charting_library/',
 		chartsStorageUrl: 'https://saveload.tradingview.com',
 		chartsStorageApiVersion: '1.1',

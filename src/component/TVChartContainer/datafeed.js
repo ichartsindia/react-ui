@@ -6,13 +6,10 @@ const configurationData = {
     // Represents the resolutions for bars supported by your datafeed
     supported_resolutions: ['1D', '1W', '1M'],
     // The `exchanges` arguments are used for the `searchSymbols` method if a user selects the exchange
-    exchanges: [
-        { value: 'Bitfinex', name: 'Bitfinex', desc: 'Bitfinex'},
-        { value: 'Kraken', name: 'Kraken', desc: 'Kraken bitcoin exchange'},
-    ],
+    exchanges: [],
     // The `symbols_types` arguments are used for the `searchSymbols` method if a user selects this symbol type
     symbols_types: [
-        { name: 'crypto', value: 'crypto'}
+        { name: 'Options', value: 'Options'}
     ]
 };
 
@@ -21,26 +18,7 @@ const lastBarsCache = new Map();
 
 // Obtains all symbols for all exchanges supported by CryptoCompare API
 async function getAllSymbols() {
-    const data = await makeApiRequest('data/v3/all/exchanges');
-    let allSymbols = [];
-
-    for (const exchange of configurationData.exchanges) {
-        const pairs = data.Data[exchange.value].pairs;
-
-        for (const leftPairPart of Object.keys(pairs)) {
-            const symbols = pairs[leftPairPart].map(rightPairPart => {
-                const symbol = generateSymbol(exchange.value, leftPairPart, rightPairPart);
-                return {
-                    symbol: symbol.short,
-                    full_name: symbol.full,
-                    description: symbol.short,
-                    exchange: exchange.value,
-                    type: 'crypto',
-                };
-            });
-            allSymbols = [...allSymbols, ...symbols];
-        }
-    }
+    const allSymbols =await makeApiRequest(`https://www.icharts.in/opt/api/tv/SearchDataForTV.php?limit=30&query=NIFTY&type=Options_Latest&exchange=NSE&default_symbol_type_val=Futures_Hist`);
     return allSymbols;
 }
 
@@ -77,6 +55,7 @@ export default {
         console.log('[resolveSymbol]: Method call', symbolName);
         const symbols = await getAllSymbols();
         const symbolItem = symbols.find(({ full_name }) => full_name === symbolName);
+        console.log("symbols", symbolItem);
         if (!symbolItem) {
             console.log('[resolveSymbol]: Cannot resolve symbol', symbolName);
             onResolveErrorCallback('Cannot resolve symbol');
@@ -90,7 +69,7 @@ export default {
             type: symbolItem.type,
             session: '24x7',
             timezone: 'Etc/UTC',
-            exchange: symbolItem.exchange,
+            exchange: "NSE",
             minmov: 1,
             pricescale: 100,
             has_intraday: false,
@@ -107,36 +86,46 @@ export default {
     getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { from, to, firstDataRequest } = periodParams;
         console.log('[getBars]: Method call', symbolInfo, resolution, from, to);
-        const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
-        const urlParameters = {
-            e: parsedSymbol.exchange,
-            fsym: parsedSymbol.fromSymbol,
-            tsym: parsedSymbol.toSymbol,
-            toTs: to,
-            limit: 2000,
-        };
-        const query = Object.keys(urlParameters)
-            .map(name => `${name}=${encodeURIComponent(urlParameters[name])}`)
-                .join('&');
+        // const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
+        // const urlParameters = {
+        //     e: symbolInfo.exchange,
+        //     fsym: symbolInfo.fromSymbol,
+        //     tsym: parsedSymbol.toSymbol,
+        //     toTs: to,
+        //     limit: 2000,
+        // };
+        // const query = Object.keys(urlParameters)
+        //     .map(name => `${name}=${encodeURIComponent(urlParameters[name])}`)
+        //         .join('&');
         try {
-            const data = await makeApiRequest(`data/histoday?${query}`);
-            if (data.Response && data.Response === 'Error' || data.Data.length === 0) {
+           
+            const data =await makeApiRequest(`https://www.icharts.in/opt/api/tv/getDataForTV_API.php?symbol=NIFTY23AUG31&resolution=1&from=2023-07-18&to=2023-08-09&DataRequest=0&SymbType=FNO`);
+console.log(data)
+            if ("ok"!=data.s) {
                 // "noData" should be set if there is no data in the requested period
                 onHistoryCallback([], { noData: true });
                 return;
             }
             let bars = [];
-            data.Data.forEach(bar => {
-                if (bar.time >= from && bar.time < to) {
-                    bars = [...bars, {
-                        time: bar.time * 1000,
-                        low: bar.low,
-                        high: bar.high,
-                        open: bar.open,
-                        close: bar.close,
-                    }];
+
+            let times=data.t;
+            let lows=data.l;
+            let highs=data.h;
+            let closes=data.c;
+            let opens=data.o;
+
+            times.forEach((t,index)=>{
+                let bar={
+                    time: t * 1000,
+                    low: lows[index],
+                    high: highs[index],
+                    open: opens[index],
+                    close: closes[index]
                 }
+
+                bars.push(bar);
             });
+console.log("bars:", bars);
             if (firstDataRequest) {
                 lastBarsCache.set(symbolInfo.full_name, { ...bars[bars.length - 1] });
             }

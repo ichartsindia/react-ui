@@ -53,6 +53,7 @@ interface State {
   latestRefreshDate: Date;
   whatif: WhatIf;
   lastUpdate: Date;
+  collapsed:boolean
 }
 
 export class StrategyBuilder extends React.Component<Props, State> {
@@ -95,7 +96,8 @@ export class StrategyBuilder extends React.Component<Props, State> {
       strategyId: null,
       latestRefreshDate: null,
       whatif: null,
-      lastUpdate: null
+      lastUpdate: null,
+      collapsed: true
     }
 
     this.classPayoff = "p-card col-12 lg:col-12";
@@ -287,11 +289,10 @@ export class StrategyBuilder extends React.Component<Props, State> {
       }
       )
   }
-
+  
   render() {
     return (
       <div>
-        <div id="tv_chart_container"><TVChartContainer /></div>
         <div className="grid p-fluid" >
           <div>
             {this.state.isBusy ? <CircleSpinnerOverlay loading={true} overlayColor="rgba(0,153,255,0.2)" /> : null}
@@ -495,7 +496,10 @@ export class StrategyBuilder extends React.Component<Props, State> {
               }} /></div> : null
           }
 
-        </div>
+        </div>     
+        <Panel id="tv_chart_container" style={{display: this.state.legEntityList.length>0?"block":"none"}} header="Trading View" toggleable collapsed={this.state.collapsed} onToggle={()=>this.setState({collapsed:!this.state.collapsed})} >
+          <TVChartContainer symbol={"NIFTY23OCT1918300CE"}/>
+        </Panel>
       </div>
 
     )
