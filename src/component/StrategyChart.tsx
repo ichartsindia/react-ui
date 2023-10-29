@@ -11,13 +11,15 @@ import { LegEntity } from '../entity/LegEntity';
 import '../component/Simulator.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import { PLComputeCompoenent } from './PLComputeCompoenent';
-import { LegComponent } from './LegComponent';
-import { OptionChainComponent } from './OptionChainComponent';
+import { LegLiteComponent } from './LegLiteComponent';
+import { OptionChainLiteComponent } from './OptionChainLiteComponent';
 import { DialogLoad } from './DialogLoad';
 import { StrategyProfile } from '../entity/StretegyProfile';
 import { CircleSpinnerOverlay } from 'react-spinner-overlay';
 import { TVChartContainer } from '../component/TVChartContainer/index';
 import { Utility } from '../utils/Utility';
+import { OverlayPanel } from 'primereact/overlaypanel';
+
 interface Props {
 
 }
@@ -54,19 +56,20 @@ interface State {
   latestRefreshDate: Date;
   whatif: WhatIf;
   lastUpdate: Date;
-  collapsed:boolean;
+  collapsed: boolean;
+  tradingviewSymbol: string; //NIFTY23OCT2618850CE symbol+expiry+
+ // refrehTradingView: boolean
 }
 
-export class StrategyBuilder extends React.Component<Props, State> {
+export class StrategyChart extends React.Component<Props, State> {
   basicData: { labels: string[]; datasets: { label: string; data: number[]; fill: boolean; borderColor: string; tension: number; }[]; };
   SymbolWithMarketSegments: any;
   interval;
-
   classPayoff: string;
   classLeg: string;
   constructor(props: Props) {
     super(props);
-
+    
     this.state = {
       records: [],
       selectedsymbol: 'NIFTY',
@@ -90,7 +93,6 @@ export class StrategyBuilder extends React.Component<Props, State> {
       strategyProfile: null,
       classChain: "col-5 lg:col-5 ",
       classRight: "col-7 lg:col-7",
-
       chainShowed: true,
       payoffChartShowed: true,
       exitedLegList: [],
@@ -99,49 +101,54 @@ export class StrategyBuilder extends React.Component<Props, State> {
       whatif: null,
       lastUpdate: null,
       collapsed: true,
+      tradingviewSymbol: null,
+   //   refrehTradingView: true
     }
-
+   
     this.classPayoff = "p-card col-12 lg:col-12";
     this.classLeg = "p-card col-12 lg:col-12";
   }
 
   componentDidMount = () => {
     this.loadsymbolListAndExpiryList();
-    this.setCounter();
+  //  this.setCounter();
 
-    document.addEventListener('keydown', event => {
+    // document.addEventListener('keydown', event => {
 
-      // event.preventDefault();
-      this.stopCounter();
-      this.setCounter();
+    //   // event.preventDefault();
+    //   this.stopCounter();
+    //   // this.setCounter();
 
-    });
+    // });
 
-    document.addEventListener('click', event => {
-      // event.preventDefault();
-      this.stopCounter();
-      this.setCounter();
-    });
+    // document.addEventListener('click', event => {
+    //   // event.preventDefault();
+    //   this.stopCounter();
+    //   // this.setCounter();
+    // });
 
     if (this.state.lastUpdate != null && this.state.latestRefreshDate > this.state.lastUpdate) {
       this.setState({ latestRefreshDate: this.state.lastUpdate }, () => console.log(this.state))
     }
+
+   
   }
 
-  stopCounter = () => {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-  }
+  // stopCounter = () => {
+  //   if (this.interval) {
+  //     clearInterval(this.interval);
+  //     this.interval = null;
+  //   }
+  // }
 
-  setCounter = () => {
-    this.interval = setInterval(() => {
-      this.refreshData();
-      //    this.refreshOptionData();
-      //  this.onExpiryDateChange(this.state.selectedExpiryDate,false);
-      }, 30000);
-  }
+  // setCounter = () => {
+  //   this.interval = setInterval(() => {
+  //     this.refreshData();
+  //     //    this.refreshOptionData();
+  //     //  this.onExpiryDateChange(this.state.selectedExpiryDate,false)
+
+  //   }, 30000);
+  // }
 
   componentWillUnmount() {
     clearInterval(this.interval);
@@ -156,16 +163,19 @@ export class StrategyBuilder extends React.Component<Props, State> {
     let url = "https://www.icharts.in/opt/api/SymbolDetails_Api.php?sym=" + symbol[0].symbol + "&exp_date=" + date + "&sym_type=" + symbol[0].symbol_type;
     if (displayBusy)
       this.setState({ isBusy: true });
-    axios.get(url, { withCredentials: false })
+     
+      axios.get(url, { withCredentials: false })
       .then(response => {
+
         let data = response.data;
+      
         if (data.length > 0) {
           let record = data[0];
           let latestRefreshDate = new Date();
           if (latestRefreshDate > new Date(record.last_updated)) {
             latestRefreshDate = new Date(record.last_updated);
           }
-            let newFormatDate = Utility.changeDateFormat(this.state.selectedExpiryDate);
+          let newFormatDate = Utility.changeDateFormat(date);
           let tradingviewSymbol = `${this.state.selectedsymbol}${newFormatDate}`;
 
           this.setState({
@@ -180,7 +190,17 @@ export class StrategyBuilder extends React.Component<Props, State> {
             strategyProfile: null,
             lastUpdate: latestRefreshDate,
             latestRefreshDate: latestRefreshDate,
+            tradingviewSymbol: tradingviewSymbol,
           }, () => this.refreshOptionData(false, leg));
+
+
+          // console.log(tradingviewSymbol);
+          // if (tradingviewSymbol != this.state.tradingviewSymbol) {
+          //   this.setState({
+
+          //     refrehTradingView: true
+          //   })
+          // }
         }
 
       }).catch(err => {
@@ -202,8 +222,14 @@ export class StrategyBuilder extends React.Component<Props, State> {
         this.setState({ isBusy: true })
         axios.get(url, { withCredentials: false })
           .then(response => {
-            let data = response.data;
-            this.setState({ expiryDateList: data, isBusy: false, selectedExpiryDate: data[0]["expiry_dates"] }, () => this.onExpiryDateChange(data[0]["expiry_dates"]));
+            let data = response.data; 
+            
+            let newFormatDate = Utility.changeDateFormat(data[0]["expiry_dates"]);
+            let tradingviewSymbol = `${this.state.selectedsymbol}${newFormatDate}`;
+
+            this.setState({ expiryDateList: data, isBusy: false, selectedExpiryDate: data[0]["expiry_dates"], tradingviewSymbol: tradingviewSymbol}, () => {
+              this.onExpiryDateChange(data[0]["expiry_dates"])
+            });
           }).catch(err => {
             this.setState({ expiryDateList: err.response.data });
           });
@@ -268,239 +294,90 @@ export class StrategyBuilder extends React.Component<Props, State> {
 
           if (data == null) return;
           if (fromTimer) return;
-
-          let strikePriceArray = data.map(p => p.Strike_Price);
-          let closest = PLCalc.findClosest(strikePriceArray, this.state.fairPrice);
-          let tbody = document.querySelector('.optionList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody');
-          let trs = tbody.querySelectorAll('tr');
-          let len = trs.length;
-
-          if (len > 40) {
-            for (let i = 0; i < len; i++) {
-              if (trs[i].innerHTML.indexOf(closest) > -1) {
-                if (i > 13)
-                  trs[i - 13]?.scrollIntoView();
-                else {
-                  trs[i - 10]?.scrollIntoView();
-                }
-                break;
-              }
-            }
-          }
         })
       }
       )
   }
-  
+e
+
   render() {
+   
     return (
-      <div>
-        <div className="grid p-fluid" >
-          <div>
-            {this.state.isBusy ? <CircleSpinnerOverlay loading={true} overlayColor="rgba(0,153,255,0.2)" /> : null}
-          </div>
-          <div className="col-12">
-            <div className='p-card secondLine'>
-              <div className="flex-item symbol-dropdown" ><Dropdown value={this.state.selectedsymbol} options={this.state.SymbolList} onChange={(e) => {
-                this.setState({ selectedsymbol: e.value });
-                let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == e.value);
-                this.setState({ symbol: symbol });
-                let url = "https://www.icharts.in/opt/api/getExpiryDates_Api.php?sym=" + e.value + "&sym_type=" + symbol[0].symbol_type;
-                this.setState({ isBusy: true })
-                axios.get(url, { withCredentials: false })
-                  .then(response => {
-                    let data = response.data;
-                    let expiry = data != null && data.length > 0 ? data[0]['expiry_dates'] : null;
-                    this.setState({ expiryDateList: data, isBusy: false, records: [], selectedExpiryDate: expiry });
-                    if (expiry != null) {
-                      this.onExpiryDateChange(expiry);
-                    }
-                  }).catch(err => {
-                    this.setState({ expiryDateList: err.response.data });
-                  });
-              }} /></div>
-              <div className="flex-item date-dropdown"><Dropdown value={this.state.selectedExpiryDate} optionValue="expiry_dates" optionLabel="expiry_dates" options={this.state.expiryDateList}
-                onChange={(e) => {
-                  this.onExpiryDateChange(e.value);
-                }} /></div>
-              <div className="flex-item"><Button className='smallButton' onClick={() => {
-                this.setState({
-                  openSaveDialog: true
-                });
-              }}>Save</Button></div>
-              <div className="flex-item"><Button className='smallButton' onClick={() => {
-                this.setState({
-                  openLoadDialog: true
-                });
-              }}>Load</Button></div>
-              <div className="flex-item"><Button className='smallButton' onClick={() => {
-                this.setState({ selectedExpiryDate: null, legEntityList: [], exitedLegList: [] }, () => { this.refreshOptionData(false) })
-              }}>Reset</Button></div>
-              <div className="flex-item"><Button className='smallButton'>Trade</Button></div>
-            </div>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex' }}>
-                  <div className='flex-item'>Fair Price:</div>
-                  <div className='flex-item'>{this.state.fairPrice}</div>
-                  <div className='flex-item'>Future Price:</div>
-                  <div className='flex-item'>{this.state.futPrice}</div>
-                  <div className='flex-item'>Lot Size:</div>
-                  <div className='flex-item'>{this.state.lotSize}</div>
-                  <div className='flex-item'>IV:</div>
-                  <div className='flex-item'>{this.state.avgiv}</div>
-                  <div className='flex-item'>IVR:</div>
-                  <div className='flex-item'>{this.state.ivr}</div>
-                  <div className='flex-item'>IVP:</div>
-                  <div className='flex-item'>{this.state.ivp}</div>
-                  <div className='flex-item'>
-                    <div style={{ display: 'flex' }}>
-                      <div >
-                        <img src={'./plus.png'} style={{ height: '20px', cursor: 'pointer' }} onClick={() => {
-                          let legList = this.state.legEntityList;
-                          let found = legList.filter(p => p.Option_Price == this.state.futPrice && p.CE_PE == 'FU')
-                          console.log(found)
-                          if (found.length == 0) {
-                            let legEntity = new LegEntity();
-                            legEntity.Strike_Price = null
-                            legEntity.Position_Lot = 1;
-                            legEntity.Expiry = this.state.selectedExpiryDate;
-                            legEntity.Option_Price = this.state.futPrice;
-                            legEntity.Entry_Price = this.state.futPrice;
-                            legEntity.CE_PE = 'FU';
-                            legEntity.Buy_Sell = 'B';
-                            legEntity.IV = null;
-
-                            legList.push(legEntity);
-                          } else {
-                            found[0].Position_Lot = found[0].Position_Lot + 1;
-                          }
-                          let chartData = PLCalc.chartData(this.state);
-                          this.setState({ legEntityList: legList, chartData: chartData });
-
-                        }} />
-                      </div>
-                      <div>
-                        Add Futures
-                      </div>
-                      <div style={{ marginLeft: ' 20px' }}>
-                        <img src={'./icons8-next-96.png'} style={{ height: '20px', cursor: 'pointer' }} onClick={() => {
-
-                        }}></img></div>
-                      <div>
-                        Trading View
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex' }}>
-                  <div className='flex-item'>Last Update Time</div>
-                  <div className='flex-item'>{this.state.latestRefreshDate != null ? this.state.latestRefreshDate.toLocaleTimeString() : null}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* list of available positions */}
-          <div className={this.state.classRight} style={{ borderStyle: 'ridge' }} >
-            <div className='alignedCenter' style={{ display: this.state.chainShowed ? 'flex' : 'none' }}
-              onClick={() => {
-                this.setState({
-                  payoffChartShowed: !this.state.payoffChartShowed && this.state.chainShowed
-                })
-              }}>Payoff Chart
-              <img src={this.state.payoffChartShowed ? './hide_up.svg' : './show_down.svg'} />
-            </div>
-            <div className={this.classPayoff} style={{ marginBottom: '10px' }} hidden={this.state.legEntityList.length == 0 || !this.state.payoffChartShowed}>
-              <PayoffChartComponent
-                passedStateData={this.state}
-                callback={(p, q) => {
-                  this.setState({ whatif: p, legEntityList: q });
-                  this.updateRecord(null, this.generateLegList, this.state.records);
-                }}
-                callbackShow={() => {
-                  this.classPayoff = "p-card col-12";
-                  this.classLeg = "p-card col-12";
-                  this.setState({
-                    classChain: "col-6",
-                    classRight: "col-6",
-                    chainShowed: true
-                  })
-                }} />
-            </div>
-            <div className={this.classLeg} style={{ display: 'flex' }}>
-              <div style={{ width: '20%', marginRight: '20px', display: this.state.legEntityList.length > 0 ? 'block' : 'none' }}>
-                <PLComputeCompoenent key={"plcompute_" + JSON.stringify(this.state.legEntityList)} passedData={this.state} />
-              </div>
-              <div style={{ width: this.state.legEntityList.length == 0 ? '100%' : '80%' }}>
-                <LegComponent passedData={this.state}
-                  callback={
-                    legEntityList => {
-                      console.log(legEntityList);
-                      let exitedList = legEntityList.filter(p => p.exited);
-                      let stateValue = JSON.parse(JSON.stringify(this.state));
-                      stateValue.legEntityList = legEntityList;
-                      stateValue.exitedLegList = exitedList;
-
-                      let records = this.convertLegToOptionChain(stateValue.records, legEntityList, this.state.selectedExpiryDate);
-
-                      let chartData = PLCalc.chartData(stateValue);
-                      this.setState({ chartData: chartData, records: records, legEntityList: legEntityList, exitedLegList: exitedList });
-                    }}
-                  callbackExpiryChange={
-                    (leg) => {
-                      this.onExpiryDateChange(leg.Expiry, true, leg);
-                    }
+      <div className="grid p-fluid" >
+        {/* <div>
+          {this.state.isBusy ? <CircleSpinnerOverlay loading={true} overlayColor="rgba(0,153,255,0.2)" /> : null}
+        </div> */}
+        <div className="col-12">
+          <div className='p-card secondLine'>
+            <div className="flex-item symbol-dropdown" ><Dropdown value={this.state.selectedsymbol} options={this.state.SymbolList} 
+            onChange={(e) => {
+              this.setState({ selectedsymbol: e.value });
+              let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == e.value);
+              this.setState({ symbol: symbol });
+              let url = "https://www.icharts.in/opt/api/getExpiryDates_Api.php?sym=" + e.value + "&sym_type=" + symbol[0].symbol_type;
+              this.setState({ isBusy: true })
+              axios.get(url, { withCredentials: false })
+                .then(response => {
+                  let data = response.data;
+                  let expiry = data != null && data.length > 0 ? data[0]['expiry_dates'] : null;
+                  this.setState({ expiryDateList: data, isBusy: false, records: [], selectedExpiryDate: expiry });
+                  if (expiry != null) {
+                    this.onExpiryDateChange(expiry);
                   }
+                }).catch(err => {
+                  this.setState({ expiryDateList: err.response.data });
+                });
+            }} /></div>
+            <div className="flex-item date-dropdown"><Dropdown value={this.state.selectedExpiryDate} optionValue="expiry_dates" optionLabel="expiry_dates" options={this.state.expiryDateList}
+              onChange={(e) => {
+                this.onExpiryDateChange(e.value);
+              }} /></div>
+          </div>
+        </div>
+
+        <div className="col-12" style={{ display: 'flex' }} >
+          <div className="card justify-content-center" style={{ width: "30%" }}>
+            
+            <div style={{ display: this.state.legEntityList.length>0?'block':'none', borderStyle: 'ridge', padding:'5px' }}>
+            <LegLiteComponent passedData={this.state}
+                callback={
+                  legEntityList => {
+                    console.log(legEntityList);
+                    let exitedList = legEntityList.filter(p => p.exited);
+                    let stateValue = JSON.parse(JSON.stringify(this.state));
+                    stateValue.legEntityList = legEntityList;
+                    stateValue.exitedLegList = exitedList;
+
+                    let records = this.convertLegToOptionChain(stateValue.records, legEntityList, this.state.selectedExpiryDate);
+
+                    let chartData = PLCalc.chartData(stateValue);
+                    this.setState({ chartData: chartData, records: records, legEntityList: legEntityList, exitedLegList: exitedList });
+                  }}
+                callbackExpiryChange={
+                  (leg) => {
+                    this.onExpiryDateChange(leg.Expiry, true, leg);
+                  }
+                }
+              />   <p></p>
+            </div>        
+        
+            <div style={{ borderStyle: 'ridge', marginTop:'15px' }}>
+                <OptionChainLiteComponent passedData={this.state}
+                  callback={data => {
+                    this.updateRecord(null, this.generateLegList, data.records);
+                    }}
+                  callbackExpiryChange={(expiry) => {
+                    this.onExpiryDateChange(expiry, true);
+                  }}
                 />
-              </div>
-            </div>
-            <p></p>
-          </div>
-          {/* right side: charts and leg table  */}
-          <div className={this.state.classChain} style={{ borderStyle: 'ridge' }}>
-            <div className="p-card flex flex-column" >
-              <OptionChainComponent passedData={this.state}
-                callback={data => {
-                  this.updateRecord(null, this.generateLegList, data.records);
-                  console.log(this.state.legEntityList);
-                }}
-                callbackExpiryChange={(expiry) => {
-                  this.onExpiryDateChange(expiry, true);
-                }}
-                callbackHide={() => {
-                  this.classPayoff = "p-card col-6";
-                  this.classLeg = "p-card col-6";
-                  this.setState({
-                    classChain: 'hideComponent',
-                    classRight: 'col-12 flex',
-                    chainShowed: false
-                  });
-                }
-                } />
+              
             </div>
           </div>
-
-
-          {
-            this.state.openSaveDialog ? <div>
-              <DialogSave passedData={this.state} closed={(st_save_id) => { this.setState({ openSaveDialog: false, strategyId: st_save_id }) }} /></div> : null
-          }
-          {
-            this.state.openLoadDialog ? <div>
-              <DialogLoad passedData={this.state} closed={(closed, data) => {
-                if (closed == null) {
-                  this.setState({ strategyId: data.strategy_id })
-                  this.loadOptionChain(data)
-                } else {
-                  this.setState({ openLoadDialog: false })
-                }
-              }} /></div> : null
-          }
-
-        </div>     
+          <div style={{ width: "70%"}}>
+            {this.state.tradingviewSymbol ? <TVChartContainer symbol={this.state.tradingviewSymbol} optionList={this.state.legEntityList}/> : null}
+          </div>
+        </div>
       </div>
-
     )
   }
 

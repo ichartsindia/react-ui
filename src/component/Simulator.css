@@ -27,6 +27,7 @@ tr:hover button {
   /* display: none!important; */
 }
 
+
 div[id="selectedList"]>div>div>table>thead {
   display:none;
 }

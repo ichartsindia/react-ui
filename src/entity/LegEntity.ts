@@ -11,4 +11,5 @@ export class LegEntity {
    Entry_Price:number;
    Exit_Price:number;
    Expiry: string;
+   Symbol:string;
 }

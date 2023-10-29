@@ -9,60 +9,45 @@ function getLanguageFromURL() {
 	return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-export const TVChartContainer = (symbol) => {
+export const TVChartContainer = (symbol,optionList) => {
 	const chartContainerRef = useRef();
 console.log(symbol);
-	const defaultProps = {
-		symbol: symbol.symbol,
-		interval: 'D',
-		datafeedUrl: 'https://www.icharts.in/opt/api/tv/SymbolsDataForTV_API.php',
-		libraryPath: '/charting_library/',
-		chartsStorageUrl: 'https://saveload.tradingview.com',
-		chartsStorageApiVersion: '1.1',
-		clientId: 'tradingview.com',
-		userId: 'public_user_id',
-		fullscreen: false,
-		autosize: true,
-		studiesOverrides: {},
-	};
+let symbolString=symbol.symbol;
+let symbolStringCombined="NIFTY";
+	if(symbol.optionList.length>0){
+		symbolStringCombined="";
+		symbol.optionList.forEach(p=>{
+			console.log("before",symbolStringCombined);
+			symbolStringCombined=symbolStringCombined + (symbolStringCombined!=""?"|":"")+symbolString + p.Strike_Price+p.CE_PE+p.Buy_Sell+p.Position_Lot;
+			console.log("after",symbolStringCombined);
+		})
+	}
 
+	console.log(symbolStringCombined);
 	useEffect(() => {
 		const widgetOptions = {
-			symbol: defaultProps.symbol,
+			symbol: symbolStringCombined,
 			// BEWARE: no trailing slash is expected in feed URL
 			datafeed: Datafeed,
-			interval: defaultProps.interval,
+			interval: '1',
 			container: chartContainerRef.current,
-			library_path: defaultProps.libraryPath,
-
+			library_path: '/charting_library/',
 			locale: getLanguageFromURL() || 'en',
 			disabled_features: ['use_localstorage_for_settings'],
 			enabled_features: ['study_templates'],
-			charts_storage_url: defaultProps.chartsStorageUrl,
-			charts_storage_api_version: defaultProps.chartsStorageApiVersion,
-			client_id: defaultProps.clientId,
-			user_id: defaultProps.userId,
-			fullscreen: defaultProps.fullscreen,
-			autosize: defaultProps.autosize,
-			studies_overrides: defaultProps.studiesOverrides,
+			charts_storage_url: 'https://saveload.tradingview.com',
+			charts_storage_api_version: '1.1',
+			client_id: 'icharts.in',
+			user_id: 'public_user_id',
+			fullscreen:false,
+			autosize: true,
 		};
 
 		const tvWidget = new widget(widgetOptions);
 
 		tvWidget.onChartReady(() => {
 			tvWidget.headerReady().then(() => {
-				const button = tvWidget.createButton();
-				button.setAttribute('title', 'Click to show a notification popup');
-				button.classList.add('apply-common-tooltip');
-				button.addEventListener('click', () => tvWidget.showNoticeDialog({
-					title: 'Notification',
-					body: 'TradingView Charting Library API works correctly',
-					callback: () => {
-						console.log('Noticed!');
-					},
-				}));
-
-				button.innerHTML = 'Check API';
+				
 			});
 		});
 
@@ -70,8 +55,10 @@ console.log(symbol);
 			tvWidget.remove();
 		};
 	});
-
-	return (
+	
+	
+	
+	  return (
 		<div
 			ref={chartContainerRef}
 			className={'TVChartContainer'}
