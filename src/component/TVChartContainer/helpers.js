@@ -1,7 +1,5 @@
 export async function makeApiRequest(path) {
     try {
-        // let url=`https://min-api.cryptocompare.com/${path}`;
-        // console.log(url);
         const response = await fetch(path);
         return response.json();
     } catch(error) {
@@ -76,3 +74,16 @@ export function findIntersect (jsonObj1, jsonObj2 ){
 
     return commonTimes;
 }
+export function millisecondsToDate(milliseconds) {
+  const date = new Date(milliseconds);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // Months are 0-based, so add 1
+  const day = date.getDate();
+
+
+  // Create a formatted date string
+  const formattedDate = `${year}-${month}-${day}`;
+
+  return formattedDate;
+}
+

@@ -20,7 +20,7 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": "."
   },
-  "include": ["src", "index.d.ts", "public/tvChart.js", "build/src/component/TVChartContainer/main.js", "build/src/component/TVChartContainer/datafeed.js", "build/src/component/TVChartContainer/helpers.js", "build/src/component/TVChartContainer/streaming.js"],
+  "include": ["src", "index.d.ts", "public/tvChart.js", "build/src/component/TVChartContainer/main.js", "build/src/component/TVChartContainer/datafeed.js", "build/src/component/TVChartContainer/helpers.js"],
   "exclude": [
     "node_modules",
     "dist",

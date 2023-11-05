@@ -1,5 +1,4 @@
-import { makeApiRequest, parseBuyOrSell, parseLot, parseSymbol,findIntersect } from './helpers.js';
-import { subscribeOnStream, unsubscribeFromStream } from './streaming.js';
+import { makeApiRequest, parseBuyOrSell, parseLot, parseSymbol,findIntersect,millisecondsToDate } from './helpers.js';
 
 
 // DatafeedConfiguration implementation
@@ -19,7 +18,7 @@ const configurationData = {
     exchanges: [{ value: 'NSE', name: 'NSE', desc: 'NSE' },],
     // The `symbols_types` arguments are used for the `searchSymbols` method if a user selects this symbol type
     symbols_types: [
-        { name: 'Futures', value: 'Futures' }
+        { name: 'Options', value: 'Options' }
     ]
 };
 
@@ -36,14 +35,17 @@ async function getAllSymbols(symbol) {
     return allSymbols;
 }
 
-async function retrieveSingleLegBars(sybmolWhole){
+async function retrieveSingleLegBars(sybmolWhole, periodParams) {
     let symbol = parseSymbol(sybmolWhole);
+    const From = millisecondsToDate(periodParams.from * 1000);
+    const To = millisecondsToDate(periodParams.to * 1000);
+
     let bars = [];
-    let url = `https://www.icharts.in/opt/api/tv/getDataForTV_API.php?symbol=${symbol}&resolution=1&from=2022-07-18&to=2023-11-09&DataRequest=0&SymbType=FNO`;
+    let url = `https://www.icharts.in/opt/api/tv/getDataForTV_API.php?symbol=${symbol}&resolution=1&from=${From}&to=${To}&DataRequest=0&SymbType=FNO`;
     const data = await makeApiRequest(url);
-    const buy=parseBuyOrSell(sybmolWhole)=="B";
-    const lot=parseLot(sybmolWhole)
-    const totalLot=buy? lot:-lot;
+    const buy = parseBuyOrSell(sybmolWhole) == "B";
+    const lot = parseLot(sybmolWhole)
+    const totalLot = buy ? lot : -lot;
 
     let times = data.t;
     let lows = data.l;
@@ -51,23 +53,24 @@ async function retrieveSingleLegBars(sybmolWhole){
     let closes = data.c;
     let opens = data.o;
     let volumes = data.v;
-
-    times.forEach((t, index) => {
-    let bar = {
-            time: times[index] * 1000,
-            low: lows[index] * totalLot,
-            high: highs[index] * totalLot,
-            open: opens[index] * totalLot,
-            close: closes[index] * totalLot,
-            //volume: volumes[index]
-        }
-        bars.push(bar);   
-    });
+    if (times != null) {
+        times.forEach((t, index) => {
+            let bar = {
+                time: times[index] * 1000,
+                low: lows[index] * totalLot,
+                high: highs[index] * totalLot,
+                open: opens[index] * totalLot,
+                close: closes[index] * totalLot,
+                //volume: volumes[index]
+            }
+            bars.push(bar);
+        });
+    }
 
     return bars;
 }
 
-async function retrieveMultipleLegBars(){
+async function retrieveMultipleLegBars(periodParams){
     const symbolList = originalSymbolList.split("|");
     console.log("symbolList",symbolList);
     let barsList = [];
@@ -76,7 +79,7 @@ async function retrieveMultipleLegBars(){
         for (var i=0; i<symbolList.length;i++){
             var sybmolWhole = symbolList[i];
             console.log("sybmolWhole",sybmolWhole);
-            let bars = await retrieveSingleLegBars(sybmolWhole);
+            let bars = await retrieveSingleLegBars(sybmolWhole,periodParams);
             barsList.push(bars);
         }
     }
@@ -88,25 +91,27 @@ async function getIntersection(bars1,bars2){
     return insertion;
 }
 
-async function merge2Bars(bars1,bars2) {
+async function merge2Bars(bars1, bars2) {
     let finalBars = [];
-    let times = await getIntersection(bars1,bars2);
-    times.forEach((time,index) => {
-        let bar={time: time,
-            low: bars1[index].low + bars2[index].low,
-            high: bars1[index].high + bars2[index].high,
-            open: bars1[index].open + bars2[index].open,
-            close: bars1[index].close + bars2[index].close
-        }
+    let times = await getIntersection(bars1, bars2);
+    if (times != null) {
+        times.forEach((time, index) => {
+            let bar = {
+                time: time,
+                low: bars1[index].low + bars2[index].low,
+                high: bars1[index].high + bars2[index].high,
+                open: bars1[index].open + bars2[index].open,
+                close: bars1[index].close + bars2[index].close
+            }
 
-        finalBars.push(bar);
-    });
-
+            finalBars.push(bar);
+        });
+    }
     return finalBars;
 }
 
-async function mergeData(){
-     let barsList = await retrieveMultipleLegBars();
+async function mergeData(periodParams){
+     let barsList = await retrieveMultipleLegBars(periodParams);
     if(barsList.length==1) {
         return barsList[0];
     } 
@@ -169,10 +174,10 @@ export default {
 
 
     getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-        console.log(periodParams);
+        console.log("periodParams",periodParams);
         let symbol=symbolInfo;
         try {
-            let bars=await mergeData();
+            let bars=await mergeData(periodParams);
             if (periodParams.firstDataRequest) {
                 lastBarsCache.set(symbol, { ...bars[bars.length - 1] });
             }

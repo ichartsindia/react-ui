@@ -47,7 +47,7 @@ export class LegLiteComponent extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps, prevState) {
     if(this.props.passedData.expiryDateList!=null){
-      this.expiryList=this.props.passedData.expiryDateList.slice(0, 4).map(p=>p.expiry_dates);
+      this.expiryList=this.props.passedData.expiryDateList.map(p=>p.expiry_dates);
     }
     this.previouslegEntityList = prevProps.passedData.legEntityList
   }
@@ -70,7 +70,7 @@ export class LegLiteComponent extends React.Component<Props, State> {
             <Column body={this.currentPriceTemplate} header='Current Price' align="center"></Column>
             <Column body={this.legPLTemplate} align="center" header="Current P/L"></Column>
             <Column body={this.ivTemplate} header='IV' align="center"></Column> */}
-            <Column header="Lots" field="Position_Lot" align="center"></Column>
+            {/* <Column header="Lots" field="Position_Lot" align="center"></Column> */}
             <Column body={this.deleteTemplate} ></Column>
           </DataTable>
         </div>
@@ -118,7 +118,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
     if (rowData.CE_PE=='FU') {
       return 'Futures';//rowData.Strike_Price;
     } else {
-      return rowData.Strike_Price;
+      return rowData.Strike_Price+ this.props.passedData.lotSize + rowData.CE_PE;
     }
   }
 
@@ -159,9 +159,9 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
 
   lotTemplate = (rowData: LegEntity) => {
     if (rowData.Buy_Sell == 'S') {
-      return "-" + rowData.Position_Lot + "x" + this.props.passedData.lotSize + rowData.CE_PE;
+      return "-" + rowData.Position_Lot + "x";
     } else {
-      return "+" + rowData.Position_Lot + "x" + this.props.passedData.lotSize + rowData.CE_PE;
+      return "+" + rowData.Position_Lot + "x";
     }
   }
 

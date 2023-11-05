@@ -383,13 +383,13 @@ export class StrategyBuilder extends React.Component<Props, State> {
                       <div>
                         Add Futures
                       </div>
-                      <div style={{ marginLeft: ' 20px' }}>
+                      {/* <div style={{ marginLeft: ' 20px' }}>
                         <img src={'./icons8-next-96.png'} style={{ height: '20px', cursor: 'pointer' }} onClick={() => {
 
                         }}></img></div>
                       <div>
                         Trading View
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

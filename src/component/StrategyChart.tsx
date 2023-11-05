@@ -269,6 +269,7 @@ export class StrategyChart extends React.Component<Props, State> {
 
   refreshOptionData = (fromTimer = false, leg = null) => {
     let urlDetail = "https://www.icharts.in/opt/api/OptionChain_Api.php?sym=" + this.state.symbol[0].symbol + "&exp_date=" + this.state.selectedExpiryDate + "&sym_type=" + this.state.symbol[0].symbol_type;
+   console.log(urlDetail);
     axios(urlDetail, { withCredentials: false })
       .then(response => {
         let data = response.data;
@@ -309,30 +310,43 @@ e
         </div> */}
         <div className="col-12">
           <div className='p-card secondLine'>
-            <div className="flex-item symbol-dropdown" ><Dropdown value={this.state.selectedsymbol} options={this.state.SymbolList} 
-            onChange={(e) => {
-              this.setState({ selectedsymbol: e.value });
-              let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == e.value);
-              this.setState({ symbol: symbol });
-              let url = "https://www.icharts.in/opt/api/getExpiryDates_Api.php?sym=" + e.value + "&sym_type=" + symbol[0].symbol_type;
-              this.setState({ isBusy: true })
-              axios.get(url, { withCredentials: false })
-                .then(response => {
-                  let data = response.data;
-                  let expiry = data != null && data.length > 0 ? data[0]['expiry_dates'] : null;
-                  this.setState({ expiryDateList: data, isBusy: false, records: [], selectedExpiryDate: expiry });
-                  if (expiry != null) {
-                    this.onExpiryDateChange(expiry);
-                  }
-                }).catch(err => {
-                  this.setState({ expiryDateList: err.response.data });
-                });
-            }} /></div>
-            <div className="flex-item date-dropdown"><Dropdown value={this.state.selectedExpiryDate} optionValue="expiry_dates" optionLabel="expiry_dates" options={this.state.expiryDateList}
+            <div className="flex-item symbol-dropdown" ><Dropdown value={this.state.selectedsymbol} options={this.state.SymbolList}
               onChange={(e) => {
-                this.onExpiryDateChange(e.value);
+                this.setState({ selectedsymbol: e.value });
+                let symbol = this.SymbolWithMarketSegments.filter(p => p.symbol == e.value);
+                this.setState({ symbol: symbol });
+                let url = "https://www.icharts.in/opt/api/getExpiryDates_Api.php?sym=" + e.value + "&sym_type=" + symbol[0].symbol_type;
+                this.setState({ isBusy: true })
+                axios.get(url, { withCredentials: false })
+                  .then(response => {
+                    let data = response.data;
+                    let expiry = data != null && data.length > 0 ? data[0]['expiry_dates'] : null;
+                    this.setState({ expiryDateList: data, isBusy: false, records: [], selectedExpiryDate: expiry });
+                    if (expiry != null) {
+                      this.onExpiryDateChange(expiry);
+                    }
+                  }).catch(err => {
+                    this.setState({ expiryDateList: err.response.data });
+                  });
               }} /></div>
-          </div>
+            <div className="flex-item"><Button className='smallButton' onClick={() => {
+              this.setState({ selectedExpiryDate: this.state.expiryDateList[0]["expiry_dates"], legEntityList: [], exitedLegList: [] }, () => { this.refreshOptionData(false) })
+            }}>Reset</Button></div>        
+          </div> 
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex' }}>
+                  <div className='flex-item'>Fair Price:</div>
+                  <div className='flex-item'>{this.state.fairPrice}</div>
+                  <div className='flex-item'>Future Price:</div>
+                  <div className='flex-item'>{this.state.futPrice}</div>
+                  <div className='flex-item'>Lot Size:</div>
+                  <div className='flex-item'>{this.state.lotSize}</div>
+                </div>
+                <div style={{ display: 'flex' }}>
+                  <div className='flex-item'>Last Update Time</div>
+                  <div className='flex-item'>{this.state.latestRefreshDate != null ? this.state.latestRefreshDate.toLocaleTimeString() : null}</div>
+                </div>
+              </div> 
         </div>
 
         <div className="col-12" style={{ display: 'flex' }} >

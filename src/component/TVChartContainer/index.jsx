@@ -39,6 +39,7 @@ let symbolStringCombined="NIFTY";
 			charts_storage_api_version: '1.1',
 			client_id: 'icharts.in',
 			user_id: 'public_user_id',
+			timezone: "Asia/Kolkata",
 			fullscreen:false,
 			autosize: true,
 		};

@@ -4,6 +4,7 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { OptionChain } from "../entity/OptionChain";
 import { PLCalc } from "../utils/PLCalc";
+import { TabMenu } from 'primereact/tabmenu';
 
 interface Props {
   passedData
@@ -36,50 +37,51 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
     let records = this.props.passedData.records;
     let strikePriceArray = records.map(p => p.Strike_Price);
     this.closest = PLCalc.findClosest(strikePriceArray, this.props.passedData.fairPrice);
-    let expiryList = [];  
+    let expiryList = [];
+
     if (this.props.passedData.expiryDateList != null && this.props.passedData.expiryDateList.length > 4) {
-      for (let i = 0; i < 4; i++) {
-      
-    let strikePriceArray = records.map(p => p.Strike_Price);
-    expiryList.push(<button key={"button_" + this.props.passedData.expiryDateList[i]["expiry_dates"]} 
-    className= {this.props.passedData.selectedExpiryDate!=this.props.passedData.expiryDateList[i]["expiry_dates"]?'button-above-option-chain':'button-above-option-chain-orange'} 
-    onClick={(e) => {
-          this.props.passedData.selectedExpiryDate = e.target["innerText"];
-          e.target['className']='button-above-option-chain-orange';
-          this.props.callbackExpiryChange(this.props.passedData.selectedExpiryDate);
-        }
-        }>{this.props.passedData.expiryDateList[i]["expiry_dates"]} </button>);
+      for (let i = 0; i < this.props.passedData.expiryDateList.length; i++) {
+
+        let strikePriceArray = records.map(p => p.Strike_Price);
+        expiryList.push(<button key={"button_" + this.props.passedData.expiryDateList[i]["expiry_dates"]}
+          className={this.props.passedData.selectedExpiryDate != this.props.passedData.expiryDateList[i]["expiry_dates"] ? 'button-above-option-chain' : 'button-above-option-chain-orange'}
+          onClick={(e) => {
+            this.props.passedData.selectedExpiryDate = e.target["innerText"];
+            e.target['className'] = 'button-above-option-chain-orange';
+            this.props.callbackExpiryChange(this.props.passedData.selectedExpiryDate);
+          }
+          }>{this.props.passedData.expiryDateList[i]["expiry_dates"]} </button>);
       }
-      // console.log("after",expiryList);
     }
-    let offset = this.props.passedData.legEntityList.length*25;
-    let height = window.innerHeight-200 
-    
-    if(offset>0){
-      height = height-100-offset
+    let offset = this.props.passedData.legEntityList.length * 25;
+    let height = window.innerHeight - 200
+
+    if (offset > 0) {
+      height = height - 100 - offset
     }
-    console.log("height",height);
+  
     return (
-       <div>
-        <div className="alignedCenter">Option Chain</div> 
-          <div style={{display:'flex', justifyContent: 'space-evenly', marginBottom:'3px', marginTop:'3px'}}>      
-            {expiryList}
-          </div> 
-          <div key={'optionList_' + this.props.passedData.selectedsymbol}>
-            <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight={height +'px'} showGridlines >
-              {/* <Column style={{ width: '6%',  backgroundColor:  '#FFFF00' }} align="right" field='Call_Delta' header="Delta"></Column> */}
-              <Column style={{ width: '6%' }} align="right" header="Delta" body={this.deltaTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right" header="IV"  body={this.ivTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right" header="LTP" body={this.ltpTemplate}></Column>
-              <Column style={{ width: '32%' }} align="left"  header="Call" body={this.callTemplate}></Column>
-              <Column style={{ width: '12%' }} align="center" header="Strike" body={this.strikeTemplate}  ></Column>
-              <Column style={{ width: '32%' }} align="right" header="Put" body={this.putTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right"  header="LTP" body={this.ltpPutTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right"  header="IV" body={this.ivPutTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right"  header="Delta" body={this.deltaPutTemplate}></Column>
-            </DataTable>
-          </div>
+      <div>
+        <div className="alignedCenter">Option Chain</div>
+        <div style={{ display: 'flex', marginBottom: '3px', marginTop: '3px',  overflowX: "scroll", overflowY: "hidden", whiteSpace:"nowrap" }}>
+       <Panel>{expiryList} 
+        </Panel>     
         </div>
+        <div key={'optionList_' + this.props.passedData.selectedsymbol}>
+          <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight={height + 'px'} showGridlines >
+            {/* <Column style={{ width: '6%',  backgroundColor:  '#FFFF00' }} align="right" field='Call_Delta' header="Delta"></Column> */}
+            <Column style={{ width: '6%' }} align="right" header="Delta" body={this.deltaTemplate}></Column>
+            <Column style={{ width: '6%' }} align="right" header="IV" body={this.ivTemplate}></Column>
+            <Column style={{ width: '6%' }} align="right" header="LTP" body={this.ltpTemplate}></Column>
+            <Column style={{ width: '32%' }} align="left" header="Call" body={this.callTemplate}></Column>
+            <Column style={{ width: '12%' }} align="center" header="Strike" body={this.strikeTemplate}  ></Column>
+            <Column style={{ width: '32%' }} align="right" header="Put" body={this.putTemplate}></Column>
+            <Column style={{ width: '6%' }} align="right" header="LTP" body={this.ltpPutTemplate}></Column>
+            <Column style={{ width: '6%' }} align="right" header="IV" body={this.ivPutTemplate}></Column>
+            <Column style={{ width: '6%' }} align="right" header="Delta" body={this.deltaPutTemplate}></Column>
+          </DataTable>
+        </div>
+      </div>
     )
   }
 
