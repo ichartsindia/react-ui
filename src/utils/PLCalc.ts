@@ -98,9 +98,7 @@ export class PLCalc {
             MarketCloseTime = 15.5;
             pdiff = Math.ceil(S * 0.00015)
         }
-        console.log(optheader.dealDate)
-        console.log(Date.parse(optleg.dealDate));
-
+   
         // let cdt = Date.parse(optheader.dealDate);
         let dateFormat
         if(optheader.dealDate.indexOf("-")>0)
@@ -111,7 +109,7 @@ export class PLCalc {
         let expdt = Date.parse(optleg.expdt);
 
         let tsecs = (expdt - cdt) / 1000 + MarketCloseTime * 60 * 60;
-        console.log(tsecs)
+       
         if (tsecs == 0.0)
             tsecs = 60.0
 
@@ -135,7 +133,7 @@ export class PLCalc {
         else if (PutCallFlag == 'P') {
             v = this.getSigma(optionPrice, S, X, T, 0, 'put', 0.1);
          }
-console.log(xstart)
+
         let xdata = this.range(xstart, xend, pdiff / 4);
 
         // Compute Leg Data
@@ -147,7 +145,6 @@ console.log(xstart)
                 let strike = stkprice;
                  if (optleg.futuresPrice && optleg.expdt != optheader.payoffdate) {
                     strike = stkprice * ((parseFloat(optleg.futuresPrice)) / parseFloat(optheader.futuresPrice));
-                    console.log(strike);
                 }
                 let p = bs.blackScholes(strike, X, T, v, r, "call");
     
@@ -313,7 +310,7 @@ console.log(xstart)
         let avgiv = optheader.avgiv / 100.0;
 
         let expdt = mexpdt ? Utility.timeFromString(mexpdt) : null;//MarketCloseTime,"%Y-%m-%d %H:%M:%S")
-        console.log(optheader.dealDate)
+      
         // let dealdt = Date.parse(optheader.dealDate);
 
         let dateFormat
@@ -323,8 +320,7 @@ console.log(xstart)
             dateFormat="MM/DD/YYYY, h:mm:ss a";
         let dealdt = moment(optheader.dealDate, dateFormat).toDate().getTime();
 
-console.log(expdt)
-console.log(dealdt)
+
         let tsecs = (expdt - dealdt) / 1000 + MarketCloseTime * 60 * 60;
         let tdays = tsecs / (24.0 * 60.0 * 60.0);
         let T = tdays / 365.0;

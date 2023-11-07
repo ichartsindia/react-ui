@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './index.css';
 import { widget } from '../../charting_library';
 import Datafeed from './datafeed.js';
@@ -9,21 +9,18 @@ function getLanguageFromURL() {
 	return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-export const TVChartContainer = (symbol,optionList) => {
+const TVChartContainer = ({ symbol, optionList, onCallback }) => {
 	const chartContainerRef = useRef();
-console.log(symbol);
-let symbolString=symbol.symbol;
-let symbolStringCombined="NIFTY";
-	if(symbol.optionList.length>0){
-		symbolStringCombined="";
-		symbol.optionList.forEach(p=>{
-			console.log("before",symbolStringCombined);
-			symbolStringCombined=symbolStringCombined + (symbolStringCombined!=""?"|":"")+symbolString + p.Strike_Price+p.CE_PE+p.Buy_Sell+p.Position_Lot;
-			console.log("after",symbolStringCombined);
+
+	let symbolString = symbol;
+	let symbolStringCombined = "NIFTY";
+	if (optionList.length > 0) {
+		symbolStringCombined = "";
+		optionList.forEach(p => {
+			symbolStringCombined = symbolStringCombined + (symbolStringCombined != "" ? "|" : "") + symbolString + p.Strike_Price + p.CE_PE + p.Buy_Sell + p.Position_Lot;
 		})
 	}
 
-	console.log(symbolStringCombined);
 	useEffect(() => {
 		const widgetOptions = {
 			symbol: symbolStringCombined,
@@ -40,29 +37,34 @@ let symbolStringCombined="NIFTY";
 			client_id: 'icharts.in',
 			user_id: 'public_user_id',
 			timezone: "Asia/Kolkata",
-			fullscreen:false,
+			fullscreen: false,
 			autosize: true,
+			loading_screen: null
 		};
-
+	
 		const tvWidget = new widget(widgetOptions);
+		
 
 		tvWidget.onChartReady(() => {
-			tvWidget.headerReady().then(() => {
-				
-			});
+			onCallback("return false")
 		});
 
 		return () => {
 			tvWidget.remove();
 		};
 	});
-	
-	
-	
-	  return (
+
+
+
+	return (<>
+	  
 		<div
 			ref={chartContainerRef}
 			className={'TVChartContainer'}
 		/>
+	</>
+
 	);
 }
+	export default React.memo(TVChartContainer);
+

@@ -27,9 +27,7 @@ const lastBarsCache = new Map();
 var originalSymbolList="";
 // Obtains all symbols for all exchanges supported by CryptoCompare API
 
-async function getAllSymbols(symbol) {
-    console.log("getAllSymbols",symbol);
-   
+async function getAllSymbols(symbol) {   
     let allSymbols = await makeApiRequest(`https://www.icharts.in/opt/api/tv/SearchDataForTV.php?limit=30&query=${symbol}&type=Options_Latest&exchange=NSE&default_symbol_type_val=Futures_Hist`);
    
     return allSymbols;
@@ -72,13 +70,12 @@ async function retrieveSingleLegBars(sybmolWhole, periodParams) {
 
 async function retrieveMultipleLegBars(periodParams){
     const symbolList = originalSymbolList.split("|");
-    console.log("symbolList",symbolList);
+ 
     let barsList = [];
 
     if (symbolList.length > 0) {
         for (var i=0; i<symbolList.length;i++){
             var sybmolWhole = symbolList[i];
-            console.log("sybmolWhole",sybmolWhole);
             let bars = await retrieveSingleLegBars(sybmolWhole,periodParams);
             barsList.push(bars);
         }
@@ -126,8 +123,9 @@ async function mergeData(periodParams){
 }
 
 export default {
+ 
     onReady: (callback) => {
-        console.log('[onReady]: Method call');
+    //    console.log('[onReady]: Method call');
         setTimeout(() => callback(configurationData));
     },
 
@@ -137,7 +135,7 @@ export default {
         symbolType,
         onResultReadyCallback
     ) => {
-        console.log('[searchSymbols]: Method call');
+   //     console.log('[searchSymbols]: Method call');
 
         const symbols = await getAllSymbols(userInput);
         const newSymbols = symbols.filter(symbol => {
@@ -156,22 +154,19 @@ export default {
         onResolveErrorCallback,
         extension
     ) => {
-        console.log('[resolveSymbol]: Method call', symbolName);
+   //     console.log('[resolveSymbol]: Method call', symbolName);
         originalSymbolList=symbolName;
-        console.log("originalSymbolList",originalSymbolList)
         const symbolList = symbolName.split("|");
-        console.log(symbolList);
         if (symbolList.length > 0) {
            const result = parseSymbol(symbolList[0]);
             if (result) {
                const symbolInfo = await makeApiRequest(`https://www.icharts.in/opt/api/tv/SymbolsDataForTV_API.php?symbol=${result}&val=Options_Latest&SymbType=FNO`);
-                console.log(symbolInfo);
+         //       console.log(symbolInfo);
 
                 onSymbolResolvedCallback(symbolInfo);
             }
         }
     },
-
 
     getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         console.log("periodParams",periodParams);
@@ -183,11 +178,10 @@ export default {
             }
             onHistoryCallback(bars,{ noData: false });
             } catch (error) {
-                console.log('[getBars]: Get error', error);
+    //            console.log('[getBars]: Get error', error);
                 onErrorCallback(error);
             }
     },
-
 
     subscribeBars: (
         symbolInfo,
@@ -211,4 +205,6 @@ export default {
         console.log('[unsubscribeBars]: Method call with subscriberUID:', subscriberUID);
         // unsubscribeFromStream(subscriberUID);
     },
+
+
 };

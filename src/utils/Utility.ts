@@ -57,10 +57,6 @@ export class Utility {
             const month = match[2];
             const year = match[3];
 
-            console.log('Day:', day);
-            console.log('Month:', month);
-            console.log('Year:', year);
-
             return `${year}${month}${day}`;
         } else {
             console.log('Date format does not match.');

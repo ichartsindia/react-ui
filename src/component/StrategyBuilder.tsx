@@ -16,7 +16,6 @@ import { OptionChainComponent } from './OptionChainComponent';
 import { DialogLoad } from './DialogLoad';
 import { StrategyProfile } from '../entity/StretegyProfile';
 import { CircleSpinnerOverlay } from 'react-spinner-overlay';
-import { TVChartContainer } from '../component/TVChartContainer/index';
 import { Utility } from '../utils/Utility';
 interface Props {
 

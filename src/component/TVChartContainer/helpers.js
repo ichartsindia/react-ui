@@ -31,10 +31,10 @@ export function parseSymbol(fullSymbol){
         const match = fullSymbol.match(pattern);
         if (match) {
             const result = match[1];
-            console.log("result",result);
+      //      console.log("result",result);
          return result;
            } else {
-            console.log("No match found.");
+            // console.log("No match found.");
           }
     return null;
 }

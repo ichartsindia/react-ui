@@ -6,7 +6,6 @@ import axios from "axios";
 import { OptionChain } from '../entity/OptionChain';
 import { OptData, OptHeader, OptLeg, WhatIf } from '../entity/OptData';
 import { PLCalc } from '../utils/PLCalc';
-import { PayoffChartComponent } from './PayoffChartComponent';
 import { LegEntity } from '../entity/LegEntity';
 import '../component/Simulator.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -16,9 +15,8 @@ import { OptionChainLiteComponent } from './OptionChainLiteComponent';
 import { DialogLoad } from './DialogLoad';
 import { StrategyProfile } from '../entity/StretegyProfile';
 import { CircleSpinnerOverlay } from 'react-spinner-overlay';
-import { TVChartContainer } from '../component/TVChartContainer/index';
 import { Utility } from '../utils/Utility';
-import { OverlayPanel } from 'primereact/overlaypanel';
+import TVChartContainer from './TVChartContainer';
 
 interface Props {
 
@@ -111,44 +109,11 @@ export class StrategyChart extends React.Component<Props, State> {
 
   componentDidMount = () => {
     this.loadsymbolListAndExpiryList();
-  //  this.setCounter();
-
-    // document.addEventListener('keydown', event => {
-
-    //   // event.preventDefault();
-    //   this.stopCounter();
-    //   // this.setCounter();
-
-    // });
-
-    // document.addEventListener('click', event => {
-    //   // event.preventDefault();
-    //   this.stopCounter();
-    //   // this.setCounter();
-    // });
 
     if (this.state.lastUpdate != null && this.state.latestRefreshDate > this.state.lastUpdate) {
       this.setState({ latestRefreshDate: this.state.lastUpdate }, () => console.log(this.state))
     }
-
-   
   }
-
-  // stopCounter = () => {
-  //   if (this.interval) {
-  //     clearInterval(this.interval);
-  //     this.interval = null;
-  //   }
-  // }
-
-  // setCounter = () => {
-  //   this.interval = setInterval(() => {
-  //     this.refreshData();
-  //     //    this.refreshOptionData();
-  //     //  this.onExpiryDateChange(this.state.selectedExpiryDate,false)
-
-  //   }, 30000);
-  // }
 
   componentWillUnmount() {
     clearInterval(this.interval);
@@ -192,15 +157,6 @@ export class StrategyChart extends React.Component<Props, State> {
             latestRefreshDate: latestRefreshDate,
             tradingviewSymbol: tradingviewSymbol,
           }, () => this.refreshOptionData(false, leg));
-
-
-          // console.log(tradingviewSymbol);
-          // if (tradingviewSymbol != this.state.tradingviewSymbol) {
-          //   this.setState({
-
-          //     refrehTradingView: true
-          //   })
-          // }
         }
 
       }).catch(err => {
@@ -302,12 +258,14 @@ export class StrategyChart extends React.Component<Props, State> {
 e
 
   render() {
-   
+   console.log("this.state.isBusy",this.state.isBusy);
     return (
+      <div>
+           <div>
+      {this.state.isBusy ? <CircleSpinnerOverlay loading={true} overlayColor="rgba(0,153,255,0.2)" /> : null}
+    </div>
       <div className="grid p-fluid" >
-        {/* <div>
-          {this.state.isBusy ? <CircleSpinnerOverlay loading={true} overlayColor="rgba(0,153,255,0.2)" /> : null}
-        </div> */}
+     
         <div className="col-12">
           <div className='p-card secondLine'>
             <div className="flex-item symbol-dropdown" ><Dropdown value={this.state.selectedsymbol} options={this.state.SymbolList}
@@ -350,7 +308,7 @@ e
         </div>
 
         <div className="col-12" style={{ display: 'flex' }} >
-          <div className="card justify-content-center" style={{ width: "30%" }}>
+          <div className="card justify-content-center" style={{ width: "34%" }}>
             
             <div style={{ display: this.state.legEntityList.length>0?'block':'none', borderStyle: 'ridge', padding:'5px' }}>
             <LegLiteComponent passedData={this.state}
@@ -361,11 +319,8 @@ e
                     let stateValue = JSON.parse(JSON.stringify(this.state));
                     stateValue.legEntityList = legEntityList;
                     stateValue.exitedLegList = exitedList;
-
                     let records = this.convertLegToOptionChain(stateValue.records, legEntityList, this.state.selectedExpiryDate);
-
-                    let chartData = PLCalc.chartData(stateValue);
-                    this.setState({ chartData: chartData, records: records, legEntityList: legEntityList, exitedLegList: exitedList });
+                    this.setState({ records: records, legEntityList: legEntityList, exitedLegList: exitedList });
                   }}
                 callbackExpiryChange={
                   (leg) => {
@@ -377,7 +332,7 @@ e
         
             <div style={{ borderStyle: 'ridge', marginTop:'15px' }}>
                 <OptionChainLiteComponent passedData={this.state}
-                  callback={data => {
+                  callback={data => {this.setState({ isBusy:true});
                     this.updateRecord(null, this.generateLegList, data.records);
                     }}
                   callbackExpiryChange={(expiry) => {
@@ -387,14 +342,31 @@ e
               
             </div>
           </div>
-          <div style={{ width: "70%"}}>
-            {this.state.tradingviewSymbol ? <TVChartContainer symbol={this.state.tradingviewSymbol} optionList={this.state.legEntityList}/> : null}
+          <div style={{ width: "66%"}}>
+            {this.state.tradingviewSymbol ? 
+            <TVChartContainer symbol={this.state.tradingviewSymbol} optionList={this.state.legEntityList} 
+            onCallback={this.handleCallback}/> : null}
           </div>
         </div>
-      </div>
+      </div> </div>
     )
   }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   // Check if the relevant state and props have changed to prevent unnecessary re-renders
+  //   if (
+  //     this.state.tradingviewSymbol !== nextState.tradingviewSymbol ||
+  //     this.state.legEntityList !== nextState.legEntityList ||
+  //     this.state.isBusy !== nextState.isBusy
+  //   ) {
+  //     return true;
+  //   }
 
+  //   return false;
+  // }
+  handleCallback = (e) => {
+    console.log(e);
+    this.setState({ isBusy: false });
+  };
 
   loadOptionChain = (data) => {
     //console.log(data);
@@ -588,21 +560,13 @@ e
     stateValue.legEntityList = legList;
     stateValue.exitedLegList = exitedLegList;
     stateValue.records = records;
-
-    // this.setState({ legEntityList: legList, exitedLegList: exitedLegList }, () => {
-    console.log(stateValue);
-    let chartData = PLCalc.chartData(stateValue);
     // console.log(chartData)
     this.setState({
-      chartData: chartData,
       legEntityList: legList,
       exitedLegList: exitedLegList,
       records: records,
       selectedExpiryDate: stateValue.selectedExpiryDate
     });
-    // this.setState({ legEntityList:legList, exitedLegList: exitedLegList});
-    // })
-    // });
   }
 
   convertLegToOptionChain = (optionList, legEntityList, expiry) => {

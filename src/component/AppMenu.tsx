@@ -26,9 +26,9 @@ const AppMenu = (props) => {
                         icon: 'pi pi-fw pi-chart-bar',
                     },
                     {
-                        label: 'Strtegy Chart',
+                        label: 'Strategy Chart',
                         command: () => {navigate('/tvChart') },
-                        icon: 'pi pi-fw pi-minus'
+                        icon: 'pi pi-fw pi-chart-line'
                     }
                 ]
             },

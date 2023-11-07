@@ -9,7 +9,7 @@ import { TabMenu } from 'primereact/tabmenu';
 interface Props {
   passedData
   callback;
- // callbackHide;
+  // callbackHide;
   callbackExpiryChange;
 }
 
@@ -18,18 +18,18 @@ interface State {
 }
 
 export class OptionChainLiteComponent extends React.Component<Props, State> {
- closest;
- previousRecords; 
- constructor(props: Props) {
+  closest;
+  previousRecords;
+  constructor(props: Props) {
     super(props);
-    
-    this.state={
+
+    this.state = {
       expiryList: []
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.previousRecords=prevProps.passedData.records;
+    this.previousRecords = prevProps.passedData.records;
   }
 
   render() {
@@ -54,31 +54,31 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
       }
     }
     let offset = this.props.passedData.legEntityList.length * 25;
-    let height = window.innerHeight - 200
+    let height = window.innerHeight - 280
 
     if (offset > 0) {
       height = height - 100 - offset
     }
-  
+
     return (
       <div>
         <div className="alignedCenter">Option Chain</div>
-        <div style={{ display: 'flex', marginBottom: '3px', marginTop: '3px',  overflowX: "scroll", overflowY: "hidden", whiteSpace:"nowrap" }}>
-       <Panel>{expiryList} 
-        </Panel>     
+        <div style={{ display: 'flex', marginBottom: '3px', marginTop: '3px', overflowX: "scroll", overflowY: "hidden", whiteSpace: "nowrap" }}>
+          <Panel height="40px">{expiryList}
+          </Panel>
         </div>
         <div key={'optionList_' + this.props.passedData.selectedsymbol}>
           <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight={height + 'px'} showGridlines >
             {/* <Column style={{ width: '6%',  backgroundColor:  '#FFFF00' }} align="right" field='Call_Delta' header="Delta"></Column> */}
-            <Column style={{ width: '6%' }} align="right" header="Delta" body={this.deltaTemplate}></Column>
-            <Column style={{ width: '6%' }} align="right" header="IV" body={this.ivTemplate}></Column>
-            <Column style={{ width: '6%' }} align="right" header="LTP" body={this.ltpTemplate}></Column>
-            <Column style={{ width: '32%' }} align="left" header="Call" body={this.callTemplate}></Column>
-            <Column style={{ width: '12%' }} align="center" header="Strike" body={this.strikeTemplate}  ></Column>
-            <Column style={{ width: '32%' }} align="right" header="Put" body={this.putTemplate}></Column>
-            <Column style={{ width: '6%' }} align="right" header="LTP" body={this.ltpPutTemplate}></Column>
-            <Column style={{ width: '6%' }} align="right" header="IV" body={this.ivPutTemplate}></Column>
-            <Column style={{ width: '6%' }} align="right" header="Delta" body={this.deltaPutTemplate}></Column>
+            <Column align="right" header="Delta" body={this.deltaTemplate}></Column>
+            <Column align="right" header="IV" body={this.ivTemplate}></Column>
+            <Column align="right" header="LTP" body={this.ltpTemplate}></Column>
+            <Column style={{ maxWidth: '90px', minWidth: '90px' }} align="center" header="Call" body={this.callTemplate}></Column>
+            <Column align="center" header="Strike" body={this.strikeTemplate}  ></Column>
+            <Column style={{ maxWidth: '90px', minWidth: '90px' }} align="center" header="Put" body={this.putTemplate}></Column>
+            <Column align="right" header="LTP" body={this.ltpPutTemplate}></Column>
+            <Column align="right" header="IV" body={this.ivPutTemplate}></Column>
+            <Column align="right" header="Delta" body={this.deltaPutTemplate}></Column>
           </DataTable>
         </div>
       </div>
@@ -86,34 +86,34 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
   }
 
   deltaTemplate = (rowData: OptionChain) => {
-    if(this.closest==rowData.Strike_Price){
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Call_Delta}
         </div>
       )
     }
     if (this.props.passedData.fairPrice >= rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#f4fcfa', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#f4fcfa', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Call_Delta}
         </div>
       )
     }
     return rowData.Call_Delta;
   }
-  
+
   ivTemplate = (rowData: OptionChain) => {
-    if(this.closest==rowData.Strike_Price){
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Call_IV}
         </div>
       )
     }
     if (this.props.passedData.fairPrice >= rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#f4fcfa', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#f4fcfa', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Call_IV}
         </div>
       )
@@ -122,16 +122,16 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
   }
 
   ltpTemplate = (rowData: OptionChain) => {
-    if(this.closest==rowData.Strike_Price){
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Call_LTP}
         </div>
       )
     }
     if (this.props.passedData.fairPrice >= rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#f4fcfa', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#f4fcfa', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Call_LTP}
         </div>
       )
@@ -140,12 +140,12 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
   }
 
   callTemplate = (rowData: OptionChain) => {
-   
-    return (<div  style={{ backgroundColor: this.closest==rowData.Strike_Price?'#ffe494':null,height:'100%', width:'100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
+
+    return (<div style={{ backgroundColor: this.closest == rowData.Strike_Price ? '#ffe494' : null, height: '100%', width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
       <div>
-        <button className='smallGreenButton' style={{marginTop:'4px',backgroundColor: rowData.Buy_Call == true ? 'green' : 'white', color: rowData.Buy_Call == true ? 'white' : 'black' }} onClick={(event) => {
-           if(rowData.Sell_Call==true){
-            rowData.Call_Lot=null;
+        <button className='smallGreenButton' style={{ marginTop: '4px', backgroundColor: rowData.Buy_Call == true ? 'green' : 'white', color: rowData.Buy_Call == true ? 'white' : 'black' }} onClick={(event) => {
+          if (rowData.Sell_Call == true) {
+            rowData.Call_Lot = null;
           }
 
           if (rowData.Call_Lot == null) {
@@ -157,34 +157,34 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
           }
           rowData.Buy_Call = true;
           rowData.Sell_Call = null;
-        //  rowData.Put_Price = null;
+          //  rowData.Put_Price = null;
 
           this.props.callback(this.props.passedData);
         }}>B</button>
       </div>
-      <div style={{marginTop:'4px'}}>
+      <div style={{ marginTop: '4px' }}>
         <button className='smallRedButton' style={{ backgroundColor: rowData.Sell_Call == true ? 'red' : 'white', color: rowData.Sell_Call == true ? 'white' : 'black' }} onClick={() => {
-          if(rowData.Buy_Call){
-            rowData.Call_Lot=null;
+          if (rowData.Buy_Call) {
+            rowData.Call_Lot = null;
           }
 
           if (rowData.Call_Lot == null) {
             rowData.Call_Lot = 1;
             rowData.Call_Price = rowData.Call_LTP;
           } else {
-           
+
             rowData.Call_Price = this.newPrice(rowData, "CE");
             rowData.Call_Lot += 1;
           }
           rowData.Sell_Call = true;
           rowData.Buy_Call = null;
-        //  rowData.Put_Price = null;
+          //  rowData.Put_Price = null;
 
           this.props.callback(this.props.passedData);
         }}>S</button>
       </div>
-      <div style={rowData.Call_Lot ? { display: 'block',   marginTop:'4px' } : { display: 'none' }}>
-        <input type="number" min={1} max={5000} className='smallText' onChange={(event) => {
+      <div style={rowData.Call_Lot ? { display: 'block', marginTop: '4px' } : { display: 'none' }}>
+        <input className='smallText' onChange={(event) => {
           rowData.Call_Lot = Number.parseInt(event.target.value);
           this.props.callback(this.props.passedData);
         }} value={rowData.Call_Lot}></input>
@@ -193,15 +193,15 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
   }
 
   putTemplate = (rowData: OptionChain) => {
-    return (<div  style={{ backgroundColor: this.closest==rowData.Strike_Price?'#ffe494':null,height:'100%', width:'100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-      <div style={rowData.Put_Lot ? { display: 'block',marginTop:'4px' } : { display: 'none' }}>
-        <input type="number" min={1} max={5000} className='smallText'
+    return (<div style={{ backgroundColor: this.closest == rowData.Strike_Price ? '#ffe494' : null, height: '100%', width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+      <div style={rowData.Put_Lot ? { display: 'block', marginTop: '4px' } : { display: 'none' }}>
+        <input className='smallText'
           onChange={(event) => {
             rowData.Put_Lot = Number.parseInt(event.target.value);
             this.props.callback(this.props.passedData);
           }} value={rowData.Put_Lot}></input>
       </div>
-      <div style={{marginTop:'4px'}}>
+      <div style={{ marginTop: '4px' }}>
         <button className='smallGreenButton' style={{ backgroundColor: rowData.Buy_Put == true ? 'green' : 'white', color: rowData.Buy_Put == true ? 'white' : 'black' }}
           onClick={() => {
             // if(rowData.Sell_Put){
@@ -217,39 +217,39 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
             }
             rowData.Buy_Put = true;
             rowData.Sell_Put = null;
-       //     rowData.Call_Price = null;
+            //     rowData.Call_Price = null;
 
             this.props.callback(this.props.passedData);
           }}>B</button>
       </div>
-      <div style={{marginTop:'4px'}}>
+      <div style={{ marginTop: '4px' }}>
         <button className='smallRedButton' style={{ backgroundColor: rowData.Sell_Put == true ? 'red' : 'white', color: rowData.Sell_Put == true ? 'white' : 'black' }}
-        onClick={() => {
-          if(rowData.Buy_Put){
-            rowData.Put_Lot =null;
-          }
+          onClick={() => {
+            if (rowData.Buy_Put) {
+              rowData.Put_Lot = null;
+            }
 
-          if (rowData.Put_Lot == null) {
-            rowData.Put_Lot = 1;
-            rowData.Put_Price = rowData.Put_LTP;
-          } else {
-            rowData.Put_Price =  this.newPrice(rowData, "PE")
-            rowData.Put_Lot += 1;
-           }
-          rowData.Sell_Put = true;
-          rowData.Buy_Put = null;
-       //   rowData.Call_Price = null;
-          this.props.callback(this.props.passedData);
-        }}>S</button>
+            if (rowData.Put_Lot == null) {
+              rowData.Put_Lot = 1;
+              rowData.Put_Price = rowData.Put_LTP;
+            } else {
+              rowData.Put_Price = this.newPrice(rowData, "PE")
+              rowData.Put_Lot += 1;
+            }
+            rowData.Sell_Put = true;
+            rowData.Buy_Put = null;
+            //   rowData.Call_Price = null;
+            this.props.callback(this.props.passedData);
+          }}>S</button>
       </div>
     </div>
-  )
+    )
   }
 
   newPrice = (rowData, CE_PE) => {
     console.log(rowData);
     let clone = JSON.parse(JSON.stringify(this.previousRecords));
-    let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0] ;
+    let foundPreviousRow = clone.filter(row => row.Strike_Price == rowData.Strike_Price)[0];
     let legs = this.props.passedData.legEntityList.filter((leg) => leg.CE_PE == CE_PE && leg.Strike_Price - rowData.Strike_Price == 0);
     let previousLeg;
     if (legs.length > 0) {
@@ -271,32 +271,32 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
     return parseFloat((totalAmout / totalLeg).toFixed(2));
 
   }
-  
-  strikeTemplate=(rowData: OptionChain)=>{
-    if(this.closest==rowData.Strike_Price){
+
+  strikeTemplate = (rowData: OptionChain) => {
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Strike_Price}
         </div>
       )
-  } 
-  return <div style={{ display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+    }
+    return <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
       {rowData.Strike_Price}
     </div>
- 
-  
-}
+
+
+  }
   ltpPutTemplate = (rowData: OptionChain) => {
-    if(this.closest==rowData.Strike_Price){
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Put_LTP}
         </div>
       )
     }
     if (this.props.passedData.fairPrice < rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#f4fcfa', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#f4fcfa', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Put_LTP}
         </div>
       )
@@ -305,35 +305,35 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
   }
 
   ivPutTemplate = (rowData: OptionChain) => {
-    if(this.closest==rowData.Strike_Price){
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Put_IV}
         </div>
       )
     }
     if (this.props.passedData.fairPrice < rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#f4fcfa', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#f4fcfa', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Put_IV}
         </div>
       )
     }
     return rowData.Put_IV;
   }
-  
+
   deltaPutTemplate = (rowData: OptionChain) => {
-    if(this.closest==rowData.Strike_Price){
+    if (this.closest == rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#ffe494', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#ffe494', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Put_Delta}
         </div>
       )
     }
-    
+
     if (this.props.passedData.fairPrice < rowData.Strike_Price) {
       return (
-        <div style={{ backgroundColor: '#f4fcfa', display:'flex',  height:'100%', width:'100%',  alignItems: 'center',justifyContent: 'right' }}>
+        <div style={{ backgroundColor: '#f4fcfa', display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'right' }}>
           {rowData.Put_Delta}
         </div>
       )
