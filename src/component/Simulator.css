@@ -46,7 +46,8 @@ body{
   height: 20px;
   font-size: smaller;
   border-radius: 5px 5px 5px 5px;
-  border-color: blue;
+  border-color: white;
+  border-style: ridge;
 }
 .small-size{
   font-size: smaller;
@@ -67,12 +68,10 @@ body{
   height: 20px;
   margin-left: 2px;
   margin-right: 2px;
-  background: white;
   text-align: center;
-  color: green;
-  border-color: green;
   font-size: smaller;
-  border-radius: 5px;
+  border-radius: 3px;
+  border-color: #22C55E;
   cursor: pointer;
 }
 
@@ -81,11 +80,9 @@ body{
   height: 20px;
   margin-left: 2px;
   margin-right: 2px;
-  background: white;
   align-content: center;
-  color: red;
   border-color: red;
-  border-radius: 5px;
+  border-radius: 3px;
   font-size:smaller;
   cursor: pointer;
 }
@@ -99,19 +96,21 @@ body{
 }
 
 .selected-button-buy{
-  background-color: green;
+  background-color: #28a745;
   color: white;
   border-radius: 5px;
+  border-color: white;
   font-size: smaller;
   cursor: pointer;
 }
 
 .selected-button-sell{
-  background-color:red;
+  background-color:rgb(239, 68, 68);
   color: white;
   border-radius: 5px;
   font-size: smaller;
   cursor: pointer;
+  border-color: white;
 }
 
 .dialog{
@@ -205,6 +204,7 @@ font-size: small;
   width: 20px;
 }
 
+
 .strategyList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody tr:hover {
   cursor: pointer;
 }
@@ -288,6 +288,8 @@ font-size: small;
   border-right-style:none;
   cursor:pointer; 
   width: 70px;
+  height: 25px;
+  margin-left: 25px;
 }
 .button-above-option-chain-orange{
   font-size:small;
@@ -297,8 +299,27 @@ font-size: small;
   border-left-style:none;
   border-right-style:none;
   cursor:pointer; 
-  background-color:orange;
+  background-color:#28a745!important;
+  color: white;
   width: 70px;
+  height: 25px;
+  margin-left: 25px;
+
+}
+
+.button-back-forth{
+  font-size:small;
+  border-radius:13px; 
+  border-bottom-style:none; 
+  border-top-style:none;
+  border-left-style:none;
+  border-right-style:none;
+  cursor:pointer; 
+  background-color: transparent;
+  color: black;
+  font-weight: bold;
+  width: 20px;
+  height: 25px;
 }
 /* .clicked{
   background-color:orange;
@@ -326,3 +347,70 @@ button:focus{background-color:orange;}  */
 /* button:active {
   background-color:orange;
 }   */
+
+/* .p-component {
+  font-weight: bold!important;
+} */
+
+.btn-xs {
+  padding: 0 5px;
+  min-width: 35px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+}
+
+.btn-outline-primary {
+  color: #31A9C9;
+  border-color: #31A9C9;
+}
+.ml-2, .mx-2 {
+  margin-left: 0.5rem!important;
+}
+.btn-outline-primary {
+  color: white!important;
+  border-color: #28a745!important;
+  background-color: #28a745;
+  /* height: 30px!important; */
+}
+.btn {
+  display: inline-block;
+  font-weight: 400;
+  color: #212529;
+  text-align: center;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* background-color: transparent; */
+  border: 1px solid transparent;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  cursor: pointer;
+  height: 30px;
+  width: 60px;
+}
+
+.p-inputnumber-buttons-stacked .p-button {
+  color: #ffffff;
+  background: #28a745!important;
+  border: 1px solid #28a745!important;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: none;
+  border-radius: 0.375rem;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: #28a745!important;
+  border-color: #28a745!important;
+  color: white!important;
+  font-weight: 400!important;
+}
+
+.legList .p-datatable-wrapper .p-datatable-table .p-datatable-thead {
+  width: 20px!important;
+}

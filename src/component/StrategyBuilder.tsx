@@ -322,20 +322,20 @@ export class StrategyBuilder extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.onExpiryDateChange(e.value);
                 }} /></div>
-              <div className="flex-item"><Button className='smallButton' onClick={() => {
+              <div className="flex-item" ><button className='btn btn-outline-primary btn-xs ml-2' onClick={() => {
                 this.setState({
                   openSaveDialog: true
                 });
-              }}>Save</Button></div>
-              <div className="flex-item"><Button className='smallButton' onClick={() => {
+              }}>Save</button></div>
+              <div className="flex-item"><button className='btn btn-outline-primary btn-xs ml-2' onClick={() => {
                 this.setState({
                   openLoadDialog: true
                 });
-              }}>Load</Button></div>
-              <div className="flex-item"><Button className='smallButton' onClick={() => {
+              }}>Load</button></div>
+              <div className="flex-item"><button className='btn btn-outline-primary btn-xs ml-2' onClick={() => {
                 this.setState({ selectedExpiryDate: null, legEntityList: [], exitedLegList: [] }, () => { this.refreshOptionData(false) })
-              }}>Reset</Button></div>
-              <div className="flex-item"><Button className='smallButton'>Trade</Button></div>
+              }}>Reset</button></div>
+              <div className="flex-item"><button className='btn btn-outline-primary btn-xs ml-2'>Trade</button></div>
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -479,8 +479,6 @@ export class StrategyBuilder extends React.Component<Props, State> {
                 } />
             </div>
           </div>
-
-
           {
             this.state.openSaveDialog ? <div>
               <DialogSave passedData={this.state} closed={(st_save_id) => { this.setState({ openSaveDialog: false, strategyId: st_save_id }) }} /></div> : null

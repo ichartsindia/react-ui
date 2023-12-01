@@ -60,17 +60,17 @@ export class OptionChainComponent extends React.Component<Props, State> {
             {expiryList}
           </div> 
           <div key={'optionList_' + this.props.passedData.selectedsymbol}>
-            <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight="calc(100vh - 182px)" showGridlines >
+            <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight="calc(100vh - 190px)" showGridlines >
               {/* <Column style={{ width: '6%',  backgroundColor:  '#FFFF00' }} align="right" field='Call_Delta' header="Delta"></Column> */}
-              <Column style={{ width: '6%' }} align="right" header="Delta" body={this.deltaTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right" header="IV"  body={this.ivTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right" header="LTP" body={this.ltpTemplate}></Column>
-              <Column style={{ width: '32%' }} align="left"  header="Call" body={this.callTemplate}></Column>
-              <Column style={{ width: '12%' }} align="center" header="Strike" body={this.strikeTemplate}  ></Column>
-              <Column style={{ width: '32%' }} align="right" header="Put" body={this.putTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right"  header="LTP" body={this.ltpPutTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right"  header="IV" body={this.ivPutTemplate}></Column>
-              <Column style={{ width: '6%' }} align="right"  header="Delta" body={this.deltaPutTemplate}></Column>
+              <Column style={{}} align="right" header="Delta" body={this.deltaTemplate}></Column>
+              <Column align="right" header="IV"  body={this.ivTemplate}></Column>
+              <Column  align="right" header="LTP" body={this.ltpTemplate}></Column>
+              <Column style={{ width: '110px' }} align="left"  header="Call" body={this.callTemplate}></Column>
+              <Column  align="center" header="Strike" body={this.strikeTemplate}  ></Column>
+              <Column style={{ width: '110px' }} align="right" header="Put" body={this.putTemplate}></Column>
+              <Column  align="right"  header="LTP" body={this.ltpPutTemplate}></Column>
+              <Column  align="right"  header="IV" body={this.ivPutTemplate}></Column>
+              <Column  align="right"  header="Delta" body={this.deltaPutTemplate}></Column>
             </DataTable>
           </div>
         </div>
@@ -135,7 +135,7 @@ export class OptionChainComponent extends React.Component<Props, State> {
    
     return (<div  style={{ backgroundColor: this.closest==rowData.Strike_Price?'#ffe494':null,height:'100%', width:'100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
       <div>
-        <button className='smallGreenButton' style={{marginTop:'4px',backgroundColor: rowData.Buy_Call == true ? 'green' : 'white', color: rowData.Buy_Call == true ? 'white' : 'black' }} onClick={(event) => {
+        <button className='smallGreenButton' style={{marginTop:'4px',backgroundColor: rowData.Buy_Call == true ? '#22C55E' : 'white', color: rowData.Buy_Call == true ? 'white' : 'black' }} onClick={(event) => {
            if(rowData.Sell_Call==true){
             rowData.Call_Lot=null;
           }
@@ -176,7 +176,7 @@ export class OptionChainComponent extends React.Component<Props, State> {
         }}>S</button>
       </div>
       <div style={rowData.Call_Lot ? { display: 'block',   marginTop:'4px' } : { display: 'none' }}>
-        <input type="number" min={1} max={5000} className='smallText' onChange={(event) => {
+        <input className='smallText' onChange={(event) => {
           rowData.Call_Lot = Number.parseInt(event.target.value);
           this.props.callback(this.props.passedData);
         }} value={rowData.Call_Lot}></input>
@@ -187,14 +187,14 @@ export class OptionChainComponent extends React.Component<Props, State> {
   putTemplate = (rowData: OptionChain) => {
     return (<div  style={{ backgroundColor: this.closest==rowData.Strike_Price?'#ffe494':null,height:'100%', width:'100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
       <div style={rowData.Put_Lot ? { display: 'block',marginTop:'4px' } : { display: 'none' }}>
-        <input type="number" min={1} max={5000} className='smallText'
+        <input className='smallText'
           onChange={(event) => {
             rowData.Put_Lot = Number.parseInt(event.target.value);
             this.props.callback(this.props.passedData);
           }} value={rowData.Put_Lot}></input>
       </div>
       <div style={{marginTop:'4px'}}>
-        <button className='smallGreenButton' style={{ backgroundColor: rowData.Buy_Put == true ? 'green' : 'white', color: rowData.Buy_Put == true ? 'white' : 'black' }}
+        <button className='smallGreenButton' style={{ backgroundColor: rowData.Buy_Put == true ? '#22C55E' : 'white', color: rowData.Buy_Put == true ? 'white' : 'black' }}
           onClick={() => {
             // if(rowData.Sell_Put){
             //   rowData.Put_Lot=null;

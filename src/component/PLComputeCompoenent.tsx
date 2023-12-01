@@ -172,23 +172,35 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
     }
 
     valueTemplate = (rowData) => {
-        if (rowData.label == 'Current Projected P/L') {
-            if (rowData.value > 0) {
-                return <div style={{ color: 'green' }}>{"₹ " + rowData.value}</div>
-            } else if (rowData.value < 0) {
-                return <div style={{ color: 'red' }}>{"₹ " + rowData.value}</div>
-            } else{
-                return "₹ 0.00";
-            }
-        }
-
-        if(rowData.value!=null){
-            return rowData.value;
-        } else{
-            return null;
-        }
+          if (rowData.value == null)
+            return null; 
         
+     if (rowData.label == 'Current Projected P/L' || rowData.label =="Max Profit"||rowData.label =="Max Loss" || rowData.label =="Net Debit" || rowData.label =="Net Credit") {
+        if (parseFloat(rowData.value) > 0) {
+            return <div style={{ color: '#28a745'}}>{"₹ " + rowData.value.toFixed(2)}</div>
+        } else if (parseFloat(rowData.value) < 0) {
+            return <div style={{ color: '#EF4444' }}>{"₹ " + rowData.value.toFixed(2)}</div>
+        } else {
+            return "₹ 0.00";
+        }
+      }
+       console.log(rowData.label.indexOf('Breakeven'))
+      if(rowData.label.indexOf('Breakeven')>-1){
+       
+        if(rowData.value.indexOf("-")>0){
+            return <div style={{ color: '#EF4444' }}>{ rowData.value}</div>
+        } else {
+            return  <div style={{ color: '#28a745' }}>{ rowData.value}</div>
+        }
+      }
+return rowData.value;
+        // if (rowData.value != null) {
+        //     
+        // } else {
+        //     return null;
+        // }
     }
+
     netDebtTemplate = (rowData: ProfitLoss) => {
         // if(Number.parseFloat(rowData.netDebit.replace("₹",''))<0)
 
@@ -211,7 +223,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (chartData != null) {
             let max = Math.max(...chartData[2]);
 
-            return "₹ " + max.toFixed(2);
+            return  max
         } else {
             return null;
         }
@@ -234,14 +246,14 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (chartData != null) {
             let min = Math.min(...chartData[2]);
 
-            return "₹ " + min.toFixed(2);
+            return min;
         } else {
             return null;
         }
     }
 
     RR = () => {
-        if (this.maxLoss() != '-Undefined-' && this.maxProfit() != '-Undefined-' && this.maxLoss() != null && this.maxProfit() != null) {
+        if (this.maxLoss() != 'Undefined' && this.maxProfit() != 'Undefined' && this.maxLoss() != null && this.maxProfit() != null) {
             return +this.maxProfit() / +this.maxLoss();
         }
         return null;
@@ -370,7 +382,7 @@ export class PLComputeCompoenent extends React.Component<Props, State> {
         if (totalShortPremium - totalLongPremium == 0)
             return null;
 
-        return "₹ " + (totalLongPremium - totalShortPremium).toFixed(2);
+        return  (totalLongPremium - totalShortPremium);
     }
 
     totalPL2 = (): string => {

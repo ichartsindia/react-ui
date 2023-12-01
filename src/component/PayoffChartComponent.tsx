@@ -208,7 +208,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                 {
                     color: 'red',
                     fillOpacity: 0.2,
-                    lineWidth: 3,
+                    lineWidth: 2.5,
                     dashStyle: 'shortdot',
                     zIndex: 3,
                     value: fairPrice * (1 + this.whatif.price / 100),
@@ -316,7 +316,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                 color: 'rgb(0,0,255)',
                 fillOpacity: 0.1,
                 connectNulls: true,
-                lineWidth: 1.5,
+                lineWidth: 2,
                 dashStyle: 'shortdot',
                 marker: {
                     enabled: false
@@ -330,7 +330,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                 color: 'rgb(50,205,50)',
                 data: arr2,
                 connectNulls: true,
-                lineWidth: 1.5,
+                lineWidth: 2,
                 marker: {
                     enabled: false
                 }
@@ -351,7 +351,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
             <div>
                 <HighchartsReact highcharts={Highcharts} options={options} containerProps={{ style: { hight: '100%', width: '100%' } }} />
             </div>
-            <div style={{ display:'flex', justifyContent:'flex-start', width: '100%' }}>
+            <div style={{ display:'flex', justifyContent:'flex-start', width: '100%', alignItems:'center' }}>
                 <div className="leglot-dropdown" >
                     <InputNumber value={this.whatif.price} onValueChange={(e) => {
                         this.whatif.price = e.value;
@@ -382,15 +382,22 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                         incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
                 </div>
                 <div style={{marginLeft:'5px',textAlign:'center'}}>
-                    <Checkbox style={{marginLeft:'5px'}} inputId="allowId" checked={this.whatif.allowLegAdjustment} onChange={(e)=>{
+                    {/* <Checkbox style={{marginLeft:'5px'}} inputId="allowId" checked={this.whatif.allowLegAdjustment} onChange={(e)=>{
                         this.whatif.allowLegAdjustment= e.checked;
                         this.whatif.IV=0;
                         this.props.callback(this.whatif);
                     }} />
-                    <label htmlFor="allowId">Allow  Leg IV Adjustments</label>
+                    <label htmlFor="allowId">Allow  Leg IV Adjustments</label> */}
+
+                    <input type="checkbox" id="allowLegAdjustment" name="allowLegAdjustment" onChange={(e)=>{
+                         this.whatif.allowLegAdjustment= e.target.checked;
+                         this.whatif.IV=0;
+                         this.props.callback(this.whatif);
+                    }}></input>
+                    <label htmlFor="allowLegAdjustment">Allow  Leg IV Adjustments</label>
                 </div>
                 <div style={{ width: '10%', marginLeft: '5px' }}>
-                    <Button label="Reset" className="p-button-primary smallButton" style={{ height: '28px', width: '60px', marginTop: '-1px' }} onClick={() => {
+                    <button  className="btn btn-outline-primary btn-xs ml-2" onClick={() => {
                         this.setState({
                             price: 50,
                             IV: 50,
@@ -406,7 +413,7 @@ export class PayoffChartComponent extends React.Component<Props, State> {
                             this.props.passedStateData.legEntityList.forEach(p=>p.iv_adjustment=null);  
                             this.props.callback(this.whatif,this.props.passedStateData.legEntityList)
                         });
-                    }} />
+                    }}>Reset</button>
                 </div>
             </div>
         </div>

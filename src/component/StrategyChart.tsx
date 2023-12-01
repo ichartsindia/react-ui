@@ -251,6 +251,24 @@ export class StrategyChart extends React.Component<Props, State> {
 
           if (data == null) return;
           if (fromTimer) return;
+          let strikePriceArray = data.map(p => p.Strike_Price);
+          let closest = PLCalc.findClosest(strikePriceArray, this.state.fairPrice);
+          let tbody = document.querySelector('.optionList .p-datatable-wrapper .p-datatable-table .p-datatable-tbody');
+          let trs = tbody.querySelectorAll('tr');
+          let len = trs.length;
+
+          if (len > 40) {
+            for (let i = 0; i < len; i++) {
+              if (trs[i].innerHTML.indexOf(closest) > -1) {
+                if (i > 13)
+                  trs[i - 13]?.scrollIntoView();
+                else {
+                  trs[i - 10]?.scrollIntoView();
+                }
+                break;
+              }
+            }
+          }
         })
       }
       )
@@ -314,7 +332,7 @@ e
             <LegLiteComponent passedData={this.state}
                 callback={
                   legEntityList => {
-                    console.log(legEntityList);
+                    this.setState({ isBusy:legEntityList.length>0});
                     let exitedList = legEntityList.filter(p => p.exited);
                     let stateValue = JSON.parse(JSON.stringify(this.state));
                     stateValue.legEntityList = legEntityList;
@@ -332,7 +350,8 @@ e
         
             <div style={{ borderStyle: 'ridge', marginTop:'15px' }}>
                 <OptionChainLiteComponent passedData={this.state}
-                  callback={data => {this.setState({ isBusy:true});
+                  callback={data => {
+                    this.setState({ isBusy:true});
                     this.updateRecord(null, this.generateLegList, data.records);
                     }}
                   callbackExpiryChange={(expiry) => {
@@ -351,20 +370,8 @@ e
       </div> </div>
     )
   }
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   // Check if the relevant state and props have changed to prevent unnecessary re-renders
-  //   if (
-  //     this.state.tradingviewSymbol !== nextState.tradingviewSymbol ||
-  //     this.state.legEntityList !== nextState.legEntityList ||
-  //     this.state.isBusy !== nextState.isBusy
-  //   ) {
-  //     return true;
-  //   }
 
-  //   return false;
-  // }
   handleCallback = (e) => {
-    console.log(e);
     this.setState({ isBusy: false });
   };
 

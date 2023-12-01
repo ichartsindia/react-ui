@@ -14,7 +14,8 @@ interface Props {
 }
 
 interface State {
-  expiryList
+  expiryList,
+  leftIndex:number;
 }
 
 export class OptionChainLiteComponent extends React.Component<Props, State> {
@@ -24,7 +25,8 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      expiryList: []
+      expiryList: [],
+      leftIndex:0
     }
   }
 
@@ -40,21 +42,33 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
     let expiryList = [];
 
     if (this.props.passedData.expiryDateList != null && this.props.passedData.expiryDateList.length > 4) {
-      for (let i = 0; i < this.props.passedData.expiryDateList.length; i++) {
-
-        let strikePriceArray = records.map(p => p.Strike_Price);
-        expiryList.push(<button key={"button_" + this.props.passedData.expiryDateList[i]["expiry_dates"]}
+      expiryList.push(<button className="button-back-forth" style={{display: this.state.leftIndex>0?'block':'none', border:'none'}} onClick={(e)=>{
+        if(this.state.leftIndex>0)
+        this.setState({leftIndex: this.state.leftIndex-1})
+      }}>&lt;</button>)
+      for (let i = this.state.leftIndex; i < 5+this.state.leftIndex; i++) {
+       expiryList.push(<button key={"button_" + this.props.passedData.expiryDateList[i]["expiry_dates"]}
           className={this.props.passedData.selectedExpiryDate != this.props.passedData.expiryDateList[i]["expiry_dates"] ? 'button-above-option-chain' : 'button-above-option-chain-orange'}
           onClick={(e) => {
             this.props.passedData.selectedExpiryDate = e.target["innerText"];
             e.target['className'] = 'button-above-option-chain-orange';
             this.props.callbackExpiryChange(this.props.passedData.selectedExpiryDate);
+            // this.setState({selectedIndex:i})
           }
           }>{this.props.passedData.expiryDateList[i]["expiry_dates"]} </button>);
       }
+      expiryList.push(<button className="button-back-forth" style={{display: this.state.leftIndex+5<this.props.passedData.expiryDateList.length?'block':'none', border:'none'}} onClick={
+        (e)=>{
+          if(this.state.leftIndex+5<this.props.passedData.expiryDateList.length)
+            this.setState({leftIndex: this.state.leftIndex+1})
+        }
+      }>&gt;</button>)
     }
-    let offset = this.props.passedData.legEntityList.length * 25;
-    let height = window.innerHeight - 280
+
+    
+
+    let offset = this.props.passedData.legEntityList.length * 29;
+    let height = window.innerHeight - 210
 
     if (offset > 0) {
       height = height - 100 - offset
@@ -63,22 +77,21 @@ export class OptionChainLiteComponent extends React.Component<Props, State> {
     return (
       <div>
         <div className="alignedCenter">Option Chain</div>
-        <div style={{ display: 'flex', marginBottom: '3px', marginTop: '3px', overflowX: "scroll", overflowY: "hidden", whiteSpace: "nowrap" }}>
-          <Panel height="40px">{expiryList}
-          </Panel>
+        <div style={{ display: 'flex', justifyContent: "space-between", height:'30px', marginBottom: '5px', marginTop: '5px', overflowX: "hidden", overflowY: "hidden", whiteSpace: "nowrap" }}>
+          {expiryList}
         </div>
         <div key={'optionList_' + this.props.passedData.selectedsymbol}>
-          <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight={height + 'px'} showGridlines >
+          <DataTable className='optionList' value={records} responsiveLayout="scroll" scrollable scrollHeight={height + 'px'} showGridlines>
             {/* <Column style={{ width: '6%',  backgroundColor:  '#FFFF00' }} align="right" field='Call_Delta' header="Delta"></Column> */}
             <Column align="right" header="Delta" body={this.deltaTemplate}></Column>
-            <Column align="right" header="IV" body={this.ivTemplate}></Column>
-            <Column align="right" header="LTP" body={this.ltpTemplate}></Column>
+            <Column style={{ maxWidth: '40px', minWidth: '40px' }}  align="right" header="IV" body={this.ivTemplate}></Column>
+            <Column style={{ maxWidth: '60px', minWidth: '60px' }}  align="right" header="LTP" body={this.ltpTemplate}></Column>
             <Column style={{ maxWidth: '90px', minWidth: '90px' }} align="center" header="Call" body={this.callTemplate}></Column>
-            <Column align="center" header="Strike" body={this.strikeTemplate}  ></Column>
+            <Column style={{ maxWidth: '60px', minWidth: '60px' }}  align="center" header="Strike" body={this.strikeTemplate}  ></Column>
             <Column style={{ maxWidth: '90px', minWidth: '90px' }} align="center" header="Put" body={this.putTemplate}></Column>
-            <Column align="right" header="LTP" body={this.ltpPutTemplate}></Column>
-            <Column align="right" header="IV" body={this.ivPutTemplate}></Column>
-            <Column align="right" header="Delta" body={this.deltaPutTemplate}></Column>
+            <Column style={{ maxWidth: '60px', minWidth: '60px' }} align="right" header="LTP" body={this.ltpPutTemplate}></Column>
+            <Column style={{ maxWidth: '40px', minWidth: '60px' }} align="right" header="IV" body={this.ivPutTemplate}></Column>
+            <Column  align="right" header="Delta" body={this.deltaPutTemplate}></Column>
           </DataTable>
         </div>
       </div>

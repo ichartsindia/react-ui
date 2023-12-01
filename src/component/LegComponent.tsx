@@ -58,11 +58,11 @@ export class LegComponent extends React.Component<Props, State> {
     let clone = JSON.parse(JSON.stringify(this.props.passedData.fairPrice));
     this.fairPrice = clone;
     return (
-      <TabView>
+      <TabView width>
         <TabPanel header="Legs">
-          <div className="p-card" id="selectedLegList" key={'Legs_' + this.props.passedData.selectedsymbol}>
-            <DataTable value={this.props.passedData.legEntityList} responsiveLayout="scroll" >
-              <Column body={this.buttonTemplate} align="center" ></Column>
+          <div id="selectedLegList" key={'Legs_' + this.props.passedData.selectedsymbol}>
+            <DataTable className='legList'  value={this.props.passedData.legEntityList} responsiveLayout="scroll">
+              <Column body={this.buttonTemplate}></Column>
               {/* <Column body={this.maxLoss} align="center" header="Max Loss"></Column> */}
               <Column body={this.plusTemplate} align="center" ></Column>
               <Column body={this.lotTemplate} header="Lots" align="center"></Column>
@@ -234,7 +234,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
 
   buttonTemplate = (rowData: LegEntity) => {
     if (rowData.Buy_Sell == 'B') {
-      return <div style={{ width: '15px'}}>
+      return <div style={{width:'20px'}}>
         <button className='selected-button-buy' onClick={(e)=>{
           rowData.Buy_Sell='S';
           this.props.callback(this.props.passedData.legEntityList);
@@ -242,7 +242,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
       </div>
     }
     if (rowData.Buy_Sell == 'S') {
-      return <div style={{ width: '15px'}}>
+      return <div>
         <button className='selected-button-sell' onClick={(e)=>{
             rowData.Buy_Sell='B';
             this.props.callback(this.props.passedData.legEntityList);
@@ -258,7 +258,7 @@ let optionPrice = (rowData.exited==true? rowData.Exit_Price: rowData.Entry_Price
     if(rowData.exited==true){
       return null;
     }
-    return <i className="pi pi-plus" style={{ color: 'slateblue', fontSize: 'smaller', cursor: 'pointer', marginRight: '-5px' }} 
+    return <i className="pi pi-plus" style={{ color: 'slateblue', fontSize: 'smaller', width:'10px', cursor: 'pointer', marginRight: '-5px' }} 
     onClick={(e) => {
         rowData.Entry_Price=this.newPrice(rowData,'plus');
         rowData.Position_Lot = +rowData.Position_Lot + 1;

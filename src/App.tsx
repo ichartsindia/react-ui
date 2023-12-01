@@ -3,25 +3,11 @@ import { Route, Routes } from "react-router-dom";
 import  AppMenu  from "./component/AppMenu";
 import  AppRoutes  from "./component/AppRoutes";
 import Container from 'react-bootstrap/Container';
-
-
-interface Props {
-    
-}
-
-interface State {
-  
-  
-}
-
-class App extends React.Component<Props, State> {
+// import "primereact/resources/themes/tailwind-light/theme.css"
+class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-     
-    };
-
- 
+   
   }
 
   render() {

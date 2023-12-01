@@ -39,22 +39,20 @@ const TVChartContainer = ({ symbol, optionList, onCallback }) => {
 			timezone: "Asia/Kolkata",
 			fullscreen: false,
 			autosize: true,
-			loading_screen: null
+			loading_screen: null,
 		};
 	
 		const tvWidget = new widget(widgetOptions);
 		
 
 		tvWidget.onChartReady(() => {
-			onCallback("return false")
+			onCallback("return false");
 		});
 
 		return () => {
 			tvWidget.remove();
 		};
 	});
-
-
 
 	return (<>
 	  

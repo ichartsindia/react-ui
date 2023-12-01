@@ -58,7 +58,7 @@ export class LegLiteComponent extends React.Component<Props, State> {
     this.fairPrice = clone;
     return (
        <div className="p-card" id="selectedLegList" key={'LegLites' + this.props.passedData.selectedsymbol}>
-          <DataTable value={this.props.passedData.legEntityList} responsiveLayout="scroll" emptyMessage="" >
+          <DataTable value={this.props.passedData.legEntityList} responsiveLayout="scroll" style={{outerWidth:"200px"}} scrollable emptyMessage="" >
             <Column body={this.buttonTemplate} align="center" ></Column>
             {/* <Column body={this.maxLoss} align="center" header="Max Loss"></Column> */}
             <Column body={this.plusTemplate} align="center" ></Column>
