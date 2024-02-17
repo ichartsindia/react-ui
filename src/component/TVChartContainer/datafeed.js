@@ -1,10 +1,10 @@
-import { makeApiRequest, parseBuyOrSell, parseLot, parseSymbol,findIntersect,millisecondsToDate } from './helpers.js';
+import { makeApiRequest, parseBuyOrSell, parseLot, parseSymbol, findIntersect, millisecondsToDate } from './helpers.js';
 
 
 // DatafeedConfiguration implementation
 const configurationData = {
     // Represents the resolutions for bars supported by your datafeed
-    supported_resolutions: ['1','2', "3", "4", "5", "10","15","20","30","60","75", "120", "240", '1D', '1W', '1M'],
+    supported_resolutions: ['1', '2', "3", "4", "5", "10", "15", "20", "30", "60", "75", "120", "240", '1D', '1W', '1M'],
     // The `exchanges` arguments are used for the `searchSymbols` method if a user selects the exchange
     // exchanges: [
     //     { value: 'Bitfinex', name: 'Bitfinex', desc: 'Bitfinex'},
@@ -24,12 +24,12 @@ const configurationData = {
 
 // Use it to keep a record of the most recent bar on the chart
 const lastBarsCache = new Map();
-var originalSymbolList="";
+var originalSymbolList = "";
 // Obtains all symbols for all exchanges supported by CryptoCompare API
 
-async function getAllSymbols(symbol) {   
+async function getAllSymbols(symbol) {
     let allSymbols = await makeApiRequest(`https://www.icharts.in/opt/api/tv/SearchDataForTV.php?limit=30&query=${symbol}&type=Options_Latest&exchange=NSE&default_symbol_type_val=Futures_Hist`);
-   
+
     return allSymbols;
 }
 
@@ -68,23 +68,23 @@ async function retrieveSingleLegBars(sybmolWhole, periodParams) {
     return bars;
 }
 
-async function retrieveMultipleLegBars(periodParams){
+async function retrieveMultipleLegBars(periodParams) {
     const symbolList = originalSymbolList.split("|");
- 
+
     let barsList = [];
 
     if (symbolList.length > 0) {
-        for (var i=0; i<symbolList.length;i++){
+        for (var i = 0; i < symbolList.length; i++) {
             var sybmolWhole = symbolList[i];
-            let bars = await retrieveSingleLegBars(sybmolWhole,periodParams);
+            let bars = await retrieveSingleLegBars(sybmolWhole, periodParams);
             barsList.push(bars);
         }
     }
     return barsList;
 }
 
-async function getIntersection(bars1,bars2){
-    let insertion = findIntersect(bars1,bars2 );
+async function getIntersection(bars1, bars2) {
+    let insertion = findIntersect(bars1, bars2);
     return insertion;
 }
 
@@ -107,25 +107,25 @@ async function merge2Bars(bars1, bars2) {
     return finalBars;
 }
 
-async function mergeData(periodParams){
-     let barsList = await retrieveMultipleLegBars(periodParams);
-    if(barsList.length==1) {
+async function mergeData(periodParams) {
+    let barsList = await retrieveMultipleLegBars(periodParams);
+    if (barsList.length == 1) {
         return barsList[0];
-    } 
-    let nextBarList =barsList[0];
-    for(var i=0; i<barsList.length-1; i++){      
-        nextBarList = await merge2Bars(nextBarList, barsList[i+1]);
-        
+    }
+    let nextBarList = barsList[0];
+    for (var i = 0; i < barsList.length - 1; i++) {
+        nextBarList = await merge2Bars(nextBarList, barsList[i + 1]);
+
     }
 
     return nextBarList;
-    
+
 }
 
 export default {
- 
+
     onReady: (callback) => {
-    //    console.log('[onReady]: Method call');
+        //    console.log('[onReady]: Method call');
         setTimeout(() => callback(configurationData));
     },
 
@@ -135,7 +135,7 @@ export default {
         symbolType,
         onResultReadyCallback
     ) => {
-   //     console.log('[searchSymbols]: Method call');
+        //     console.log('[searchSymbols]: Method call');
 
         const symbols = await getAllSymbols(userInput);
         const newSymbols = symbols.filter(symbol => {
@@ -145,7 +145,7 @@ export default {
                 .indexOf(userInput.toLowerCase()) !== -1;
             return isExchangeValid && isFullSymbolContainsInput;
         });
-         onResultReadyCallback(symbols);
+        onResultReadyCallback(symbols);
     },
 
     resolveSymbol: async (
@@ -154,14 +154,14 @@ export default {
         onResolveErrorCallback,
         extension
     ) => {
-   //     console.log('[resolveSymbol]: Method call', symbolName);
-        originalSymbolList=symbolName;
+        //     console.log('[resolveSymbol]: Method call', symbolName);
+        originalSymbolList = symbolName;
         const symbolList = symbolName.split("|");
         if (symbolList.length > 0) {
-           const result = parseSymbol(symbolList[0]);
+            const result = parseSymbol(symbolList[0]);
             if (result) {
-               const symbolInfo = await makeApiRequest(`https://www.icharts.in/opt/api/tv/SymbolsDataForTV_API.php?symbol=${result}&val=Options_Latest&SymbType=FNO`);
-         //       console.log(symbolInfo);
+                const symbolInfo = await makeApiRequest(`https://www.icharts.in/opt/api/tv/SymbolsDataForTV_API.php?symbol=${result}&val=Options_Latest&SymbType=FNO`);
+                //       console.log(symbolInfo);
 
                 onSymbolResolvedCallback(symbolInfo);
             }
@@ -169,18 +169,33 @@ export default {
     },
 
     getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-        console.log("periodParams",periodParams);
-        let symbol=symbolInfo;
-        try {
-            let bars=await mergeData(periodParams);
-            if (periodParams.firstDataRequest) {
-                lastBarsCache.set(symbol, { ...bars[bars.length - 1] });
-            }
-            onHistoryCallback(bars,{ noData: false });
+        console.log("periodParams", periodParams);
+        let symbol = symbolInfo;
+
+        const fetchData = async () => {
+            try {
+                let bars = await mergeData(periodParams);
+                if (periodParams.firstDataRequest) {
+                    lastBarsCache.set(symbol, { ...bars[bars.length - 1] });
+                }
+                onHistoryCallback(bars, { noData: false });
             } catch (error) {
-    //            console.log('[getBars]: Get error', error);
-                onErrorCallback(error);
+                // onErrorCallback(error);
             }
+        };
+
+        fetchData();
+
+         const intervalId = setInterval(() => {
+             fetchData();
+         }, 1000); 
+
+
+        const cleanup = () => {
+            clearInterval(intervalId);
+        };
+
+        return cleanup;
     },
 
     subscribeBars: (
