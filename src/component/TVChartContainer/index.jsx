@@ -21,6 +21,7 @@ const TVChartContainer = ({ symbol, optionList, onCallback }) => {
 		})
 	}
 
+
 	useEffect(() => {
 		const widgetOptions = {
 			symbol: symbolStringCombined,
@@ -40,22 +41,56 @@ const TVChartContainer = ({ symbol, optionList, onCallback }) => {
 			fullscreen: false,
 			autosize: true,
 			loading_screen: null,
+			debug: true,
+			custom_formatters: {
+				timeFormatter: {
+					format: (date) => {
+						const _format_str = '%h:%m';
+						return _format_str
+							.replace('%h', date.getUTCHours(), 2)
+							.replace('%m', date.getUTCMinutes(), 2)
+							.replace('%s', date.getUTCSeconds(), 2);
+					}
+				},
+			},
+			
 		};
-	
+
 		const tvWidget = new widget(widgetOptions);
-		
 
 		tvWidget.onChartReady(() => {
+		
 			onCallback("return false");
+
+			const items =sessionStorage.getItem("ichart_study_items");
+			const itemsReturned = JSON.parse(items);
+			console.log("itemsReturned",itemsReturned);
+			itemsReturned.forEach(item=>{
+				tvWidget.activeChart().createStudy(item, false, false, { length: 5 }, { 'Plot.color': 'rgb(150, 95, 196)' });
+			})
 		});
 
-		return () => {
-			tvWidget.remove();
-		};
+
+		tvWidget.subscribe('study', (event) => { 
+			console.log(`A ${event.value} indicator was added`, event) 
+			
+			let items =[];
+			let itemsReturned = sessionStorage.getItem("ichart_study_items");
+
+			if(itemsReturned!==null){
+			  	items.push(...JSON.parse(itemsReturned));
+			}
+			if (!items.includes(event.value)) {
+				items.push(event.value);
+			}
+			sessionStorage.setItem("ichart_study_items", JSON.stringify(items));
+		});
+
 	});
 
+	
 	return (<>
-	  
+
 		<div
 			ref={chartContainerRef}
 			className={'TVChartContainer'}
@@ -64,5 +99,6 @@ const TVChartContainer = ({ symbol, optionList, onCallback }) => {
 
 	);
 }
-	export default React.memo(TVChartContainer);
+
+export default React.memo(TVChartContainer);
 
